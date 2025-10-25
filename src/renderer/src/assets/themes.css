@@ -1,0 +1,267 @@
+/* ============================================
+   LUMA THEME SYSTEM - Liman Renk Paletleri
+   ============================================ */
+
+/* DRAGON THEME (Mevcut - Turuncu Ateş Ejderhası) */
+[data-theme="dragon"] {
+    --primary: #ff8552;
+    --secondary: #ffb347;
+    --accent: #ffc061;
+    
+    --bg-primary: #0a2f2e;
+    --bg-secondary: #0f3d3c;
+    --bg-tertiary: #154a48;
+    --bg-card: #0f3a38;
+    --bg-hover: #1a5250;
+
+    --text-primary: #e0ffff;
+    --text-secondary: #b3f5f0;
+    --text-muted: #7dd4cf;
+
+    --border-primary: #1a5250;
+    --border-secondary: #00d4aa;
+    
+    --gradient-primary: linear-gradient(135deg, #ff8552, #ffb347);
+    --shadow-glow: 0 0 20px rgba(255, 107, 53, 0.4);
+}
+
+/* OCEAN THEME (Okyanus Mavisi - Derin Su) */
+[data-theme="ocean"] {
+    --primary: #0ea5e9;
+    --secondary: #38bdf8;
+    --accent: #7dd3fc;
+    
+    --bg-primary: #0c1e2e;
+    --bg-secondary: #0f2942;
+    --bg-tertiary: #133556;
+    --bg-card: #0f2d45;
+    --bg-hover: #1a3e5f;
+
+    --text-primary: #e0f2fe;
+    --text-secondary: #bae6fd;
+    --text-muted: #7dd3fc;
+
+    --border-primary: #1e3a5f;
+    --border-secondary: #0ea5e9;
+    
+    --gradient-primary: linear-gradient(135deg, #0ea5e9, #38bdf8);
+    --shadow-glow: 0 0 20px rgba(14, 165, 233, 0.4);
+}
+
+/* SUNSET THEME (Gün Batımı - Pembe/Mor) */
+[data-theme="sunset"] {
+    --primary: #ec4899;
+    --secondary: #f472b6;
+    --accent: #f9a8d4;
+    
+    --bg-primary: #2e0a1e;
+    --bg-secondary: #421033;
+    --bg-tertiary: #561547;
+    --bg-card: #3d1231;
+    --bg-hover: #5f1a4d;
+
+    --text-primary: #fce7f3;
+    --text-secondary: #fbcfe8;
+    --text-muted: #f9a8d4;
+
+    --border-primary: #5f1a4d;
+    --border-secondary: #ec4899;
+    
+    --gradient-primary: linear-gradient(135deg, #ec4899, #f472b6);
+    --shadow-glow: 0 0 20px rgba(236, 72, 153, 0.4);
+}
+
+/* FOREST THEME (Orman Yeşili - Doğa) */
+[data-theme="forest"] {
+    --primary: #10b981;
+    --secondary: #34d399;
+    --accent: #6ee7b7;
+    
+    --bg-primary: #0a2e1e;
+    --bg-secondary: #0f4233;
+    --bg-tertiary: #155647;
+    --bg-card: #0f3d31;
+    --bg-hover: #1a5f4d;
+
+    --text-primary: #d1fae5;
+    --text-secondary: #a7f3d0;
+    --text-muted: #6ee7b7;
+
+    --border-primary: #1a5f4d;
+    --border-secondary: #10b981;
+    
+    --gradient-primary: linear-gradient(135deg, #10b981, #34d399);
+    --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+/* MIDNIGHT THEME (Gece Mavisi - Koyu Tema) */
+[data-theme="midnight"] {
+    --primary: #6366f1;
+    --secondary: #818cf8;
+    --accent: #a5b4fc;
+    
+    --bg-primary: #0a0a1e;
+    --bg-secondary: #0f0f33;
+    --bg-tertiary: #151547;
+    --bg-card: #0f0f2e;
+    --bg-hover: #1a1a4d;
+
+    --text-primary: #e0e7ff;
+    --text-secondary: #c7d2fe;
+    --text-muted: #a5b4fc;
+
+    --border-primary: #1a1a4d;
+    --border-secondary: #6366f1;
+    
+    --gradient-primary: linear-gradient(135deg, #6366f1, #818cf8);
+    --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.4);
+}
+
+/* AMBER THEME (Kehribar - Sıcak Sarı/Turuncu) */
+[data-theme="amber"] {
+    --primary: #f59e0b;
+    --secondary: #fbbf24;
+    --accent: #fcd34d;
+    
+    --bg-primary: #2e1a0a;
+    --bg-secondary: #422910;
+    --bg-tertiary: #563715;
+    --bg-card: #3d2510;
+    --bg-hover: #5f391a;
+
+    --text-primary: #fef3c7;
+    --text-secondary: #fde68a;
+    --text-muted: #fcd34d;
+
+    --border-primary: #5f391a;
+    --border-secondary: #f59e0b;
+    
+    --gradient-primary: linear-gradient(135deg, #f59e0b, #fbbf24);
+    --shadow-glow: 0 0 20px rgba(245, 158, 11, 0.4);
+}
+
+/* CYBER THEME (Siber Neon - Yeşil/Mavi Matrix) */
+[data-theme="cyber"] {
+    --primary: #00ff88;
+    --secondary: #00ffcc;
+    --accent: #00ffee;
+    
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #0f0f0f;
+    --bg-tertiary: #1a1a1a;
+    --bg-card: #151515;
+    --bg-hover: #202020;
+
+    --text-primary: #00ff88;
+    --text-secondary: #00ffcc;
+    --text-muted: #00cc99;
+
+    --border-primary: #00ff88;
+    --border-secondary: #00ffcc;
+    
+    --gradient-primary: linear-gradient(135deg, #00ff88, #00ffcc);
+    --shadow-glow: 0 0 20px rgba(0, 255, 136, 0.6);
+}
+
+/* LAVENDER THEME (Lavanta - Mor/Pembe Pastel) */
+[data-theme="lavender"] {
+    --primary: #a78bfa;
+    --secondary: #c4b5fd;
+    --accent: #ddd6fe;
+    
+    --bg-primary: #1e0a2e;
+    --bg-secondary: #2d1042;
+    --bg-tertiary: #3c1556;
+    --bg-card: #2a1240;
+    --bg-hover: #4a1a5f;
+
+    --text-primary: #f5f3ff;
+    --text-secondary: #ede9fe;
+    --text-muted: #ddd6fe;
+
+    --border-primary: #4a1a5f;
+    --border-secondary: #a78bfa;
+    
+    --gradient-primary: linear-gradient(135deg, #a78bfa, #c4b5fd);
+    --shadow-glow: 0 0 20px rgba(167, 139, 250, 0.4);
+}
+
+/* ROSE THEME (Gül Kırmızısı - Zarif Kırmızı) */
+[data-theme="rose"] {
+    --primary: #fb7185;
+    --secondary: #fda4af;
+    --accent: #fecdd3;
+    
+    --bg-primary: #2e0a1a;
+    --bg-secondary: #421028;
+    --bg-tertiary: #561536;
+    --bg-card: #3d1229;
+    --bg-hover: #5f1a3d;
+
+    --text-primary: #ffe4e6;
+    --text-secondary: #fecdd3;
+    --text-muted: #fda4af;
+
+    --border-primary: #5f1a3d;
+    --border-secondary: #fb7185;
+    
+    --gradient-primary: linear-gradient(135deg, #fb7185, #fda4af);
+    --shadow-glow: 0 0 20px rgba(251, 113, 133, 0.4);
+}
+
+/* EMERALD THEME (Zümrüt Yeşili - Parlak Yeşil) */
+[data-theme="emerald"] {
+    --primary: #059669;
+    --secondary: #10b981;
+    --accent: #34d399;
+    
+    --bg-primary: #0a2e1e;
+    --bg-secondary: #0f4233;
+    --bg-tertiary: #155647;
+    --bg-card: #0f3a2e;
+    --bg-hover: #1a5f4d;
+
+    --text-primary: #d1fae5;
+    --text-secondary: #a7f3d0;
+    --text-muted: #6ee7b7;
+
+    --border-primary: #1a5f4d;
+    --border-secondary: #059669;
+    
+    --gradient-primary: linear-gradient(135deg, #059669, #10b981);
+    --shadow-glow: 0 0 20px rgba(5, 150, 105, 0.4);
+}
+
+/* Ortak Stiller - Tüm Temalar */
+:root {
+    --success: #10b981;
+    --warning: #fbbf24;
+    --error: #ef4444;
+    --info: #3b82f6;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+
+    --transition-fast: 150ms ease;
+    --transition-base: 200ms ease;
+    --transition-slow: 300ms ease;
+}
+
+/* Tema Geçiş Animasyonu */
+* {
+    transition: background-color var(--transition-base),
+                color var(--transition-base),
+                border-color var(--transition-base);
+}

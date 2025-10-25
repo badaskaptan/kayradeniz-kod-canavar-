@@ -1,0 +1,354 @@
+/* Settings Panel - Dragon Theme */
+
+.api-key-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.api-key-modal {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* Settings Header */
+.settings-header {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-secondary);
+}
+
+.settings-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.close-btn {
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: all var(--transition-base);
+}
+
+.close-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--panel-primary);
+  color: var(--panel-primary);
+}
+
+/* Tab Navigation */
+.settings-tabs {
+  display: flex;
+  gap: 4px;
+  padding: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: all var(--transition-base);
+}
+
+.tab-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  background: var(--gradient-panel);
+  border-color: var(--panel-primary);
+  color: white;
+  box-shadow: 0 0 15px rgba(0, 212, 170, 0.3);
+}
+
+.tab-btn i {
+  font-size: 16px;
+}
+
+/* Settings Content */
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+}
+
+.claude-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* Setting Group */
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.setting-group label {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.input-with-icon {
+  position: relative;
+}
+
+.api-key-input {
+  width: 100%;
+  padding: 12px 40px 12px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: 'Fira Code', monospace;
+  transition: all var(--transition-base);
+  box-sizing: border-box;
+}
+
+.api-key-input:focus {
+  outline: none;
+  border-color: var(--panel-primary);
+  box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+}
+
+.api-key-input.valid {
+  border-color: #27ae60;
+}
+
+.api-key-input.invalid {
+  border-color: #e74c3c;
+}
+
+.toggle-visibility-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 8px;
+  transition: color var(--transition-base);
+}
+
+.toggle-visibility-btn:hover {
+  color: var(--text-primary);
+}
+
+/* Validation Messages */
+.validation-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.validation-message.success {
+  color: #27ae60;
+  background: rgba(39, 174, 96, 0.1);
+  border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+.validation-message.error {
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+/* Info Box */
+.info-box {
+  padding: 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+}
+
+.info-box h4 {
+  margin: 0 0 12px 0;
+  color: var(--text-primary);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-box ol {
+  margin: 0 0 12px 0;
+  padding-left: 20px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.info-box a {
+  color: var(--panel-primary);
+  text-decoration: none;
+  transition: color var(--transition-base);
+}
+
+.info-box a:hover {
+  color: var(--panel-accent);
+  text-decoration: underline;
+}
+
+.security-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+  background: rgba(0, 212, 170, 0.1);
+  border: 1px solid var(--panel-primary);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.security-note strong {
+  color: var(--panel-primary);
+}
+
+/* Settings Actions */
+.settings-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-primary);
+}
+
+.settings-actions .spacer {
+  flex: 1;
+}
+
+.settings-actions button {
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: var(--gradient-panel);
+  border: none;
+  color: white;
+  font-weight: 500;
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 0 15px rgba(0, 212, 170, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--panel-primary);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  background: transparent;
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+}
+
+.btn-danger:hover {
+  background: rgba(231, 76, 60, 0.1);
+  border-color: #c0392b;
+  color: #c0392b;
+}
+
+/* Profile Settings Wrapper */
+.profile-settings-wrapper {
+  flex: 1;
+  overflow: auto;
+}
+
+.profile-settings-wrapper .profile-manager-overlay {
+  position: relative;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  z-index: auto;
+}
+
+.profile-settings-wrapper .profile-manager-modal {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.profile-settings-wrapper .profile-header {
+  display: none; /* Hide header, Settings already has one */
+}
+
+.profile-settings-wrapper .profile-footer {
+  /* Keep footer visible for Save/Cancel buttons */
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-primary);
+}
