@@ -181,6 +181,32 @@ export class OllamaService {
       throw error
     }
   }
+
+  /**
+   * Preload model into memory (keep-alive)
+   * Call this on app startup to avoid first-query delay
+   */
+  async preloadModel(modelName: string): Promise<void> {
+    try {
+      console.log(`[OllamaService] Preloading model: ${modelName}`)
+      
+      // Send a minimal request to load model into RAM
+      await fetch(`${this.baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: modelName,
+          prompt: 'Hi',
+          stream: false,
+          keep_alive: '30m' // Keep model in RAM for 30 minutes
+        })
+      })
+      
+      console.log(`[OllamaService] Model ${modelName} preloaded successfully`)
+    } catch (error) {
+      console.warn('[OllamaService] Preload failed (non-critical):', error)
+    }
+  }
 }
 
 // Singleton instance

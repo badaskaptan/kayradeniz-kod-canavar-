@@ -71,6 +71,25 @@ function App(): React.JSX.Element {
     if (savedMode) setColorMode(savedMode)
   }, [])
 
+  // 🦙 Preload Ollama model on startup
+  useEffect(() => {
+    const preloadOllama = async (): Promise<void> => {
+      try {
+        const isAvailable = await ollamaService.isAvailable()
+        if (isAvailable) {
+          const models = await ollamaService.listModels()
+          if (models.length > 0) {
+            const modelToPreload = models.find((m) => m.name === 'gemma2:2b') || models[0]
+            await ollamaService.preloadModel(modelToPreload.name)
+          }
+        }
+      } catch (error) {
+        console.warn('[App] Ollama preload failed (non-critical):', error)
+      }
+    }
+    preloadOllama()
+  }, [])
+
   // 🎨 Resizable panels
   const [leftPanelWidth, setLeftPanelWidth] = useState(300)
   const [rightPanelWidth, setRightPanelWidth] = useState(400)
