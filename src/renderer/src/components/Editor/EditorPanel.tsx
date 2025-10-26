@@ -37,11 +37,11 @@ export function EditorPanel(): React.JSX.Element {
         { name: 'Markdown', extensions: ['md'] }
       ]
     })
-    
+
     if (result.success && result.data && result.data.length > 0) {
       const filePath = result.data[0]
       const fileResult = await window.api.fs.readFile(filePath, 'utf-8')
-      
+
       if (fileResult.success && typeof fileResult.data === 'string') {
         const fileName = filePath.split(/[\\/]/).pop() || 'untitled'
         const ext = fileName.split('.').pop()?.toLowerCase() || ''
@@ -68,7 +68,7 @@ export function EditorPanel(): React.JSX.Element {
     const result = await window.api.dialog.openDirectory({
       title: 'Workspace Klasörü Seç'
     })
-    
+
     if (result.success && result.data) {
       setWorkspacePath(result.data)
     }
@@ -92,7 +92,7 @@ export function EditorPanel(): React.JSX.Element {
       const filePath = result.data
       // Boş dosya oluştur
       const writeResult = await window.api.fs.writeFile(filePath, '', 'utf-8')
-      
+
       if (writeResult.success) {
         // Editor'da aç
         const fileName = filePath.split(/[\\/]/).pop() || 'untitled'

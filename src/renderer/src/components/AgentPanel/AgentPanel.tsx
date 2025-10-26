@@ -13,7 +13,7 @@ export function AgentPanel(): React.JSX.Element {
   // - Template CRUD işlemleri
   // - Template execution engine
   // - File/folder generation system
-  
+
   const getAgentIcon = (type: Agent['type']): React.ReactNode => {
     const iconProps = { className: 'w-4 h-4' }
     switch (type) {
@@ -32,7 +32,8 @@ export function AgentPanel(): React.JSX.Element {
       <div className="quick-start-templates">
         <h5>⚡ Hızlı Proje Başlangıç Sihirbazı</h5>
         <p className="template-description">
-          Projenizi hızla başlatın. Sağ taraftaki chat&apos;ten de özel görevler tanımlayabilirsiniz.
+          Projenizi hızla başlatın. Sağ taraftaki chat&apos;ten de özel görevler
+          tanımlayabilirsiniz.
         </p>
         <div className="template-grid">
           <button className="template-btn" disabled>

@@ -75,14 +75,27 @@ function App(): React.JSX.Element {
   useEffect(() => {
     const preloadOllama = async (): Promise<void> => {
       try {
+        console.log('[App] 🦙 Checking Ollama availability...')
         const isAvailable = await ollamaService.isAvailable()
-        if (isAvailable) {
-          const models = await ollamaService.listModels()
-          if (models.length > 0) {
-            const modelToPreload = models.find((m) => m.name === 'gemma2:2b') || models[0]
-            await ollamaService.preloadModel(modelToPreload.name)
-          }
+        
+        if (!isAvailable) {
+          console.warn('[App] ⚠️ Ollama Desktop not running - skipping preload')
+          return
         }
+
+        console.log('[App] ✅ Ollama Desktop detected')
+        const models = await ollamaService.listModels()
+        
+        if (models.length === 0) {
+          console.warn('[App] ⚠️ No models installed - run: ollama pull gemma2:2b')
+          return
+        }
+
+        const modelToPreload = models.find((m) => m.name === 'gemma2:2b') || models[0]
+        console.log(`[App] 🚀 Preloading model: ${modelToPreload.name}`)
+        
+        await ollamaService.preloadModel(modelToPreload.name)
+        console.log(`[App] ✅ Model ${modelToPreload.name} ready in RAM`)
       } catch (error) {
         console.warn('[App] Ollama preload failed (non-critical):', error)
       }
@@ -333,25 +346,26 @@ function App(): React.JSX.Element {
 
         // Ollama ile streaming chat
         let fullResponse = ''
-        
-        // Workspace bilgisi ekle
+
+        // Workspace bilgisi ekle (ultra kısa!)
         const workspaceContext = workspacePath
-          ? `\n\nCurrent workspace: ${workspacePath}\n\nIMPORTANT: You cannot access workspace files directly. If user asks about project files, explain that workspace integration is not yet available and suggest using Claude MCP server instead.`
+          ? `\nWorkspace: ${workspacePath}\nNote: File access not available yet.`
           : ''
-        
+
         await ollamaService.chatStream(
           {
             model: selectedModel,
             messages: [
               {
                 role: 'system',
-                content: `You are LUMA AI coding assistant. Answer concisely in ENGLISH ONLY. Keep responses short and technical.${workspaceContext}`
+                content: `LUMA AI - Local assistant. English only. Concise answers.${workspaceContext}`
               },
               { role: 'user', content: cleanMessage }
             ],
             options: {
               temperature: 0.7,
-              top_p: 0.9
+              top_p: 0.9,
+              num_predict: 150 // Max 150 tokens per response (hızlandırır)
             }
           },
           (chunk) => {
@@ -362,6 +376,11 @@ function App(): React.JSX.Element {
             }
           }
         )
+
+        // ⚠️ Boş response kontrolü
+        if (!fullResponse || fullResponse.trim().length === 0) {
+          throw new Error('Empty response from Ollama - model may not be loaded')
+        }
 
         if (stepId) {
           updateThinkingStep(thinkingId, stepId, {
@@ -386,13 +405,17 @@ function App(): React.JSX.Element {
         addMessage({
           role: 'assistant',
           content:
-            `❌ **Ollama Error**\n\n${errorMessage}\n\n` +
-            `**Troubleshooting:**\n` +
-            `1. Ollama Desktop uygulaması çalışıyor mu?\n` +
-            `2. Model indirildi mi? → \`ollama pull phi3.5:3.8b\`\n` +
-            `3. http://localhost:11434 erişilebilir mi?\n\n` +
-            `**Hızlı Test:**\n` +
-            `Terminal'de \`ollama list\` çalıştır`
+            `❌ **Ollama Hatası**\n\n${errorMessage}\n\n` +
+            `**Sorun Giderme:**\n` +
+            `1. ✅ **Ollama Desktop çalıyor mu?** → Sistem tepsisinde (system tray) yeşil ikon var mı?\n` +
+            `2. ✅ **Model yüklü mü?** → Terminal'de \`ollama list\` komutunu çalıştır\n` +
+            `3. ✅ **Gemma2 modeli var mı?** → \`ollama pull gemma2:2b\` (1.6GB)\n` +
+            `4. ✅ **API erişilebilir mi?** → http://localhost:11434 adresini tarayıcıda aç\n\n` +
+            `**Hızlı Çözüm:**\n` +
+            `\`\`\`bash\n` +
+            `ollama serve  # Ollama'yı başlat\n` +
+            `ollama pull gemma2:2b  # Modeli indir (1.6GB)\n` +
+            `\`\`\``
         })
       }
       return

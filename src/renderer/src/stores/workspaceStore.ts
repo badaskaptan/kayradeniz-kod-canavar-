@@ -21,7 +21,9 @@ export const useWorkspaceStore = create<WorkspaceStore>()(
         if (window.electron?.ipcRenderer) {
           window.electron.ipcRenderer
             .invoke('claude:setWorkspacePath', path)
-            .catch((error) => console.error('[WorkspaceStore] Failed to set Claude workspace:', error))
+            .catch((error) =>
+              console.error('[WorkspaceStore] Failed to set Claude workspace:', error)
+            )
         }
 
         set((state) => {

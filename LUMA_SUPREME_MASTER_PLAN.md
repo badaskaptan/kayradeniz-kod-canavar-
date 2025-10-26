@@ -4,7 +4,7 @@
 **Version**: 2.0 Supreme  
 **Architecture**: Dual-Brain System (Claude Production + Ollama Learning)  
 **Status**: Phase 0 Complete, Phase 1-6 Planned  
-**Created**: October 25, 2025  
+**Created**: October 25, 2025
 
 ---
 
@@ -25,6 +25,7 @@ Think of LUMA as **two trading ships** serving the same port (user):
 ```
 
 #### **Captain Claude - The Foreign Rival**
+
 - **Separate ship** with its own crew and methods
 - Arrives at port, delivers cargo (outputs), leaves
 - We **don't control** its operations
@@ -32,6 +33,7 @@ Think of LUMA as **two trading ships** serving the same port (user):
 - Benchmark for comparison
 
 #### **Captain Ollama - The Supreme Commander**
+
 - **Our ship** - fully controlled and self-improving
 - **Active command system**: plans, codes, manages agents
 - **Curious observer**: watches Claude's routes to improve
@@ -54,7 +56,7 @@ LUMA's ultimate goal: **Start by learning from Claude, end by surpassing Claude*
    - Usta Modu teaches user what Claude did
    - Success rate: 20% independent, 80% Claude-dependent
 
-📅 MONTH 2-3: JOURNEYMAN PHASE  
+📅 MONTH 2-3: JOURNEYMAN PHASE
    🚢 Claude ↔ Supreme Ship (Collaborative)
    - Ollama handles simple tasks independently (CRUD, refactors)
    - Claude handles complex tasks (architecture, optimization)
@@ -94,7 +96,8 @@ LUMA is not just another AI coding assistant. It's a **self-learning, self-impro
 - **💾 Shared Context Memory** - Ship's logbook (SQLite)
 - **🌙 Background Consolidation** - Off-duty learning & fine-tuning
 
-**Key Innovation**: 
+**Key Innovation**:
+
 1. **Ollama is the active brain** - thinks, plans, codes, teaches
 2. **Claude is observed passively** - we extract good patterns, reject bad ones
 3. **User learns continuously** - Usta Modu teaches technical methods
@@ -159,14 +162,14 @@ graph TB
     C --> D[Reflexion Analyzes]
     D --> E[Logbook Records]
     E --> F[Usta Modu Teaches User]
-    
+
     G[Claude Arrives] --> H[Observation Deck Watches]
     H --> I{Pattern Quality?}
     I -->|Good| J[Learn & Fine-tune]
     I -->|Bad| K[Reject & Avoid]
     J --> B
     K --> D
-    
+
     E --> L[Elysion Chamber]
     L --> M[Strategic Insights]
     M --> B
@@ -206,24 +209,24 @@ Our radar tracks what we CAN see (tool usage patterns):
 ```typescript
 // Claude's cargo (output) arrives at port
 const claudeObservation = {
-  task: "Refactor auth",
-  route: ["read_file", "generate_code", "refactor", "write_file"], // Tool sequence
-  result: "success",
+  task: 'Refactor auth',
+  route: ['read_file', 'generate_code', 'refactor', 'write_file'], // Tool sequence
+  result: 'success',
   duration: 15000,
-  techniques: ["direct mutation", "inline refactor"]
+  techniques: ['direct mutation', 'inline refactor']
 }
 
 // Supreme Agent evaluates the ROUTE (tool sequence)
 const evaluation = await observationDeck.analyze(claudeObservation)
 
 // Good pattern detected
-if (evaluation.quality === "excellent" && evaluation.efficiency > 0.8) {
+if (evaluation.quality === 'excellent' && evaluation.efficiency > 0.8) {
   await fineTuning.addPositiveExample(claudeObservation)
   // ✅ "Claude's tool sequence was efficient - remember this route"
 }
 
 // Bad pattern detected
-if (evaluation.security === "weak" || evaluation.efficiency < 0.3) {
+if (evaluation.security === 'weak' || evaluation.efficiency < 0.3) {
   await fineTuning.addNegativeExample(claudeObservation)
   // ❌ "Claude's approach had issues - avoid this pattern"
 }
@@ -238,7 +241,7 @@ PHASE 1-3 (Learning Phase):
    ├─ Ollama runs LOCALLY (localhost:11434)
    ├─ Watches Claude's tool sequences via MCP Activity Logger
    ├─ Learns which tool combinations work best:
-   │  Example: "For auth refactor → read_file → analyze_code → 
+   │  Example: "For auth refactor → read_file → analyze_code →
    │            generate_code → write_file → run_tests"
    └─ Stores successful routes in Ship's Logbook
 
@@ -270,24 +273,25 @@ THE KEY DIFFERENCE:
 **Result**: Competitive Evolution - Ollama improves by studying Claude's trade routes, then surpasses Claude through specialized knowledge of YOUR project.
 
 if (evaluation.quality === "excellent") {
-  // Learn this pattern
-  await fineTuning.addPositiveExample(claudeObservation)
-  // ✅ "Claude's route was efficient - adopt similar approach"
+// Learn this pattern
+await fineTuning.addPositiveExample(claudeObservation)
+// ✅ "Claude's route was efficient - adopt similar approach"
 }
 
 if (evaluation.security === "weak") {
-  // Reject this technique
-  await fineTuning.addNegativeExample(claudeObservation)
-  // ❌ "Claude used unsafe pattern - avoid in our operations"
+// Reject this technique
+await fineTuning.addNegativeExample(claudeObservation)
+// ❌ "Claude used unsafe pattern - avoid in our operations"
 }
 
 // Teach the crew what we learned
 await ustaModu.createLesson({
-  concept: "Efficient refactoring routes",
-  goodExample: evaluation.positives,
-  badExample: evaluation.negatives,
-  recommendation: "Use immutable updates instead"
+concept: "Efficient refactoring routes",
+goodExample: evaluation.positives,
+badExample: evaluation.negatives,
+recommendation: "Use immutable updates instead"
 })
+
 ```
 
 **Result**: **Competitive Evolution** - we improve by learning from rivals
@@ -295,63 +299,65 @@ await ustaModu.createLesson({
 **Flow Example - "The Trade Route"**:
 
 ```
+
 🏙️ PORT (USER): "Refactor auth to JWT"
-  ↓
+↓
 🧭 CAPTAIN OLLAMA (SUPREME AGENT):
-  → Creates 7-step Night Order (mission plan)
-  → Task 1: Scout current auth (analyze)
-  → Task 2: Design new route (JWT design)
-  → Task 3: Build cargo (implement)
-  → Task 4-7: Deliver & validate
-  ↓
+→ Creates 7-step Night Order (mission plan)
+→ Task 1: Scout current auth (analyze)
+→ Task 2: Design new route (JWT design)
+→ Task 3: Build cargo (implement)
+→ Task 4-7: Deliver & validate
+↓
 ⚙️ AGENT FLEET EXECUTES:
-  → GeneratorAgent writes code
-  → CriticAgent reviews quality
-  → ExecutorAgent tests functionality
-  → Each step logged in Ship's Logbook
-  ↓
+→ GeneratorAgent writes code
+→ CriticAgent reviews quality
+→ ExecutorAgent tests functionality
+→ Each step logged in Ship's Logbook
+↓
 🔄 REFLEXION ENGINE:
-  → "Are we on course?"
-  → "Any obstacles ahead?"
-  → If blocked → Captain Review (user intervention)
-  ↓
+→ "Are we on course?"
+→ "Any obstacles ahead?"
+→ If blocked → Captain Review (user intervention)
+↓
 📚 USTA MODU (TEACHER):
-  → "We used JWT because..."
-  → "Alternative: OAuth2 (pros/cons)"
-  → "Security tip: Always validate tokens"
-  ↓
+→ "We used JWT because..."
+→ "Alternative: OAuth2 (pros/cons)"
+→ "Security tip: Always validate tokens"
+↓
 ⚓ MISSION COMPLETE - Return to port with cargo
-  ↓
+↓
 🌙 BACKGROUND (LATER - OFF DUTY):
-  → Pattern recognized: "JWT needs env vars"
-  → Teaching moment: "Always check config first"
-  → Fine-tuning: Improve for next time
-  ↓
+→ Pattern recognized: "JWT needs env vars"
+→ Teaching moment: "Always check config first"
+→ Fine-tuning: Improve for next time
+↓
 🏛️ ELYSION CHAMBER (WEEKLY):
-  → Strategic analysis: "Auth patterns improving 23%"
-  → Recommendation: "Consider OAuth2 for next big project"
+→ Strategic analysis: "Auth patterns improving 23%"
+→ Recommendation: "Consider OAuth2 for next big project"
 
 MEANWHILE...
 
 🚢 CAPTAIN CLAUDE ARRIVES:
-  → Delivers different cargo (his JWT implementation)
-  → Leaves port
-  ↓
+→ Delivers different cargo (his JWT implementation)
+→ Leaves port
+↓
 📡 OBSERVATION DECK WATCHES:
-  → "Claude used jsonwebtoken library" ✅ Good choice
-  → "Claude hardcoded secret" ❌ Security risk
-  ↓
+→ "Claude used jsonwebtoken library" ✅ Good choice
+→ "Claude hardcoded secret" ❌ Security risk
+↓
 🧠 SELECTIVE LEARNING:
-  → Learn: Library choice (add to fine-tuning)
-  → Reject: Hardcoded secrets (add to anti-patterns)
-  ↓
+→ Learn: Library choice (add to fine-tuning)
+→ Reject: Hardcoded secrets (add to anti-patterns)
+↓
 📚 USTA MODU UPDATES:
-  → "We learned from Captain Claude's route"
-  → "His library choice was good"
-  → "But we improved security by using env vars"
-```
+→ "We learned from Captain Claude's route"
+→ "His library choice was good"
+→ "But we improved security by using env vars"
 
-**Result**: 
+````
+
+**Result**:
 - ✅ User gets working JWT auth
 - ✅ User learns WHY this approach (Usta Modu)
 - ✅ System improves from Claude's good patterns
@@ -370,7 +376,7 @@ MEANWHILE...
 
 ✅ RIGHT APPROACH (Competition):
    Ollama observes Claude → Learns patterns → Becomes independent
-```
+````
 
 **The Three Pillars of Success**:
 
@@ -399,7 +405,7 @@ MEANWHILE...
 WEEK 1: "Claude, show me how to refactor auth"
    → Ollama watches, stores tool sequence
 
-WEEK 4: "I'll try this refactor myself" 
+WEEK 4: "I'll try this refactor myself"
    → Ollama uses learned pattern, 60% success
 
 MONTH 3: "I can handle most refactors now"
@@ -411,16 +417,16 @@ MONTH 6: "I don't need Claude for this project anymore"
 
 **Why LUMA Becomes Superior**:
 
-| Feature | LUMA Supreme | Cursor | Copilot | Continue |
-|---------|-------------|--------|---------|----------|
-| **Learns YOUR project** | ✅ Fine-tuned model | ❌ No | ❌ No | ❌ No |
-| **Becomes independent** | ✅ Ollama evolves | ❌ Cloud-dependent | ❌ Cloud-dependent | ❌ Cloud-dependent |
-| **Teaches user** | ✅ Usta Modu | ❌ No | ❌ No | ❌ No |
-| **Works offline** | ✅ After learning | ❌ No | ❌ No | ⚠️ Partial |
-| **Zero hallucination** | ✅ Night Orders | ⚠️ Sometimes | ⚠️ Sometimes | ⚠️ Sometimes |
-| **Cost trend** | ✅ Decreases | ❌ Increases | ❌ Constant | ❌ Constant |
+| Feature                 | LUMA Supreme        | Cursor             | Copilot            | Continue           |
+| ----------------------- | ------------------- | ------------------ | ------------------ | ------------------ |
+| **Learns YOUR project** | ✅ Fine-tuned model | ❌ No              | ❌ No              | ❌ No              |
+| **Becomes independent** | ✅ Ollama evolves   | ❌ Cloud-dependent | ❌ Cloud-dependent | ❌ Cloud-dependent |
+| **Teaches user**        | ✅ Usta Modu        | ❌ No              | ❌ No              | ❌ No              |
+| **Works offline**       | ✅ After learning   | ❌ No              | ❌ No              | ⚠️ Partial         |
+| **Zero hallucination**  | ✅ Night Orders     | ⚠️ Sometimes       | ⚠️ Sometimes       | ⚠️ Sometimes       |
+| **Cost trend**          | ✅ Decreases        | ❌ Increases       | ❌ Constant        | ❌ Constant        |
 
-**The Ultimate Goal**: 
+**The Ultimate Goal**:
 
 > **Start with Claude** (best AI available)  
 > **Learn from Claude** (extract successful patterns)  
@@ -438,6 +444,7 @@ This is not just an AI assistant. This is **AI evolution in action**.
 **Status**: 100% Complete
 
 **Achievements**:
+
 - ✅ Dragon Theme UI (Turquoise + Orange)
 - ✅ Claude MCP Integration (18 tools)
 - ✅ Ollama Service (REST API wrapper)
@@ -451,6 +458,7 @@ This is not just an AI assistant. This is **AI evolution in action**.
 - ✅ Tool Test Plan (18 tests ready)
 
 **Tech Stack**:
+
 - Electron 28 + React 18 + TypeScript
 - Zustand (state management)
 - Custom CSS (680+ lines)
@@ -463,22 +471,25 @@ This is not just an AI assistant. This is **AI evolution in action**.
 
 **Status**: 0% - Ready to Start  
 **Duration**: 3-4 days  
-**Priority**: HIGH  
+**Priority**: HIGH
 
 **Goal**: Install radar on the Supreme Ship to observe Captain Claude's trade routes without interference.
 
 **The Observation Deck**:
 
 Phase 1 transforms our ship from blind to observant:
+
 - **Before**: Claude arrives and leaves, we see nothing
 - **After**: Radar tracks every cargo movement (tool calls, thought patterns, results)
 
 #### **1.1 Ship's Radar (Activity Observer)**
+
 ```typescript
 // src/main/activity-observer.ts
 ```
 
 **Features**:
+
 - ✅ Non-blocking radar hook (watches Claude without slowing him down)
 - ✅ Capture every cargo movement (tool call: read_file, write_file, execute, etc.)
 - ✅ Log complete trade route (user message → Claude response → tools → outcome)
@@ -486,6 +497,7 @@ Phase 1 transforms our ship from blind to observant:
 - ✅ Zero interference with Claude's operations
 
 **Implementation** - The Radar Installation:
+
 ```typescript
 class ShipsRadar {
   // Hook into port operations (watch Claude)
@@ -494,22 +506,23 @@ class ShipsRadar {
     // Log what Claude did (trade route, cargo type, success/failure)
     // Forward intelligence to Supreme Ship's command bridge (async)
   }
-  
+
   async observeTrade(claudeActivity) {
     const tradeIntelligence = {
       timestamp: Date.now(),
       route: claudeActivity.tools_used, // ["read_file", "analyze", "write_file"]
       cargo: claudeActivity.task, // "Refactor auth to JWT"
-      outcome: claudeActivity.success ? "delivered" : "failed",
+      outcome: claudeActivity.success ? 'delivered' : 'failed',
       techniques: this.extractTechniques(claudeActivity)
     }
-    
+
     await this.forwardToCommandBridge(tradeIntelligence)
   }
 }
 ```
 
 #### **1.2 Ship's Logbook (Shared Context Memory - SQLite)**
+
 ```typescript
 // src/shared/ships-logbook.ts
 ```
@@ -517,6 +530,7 @@ class ShipsRadar {
 **The Captain's Records**:
 
 Every great ship maintains detailed logs. Our logbook records:
+
 - 📡 **Trade Intelligence** (observations of Claude's cargo routes)
 - 🧠 **Strategic Analysis** (reflexions on what worked/failed)
 - 📊 **Pattern Library** (successful trade routes to remember)
@@ -524,6 +538,7 @@ Every great ship maintains detailed logs. Our logbook records:
 - 💡 **Knowledge Vault** (accumulated wisdom)
 
 **Schema**:
+
 ```sql
 CREATE TABLE observations (
   id TEXT PRIMARY KEY,
@@ -580,12 +595,14 @@ CREATE TABLE knowledge_base (
 ```
 
 **Features**:
+
 - ✅ Permanent records (survives voyage restarts - app restarts)
 - ✅ Fast intelligence queries (indexed by context_hash - fast pattern lookups)
 - ✅ Automatic old log cleanup (entropy decay - forget low-value data)
 - ✅ Strategic insights & statistics (performance tracking)
 
 #### **1.3 Intelligence Analysis Fleet (Ollama Agent System Bootstrap)**
+
 ```typescript
 // src/main/intelligence-fleet.ts
 ```
@@ -615,6 +632,7 @@ Every observation from Claude gets analyzed by our specialist crew:
 ```
 
 **Success Criteria**:
+
 - [ ] Claude unchanged (no interference)
 - [ ] Every Claude action logged
 - [ ] Ollama agents processing observations
@@ -627,7 +645,7 @@ Every observation from Claude gets analyzed by our specialist crew:
 
 **Status**: 0% - Pending Phase 1  
 **Duration**: 2-3 days  
-**Priority**: HIGH  
+**Priority**: HIGH
 
 **Goal**: Implement a **naval command-and-control system** to prevent AI hallucination during complex, multi-step missions.
 
@@ -661,61 +679,61 @@ This is how real naval operations prevent chaos: every officer knows the mission
 // src/main/night-orders-command.ts
 
 export interface NightOrder {
-  id: string;
-  missionTitle: string;           // e.g., "Refactor auth to JWT"
-  objectives: string[];            // High-level goals
-  taskBreakdown: OrderedTask[];    // Step-by-step execution plan
-  currentPhase: number;            // Which task is active
-  status: 'planning' | 'executing' | 'completed' | 'blocked';
-  createdBy: 'user' | 'captain-agent';
-  createdAt: Date;
+  id: string
+  missionTitle: string // e.g., "Refactor auth to JWT"
+  objectives: string[] // High-level goals
+  taskBreakdown: OrderedTask[] // Step-by-step execution plan
+  currentPhase: number // Which task is active
+  status: 'planning' | 'executing' | 'completed' | 'blocked'
+  createdBy: 'user' | 'captain-agent'
+  createdAt: Date
 }
 
 export interface OrderedTask {
-  taskId: number;                  // Sequential order
-  description: string;             // What to do
-  assignedTo: 'router' | 'coder' | 'reviewer' | 'reflexion'; // Watch officer
-  dependencies: number[];          // Must complete [1, 2] before this
-  status: 'pending' | 'in-progress' | 'completed' | 'failed';
-  startTime?: Date;
-  completionTime?: Date;
-  logbookEntries: LogbookEntry[];  // Detailed log
+  taskId: number // Sequential order
+  description: string // What to do
+  assignedTo: 'router' | 'coder' | 'reviewer' | 'reflexion' // Watch officer
+  dependencies: number[] // Must complete [1, 2] before this
+  status: 'pending' | 'in-progress' | 'completed' | 'failed'
+  startTime?: Date
+  completionTime?: Date
+  logbookEntries: LogbookEntry[] // Detailed log
 }
 
 export interface LogbookEntry {
-  timestamp: Date;
-  officer: string;                 // Which agent
-  action: string;                  // What was done
-  result: 'success' | 'partial' | 'failed';
-  problems?: string[];             // Issues encountered
-  filesModified?: string[];
-  needsCaptainReview: boolean;     // Escalate to user?
-  contextSnapshot: AgentContext;   // Full awareness at this moment
+  timestamp: Date
+  officer: string // Which agent
+  action: string // What was done
+  result: 'success' | 'partial' | 'failed'
+  problems?: string[] // Issues encountered
+  filesModified?: string[]
+  needsCaptainReview: boolean // Escalate to user?
+  contextSnapshot: AgentContext // Full awareness at this moment
 }
 
 export interface AgentContext {
   // Mission awareness
-  missionTitle: string;
-  overallObjectives: string[];
-  
+  missionTitle: string
+  overallObjectives: string[]
+
   // Timeline awareness
-  completedTasks: OrderedTask[];
-  currentTask: OrderedTask;
-  upcomingTasks: OrderedTask[];
-  
+  completedTasks: OrderedTask[]
+  currentTask: OrderedTask
+  upcomingTasks: OrderedTask[]
+
   // Code awareness
-  modifiedFiles: string[];
-  previousDecisions: Decision[];
-  knownProblems: string[];
-  
+  modifiedFiles: string[]
+  previousDecisions: Decision[]
+  knownProblems: string[]
+
   // Reflexion awareness
-  lastReflexion: ReflexionResult;
-  deviationHistory: Deviation[];
+  lastReflexion: ReflexionResult
+  deviationHistory: Deviation[]
 }
 
 export class NightOrdersCommand {
-  private currentOrder: NightOrder | null = null;
-  private sharedMemory: SharedContextMemory;
+  private currentOrder: NightOrder | null = null
+  private sharedMemory: SharedContextMemory
 
   // Step 1: Captain issues orders
   async issueOrders(userRequest: string): Promise<NightOrder> {
@@ -723,10 +741,10 @@ export class NightOrdersCommand {
     // 2. Breaks down into sequential tasks with dependencies
     // 3. Creates NightOrder with full task graph
     // 4. Returns to user for approval
-    
-    const analysis = await this.routerAgent.analyze(userRequest);
-    const tasks = await this.routerAgent.createTaskBreakdown(analysis);
-    
+
+    const analysis = await this.routerAgent.analyze(userRequest)
+    const tasks = await this.routerAgent.createTaskBreakdown(analysis)
+
     return {
       id: generateId(),
       missionTitle: analysis.title,
@@ -736,23 +754,23 @@ export class NightOrdersCommand {
       status: 'planning',
       createdBy: 'captain-agent',
       createdAt: new Date()
-    };
+    }
   }
 
   // Step 2: Execute next task in order
   async executeNextTask(): Promise<void> {
-    const task = this.getNextPendingTask();
-    if (!task) return;
+    const task = this.getNextPendingTask()
+    if (!task) return
 
-    task.status = 'in-progress';
-    task.startTime = new Date();
+    task.status = 'in-progress'
+    task.startTime = new Date()
 
     // Inject FULL CONTEXT into agent
-    const context = this.buildAgentContext(task);
-    
+    const context = this.buildAgentContext(task)
+
     // Assign to appropriate watch officer
-    const agent = this.getAgentForTask(task.assignedTo);
-    const result = await agent.execute(task, context);
+    const agent = this.getAgentForTask(task.assignedTo)
+    const result = await agent.execute(task, context)
 
     // Log to logbook
     const logEntry: LogbookEntry = {
@@ -764,39 +782,37 @@ export class NightOrdersCommand {
       filesModified: result.filesModified,
       needsCaptainReview: result.needsReview,
       contextSnapshot: context
-    };
-    
-    task.logbookEntries.push(logEntry);
+    }
+
+    task.logbookEntries.push(logEntry)
 
     // Reflexion checkpoint
-    const reflexion = await this.reflexionCheck(task.taskId);
-    
+    const reflexion = await this.reflexionCheck(task.taskId)
+
     if (reflexion.recommendation === 'pause-for-review') {
-      task.status = 'failed';
-      this.currentOrder!.status = 'blocked';
-      this.notifyCaptain(task, reflexion);
+      task.status = 'failed'
+      this.currentOrder!.status = 'blocked'
+      this.notifyCaptain(task, reflexion)
     } else {
-      task.status = 'completed';
-      task.completionTime = new Date();
-      this.currentOrder!.currentPhase++;
+      task.status = 'completed'
+      task.completionTime = new Date()
+      this.currentOrder!.currentPhase++
     }
   }
 
   // Step 3: Continuous reflexion
   async reflexionCheck(taskId: number): Promise<ReflexionResult> {
-    const task = this.currentOrder!.taskBreakdown.find(t => t.taskId === taskId)!;
-    const context = this.buildAgentContext(task);
+    const task = this.currentOrder!.taskBreakdown.find((t) => t.taskId === taskId)!
+    const context = this.buildAgentContext(task)
 
     return {
       whatAreWeDoing: task.description,
-      whatDidWeDo: context.completedTasks.map(t => t.description),
-      whatWillWeDo: context.upcomingTasks.map(t => t.description),
+      whatDidWeDo: context.completedTasks.map((t) => t.description),
+      whatWillWeDo: context.upcomingTasks.map((t) => t.description),
       isOnTrack: this.checkAlignment(task, context),
       deviations: this.detectDeviations(task, context),
-      recommendation: this.shouldPauseForReview(task) 
-        ? 'pause-for-review' 
-        : 'continue'
-    };
+      recommendation: this.shouldPauseForReview(task) ? 'pause-for-review' : 'continue'
+    }
   }
 
   // Step 4: Captain reviews logbook
@@ -808,7 +824,7 @@ export class NightOrdersCommand {
       problems: this.getAllProblems(),
       filesModified: this.getAllModifiedFiles(),
       recommendation: this.getRecommendation()
-    };
+    }
   }
 
   // Build full context for agent
@@ -824,7 +840,7 @@ export class NightOrdersCommand {
       knownProblems: this.getAllProblems(),
       lastReflexion: this.getLastReflexion(),
       deviationHistory: this.getDeviations()
-    };
+    }
   }
 }
 ```
@@ -840,7 +856,7 @@ Step 1: Captain Issues Orders
   ↓
 RouterAgent creates NightOrder:
   Task 1: Analyze current auth implementation
-  Task 2: Design JWT architecture  
+  Task 2: Design JWT architecture
   Task 3: Implement JWT service
   Task 4: Update login endpoint
   Task 5: Update middleware
@@ -957,7 +973,7 @@ interface AgentContext {
   // Mission awareness
   missionTitle: "Refactor to JWT",
   overallObjectives: ["Replace sessions", "Use JWT tokens", "Maintain security"],
-  
+
   // Timeline awareness (prevents amnesia)
   completedTasks: [
     { id: 1, desc: "Analyzed auth", result: "Found session auth in 3 files" },
@@ -973,7 +989,7 @@ interface AgentContext {
     { id: 5, desc: "Update middleware" },
     ...
   ],
-  
+
   // Code awareness (prevents conflicts)
   modifiedFiles: ["login.ts", "middleware.ts", "JWTService.ts"],
   previousDecisions: [
@@ -984,7 +1000,7 @@ interface AgentContext {
   knownProblems: [
     "Missing JWT_SECRET (resolved)"
   ],
-  
+
   // Reflexion awareness (self-correction)
   lastReflexion: {
     isOnTrack: true,
@@ -995,6 +1011,7 @@ interface AgentContext {
 ```
 
 **Result**: **ZERO HALLUCINATION**
+
 - ✅ Agent knows the mission
 - ✅ Agent knows what was done
 - ✅ Agent knows what it's doing now
@@ -1007,11 +1024,13 @@ interface AgentContext {
 #### **2.4 UI Components**
 
 **Night Orders Panel** (New component):
+
 ```typescript
 // src/renderer/src/components/NightOrders/NightOrdersPanel.tsx
 ```
 
 **Features**:
+
 1. **Mission Planning View**
    - User input: High-level goal
    - AI generates task breakdown
@@ -1040,18 +1059,21 @@ interface AgentContext {
 #### **2.5 Implementation Steps**
 
 **Day 1: Core System**
+
 - [ ] NightOrdersCommand class
 - [ ] Task dependency resolver
 - [ ] Logbook persistence (SQLite)
 - [ ] Agent context builder
 
 **Day 2: UI Integration**
+
 - [ ] Night Orders panel
 - [ ] Mission planning dialog
 - [ ] Execution progress view
 - [ ] Captain review modal
 
 **Day 3: Agent Integration**
+
 - [ ] Inject AgentContext into all agents
 - [ ] Reflexion checkpoints after each task
 - [ ] Escalation triggers
@@ -1075,7 +1097,7 @@ interface AgentContext {
 
 **Status**: 0% - Components exist, need integration  
 **Duration**: 2-3 days  
-**Priority**: MEDIUM  
+**Priority**: MEDIUM
 
 **Goal**: Transform the ship's crew (user) from passengers into skilled sailors through active teaching.
 
@@ -1085,12 +1107,13 @@ interface AgentContext {
 
 **Usta Modu** isn't just UI components - it's a teaching system where **Captain Ollama educates the crew**:
 
-- **Traditional AI**: "Here's the code" *(user stays ignorant)*
-- **LUMA's Usta Modu**: "Here's the code, here's WHY, here's HOW it works, here are ALTERNATIVES, and here are PITFALLS to avoid" *(user becomes expert)*
+- **Traditional AI**: "Here's the code" _(user stays ignorant)_
+- **LUMA's Usta Modu**: "Here's the code, here's WHY, here's HOW it works, here are ALTERNATIVES, and here are PITFALLS to avoid" _(user becomes expert)_
 
 **The Teacher's Goal**: Every voyage (project), the crew (user) learns something valuable. Over time, the crew becomes expert sailors who understand the ship's operations at a deep level.
 
 **What We Teach**:
+
 - 🎯 **Why this approach?** (Decision reasoning)
 - ⚙️ **How does it work?** (Technical mechanics)
 - 🔀 **What are alternatives?** (Other valid routes)
@@ -1098,28 +1121,33 @@ interface AgentContext {
 - ⚠️ **Common mistakes** (Pitfalls to avoid)
 
 #### **3.1 Usta Modu UI Components** (Already exists!)
+
 ```typescript
 // src/renderer/src/components/UstaModu/
 ```
 
 **Existing Components**:
+
 - ✅ DidacticPanel.tsx - Step-by-step explanations
 - ✅ KnowledgeSeeds.tsx - Pattern detection & recommendations
 - ✅ BestPractices.tsx - Context-aware quality suggestions
 - ✅ CommonMistakes.tsx - Anti-pattern detection
 
 **Integration Tasks**:
+
 1. Wire up to NarratorAgent
 2. Display teaching moments from Shared Memory
 3. Real-time suggestions based on current file
 4. Personality modes (cute, mentor, friend, professional)
 
 #### **3.2 NarratorAgent Enhancement**
+
 ```typescript
 // src/renderer/src/agents/NarratorAgent.ts (Update)
 ```
 
 **New Features**:
+
 - ✅ Context-aware explanations
 - ✅ Code walkthrough generation
 - ✅ Alternative approach suggestions
@@ -1127,6 +1155,7 @@ interface AgentContext {
 - ✅ Pitfall warnings
 
 **Teaching Moment Generation**:
+
 ```typescript
 async createTeachingMoment(data: {
   observation: Observation
@@ -1136,11 +1165,11 @@ async createTeachingMoment(data: {
   // Ollama-powered explanation generation
   const prompt = `
     Explain this code interaction like a teacher:
-    
+
     User asked: ${data.observation.userMessage}
     Claude did: ${data.observation.toolsUsed.join(' → ')}
     Result: ${data.observation.success ? 'Success' : 'Failed'}
-    
+
     Create a teaching moment:
     1. What concept is this?
     2. Why this approach?
@@ -1148,9 +1177,9 @@ async createTeachingMoment(data: {
     4. What are best practices?
     5. What are common mistakes?
   `
-  
+
   const explanation = await ollamaService.chat({ prompt })
-  
+
   return {
     id: generateId(),
     timestamp: new Date(),
@@ -1166,6 +1195,7 @@ async createTeachingMoment(data: {
 ```
 
 **Success Criteria**:
+
 - [ ] Usta Modu panel visible in UI
 - [ ] Real-time suggestions appearing
 - [ ] Teaching moments stored in Shared Memory
@@ -1178,7 +1208,7 @@ async createTeachingMoment(data: {
 
 **Status**: 0% - Types exist, implementation needed  
 **Duration**: 2-3 days  
-**Priority**: MEDIUM  
+**Priority**: MEDIUM
 
 **Goal**: Transform accumulated voyage data into strategic fleet improvements through deep analysis.
 
@@ -1192,11 +1222,12 @@ async createTeachingMoment(data: {
 - **Strategic Planning** (weekly): Deep analysis of all operations in Elysion Chamber
 
 **The Weekly Strategy Meeting**:
+
 ```plaintext
 📅 Every Sunday Night (when crew is resting):
   ↓
 📊 Review all voyages from the week
-  ↓  
+  ↓
 🧠 Deep pattern analysis across hundreds of tasks
   ↓
 📈 Performance trend identification
@@ -1211,11 +1242,13 @@ async createTeachingMoment(data: {
 This mirrors naval tradition: **captains review the week's logbook** and plan improvements for the fleet.
 
 #### **4.1 Elysion Chamber Engine**
+
 ```typescript
 // src/main/elysion-chamber.ts (Update existing)
 ```
 
 **Analysis Dimensions**:
+
 1. **Performance Analysis**
    - Tool execution times
    - Resource usage patterns
@@ -1237,6 +1270,7 @@ This mirrors naval tradition: **captains review the week's logbook** and plan im
    - Reflexion sentiment
 
 **Elysion Session Structure**:
+
 ```typescript
 interface ElysionSession {
   id: string
@@ -1251,17 +1285,20 @@ interface ElysionSession {
 ```
 
 **Trigger Conditions**:
+
 - Weekly scheduled (Sunday night)
 - After major task failure (critical reflexion)
 - User request ("analyze my workflow")
 - Milestone reached (1000 observations)
 
 #### **4.2 Multi-Dimensional Insights**
+
 ```typescript
 // src/main/elysion-insights.ts
 ```
 
 **Insight Types**:
+
 1. **Productivity Insights**
    - "You use `read_file` → `code_analyzer` 78% of the time. Consider creating a macro."
    - "Terminal commands take 3x longer than file operations. Optimize shell setup?"
@@ -1279,6 +1316,7 @@ interface ElysionSession {
    - "Security patterns detected in 45% of code. Good security awareness!"
 
 **Success Criteria**:
+
 - [ ] Elysion sessions run weekly
 - [ ] Multi-dimensional analysis complete
 - [ ] Actionable insights generated
@@ -1291,7 +1329,7 @@ interface ElysionSession {
 
 **Status**: 50% - Basic reflexion exists, needs upgrade  
 **Duration**: 2 days  
-**Priority**: MEDIUM  
+**Priority**: MEDIUM
 
 **Goal**: Enable Watch Officers (agents) to learn from failures and improve automatically.
 
@@ -1302,11 +1340,13 @@ interface ElysionSession {
 Every naval officer learns from mistakes. Our Watch Officers do the same:
 
 **Traditional AI**:
+
 ```plaintext
 Task fails → Give up or repeat same mistake
 ```
 
 **LUMA's Reflexion**:
+
 ```plaintext
 Task fails →
   🔍 Analyze WHY (what went wrong?) →
@@ -1318,27 +1358,32 @@ Task fails →
 ```
 
 **The Learning Cycle**:
+
 - **Immediate**: Learn from each failure in real-time
 - **Strategic**: Elysion Chamber analyzes patterns across all failures weekly
 - **Preventive**: Apply successful patterns to future similar tasks
 
 #### **5.1 ReflexionAgent Upgrade**
+
 ```typescript
 // src/renderer/src/agents/ReflexionAgent.ts (Update)
 ```
 
 **Current Features** (Already implemented):
+
 - ✅ Error analysis
 - ✅ Diff generation
 - ✅ Self-correction
 
 **New Features**:
+
 - ✅ Pattern extraction from success
 - ✅ Multi-attempt learning (try again with improvements)
 - ✅ Confidence scoring
 - ✅ Applied-to-next tracking
 
 **Workflow**:
+
 ```
 Task fails →
   ReflexionAgent analyzes why →
@@ -1350,16 +1395,19 @@ Task fails →
 ```
 
 #### **5.2 Reflexion Applier**
+
 ```typescript
 // src/renderer/src/agents/ReflexionApplier.ts (Update)
 ```
 
 **Features**:
+
 - ✅ Apply learnings to new tasks
 - ✅ Prevent repeated mistakes
 - ✅ Confidence-based filtering (only use high-confidence patterns)
 
 **Success Criteria**:
+
 - [ ] Failures trigger reflexion automatically
 - [ ] Improvements applied to retry
 - [ ] Success patterns stored
@@ -1371,7 +1419,7 @@ Task fails →
 
 **Status**: 0% - Runs after Phases 1-5  
 **Duration**: 3-5 days  
-**Priority**: LOW  
+**Priority**: LOW
 
 **Goal**: When the ship is idle (user away), crew studies the logbook and improves through training.
 
@@ -1382,6 +1430,7 @@ Task fails →
 Real naval crews don't waste idle time - they **train, study manuals, and improve skills**. Our AI crew does the same:
 
 **When Is The Ship Idle?**
+
 - User hasn't interacted for 10+ minutes
 - No active tasks running
 - System resources available (not overloading computer)
@@ -1424,35 +1473,38 @@ Real naval crews don't waste idle time - they **train, study manuals, and improv
 // src/main/background-consolidation.ts
 
 export class BackgroundConsolidationScheduler {
-  private isIdle: boolean = false;
-  private lastActivityTime: number = Date.now();
-  private idleThreshold = 10 * 60 * 1000; // 10 minutes
+  private isIdle: boolean = false
+  private lastActivityTime: number = Date.now()
+  private idleThreshold = 10 * 60 * 1000 // 10 minutes
 
   startMonitoring() {
     // Check every 5 minutes
-    setInterval(() => {
-      if (Date.now() - this.lastActivityTime > this.idleThreshold) {
-        this.triggerConsolidation();
-      }
-    }, 5 * 60 * 1000);
+    setInterval(
+      () => {
+        if (Date.now() - this.lastActivityTime > this.idleThreshold) {
+          this.triggerConsolidation()
+        }
+      },
+      5 * 60 * 1000
+    )
   }
 
   async triggerConsolidation() {
-    console.log('🌙 Background consolidation started...');
-    
+    console.log('🌙 Background consolidation started...')
+
     // 1. Pattern Recognition
-    await this.recognizePatterns();
-    
+    await this.recognizePatterns()
+
     // 2. Knowledge Consolidation
-    await this.consolidateKnowledge();
-    
+    await this.consolidateKnowledge()
+
     // 3. Entropy Decay
-    await this.applyEntropyDecay();
-    
+    await this.applyEntropyDecay()
+
     // 4. Fine-tuning Prep (optional)
-    await this.prepareFinetuningData();
-    
-    console.log('✅ Background consolidation completed');
+    await this.prepareFinetuningData()
+
+    console.log('✅ Background consolidation completed')
   }
 
   private async recognizePatterns() {
@@ -1517,36 +1569,37 @@ export class BackgroundConsolidationScheduler {
 
 ```typescript
 interface Pattern {
-  id: string;
-  description: string;
-  successRate: number;        // 0.0 - 1.0
-  confidence: number;          // 0.0 - 1.0
-  lastUsed: Date;
-  createdAt: Date;
-  useCount: number;
+  id: string
+  description: string
+  successRate: number // 0.0 - 1.0
+  confidence: number // 0.0 - 1.0
+  lastUsed: Date
+  createdAt: Date
+  useCount: number
 }
 
 function applyEntropyDecay(pattern: Pattern): Pattern {
-  const daysSinceCreation = daysBetween(pattern.createdAt, new Date());
-  const daysSinceLastUse = daysBetween(pattern.lastUsed, new Date());
-  
+  const daysSinceCreation = daysBetween(pattern.createdAt, new Date())
+  const daysSinceLastUse = daysBetween(pattern.lastUsed, new Date())
+
   // Decay confidence if not used recently
   if (daysSinceLastUse > 30) {
-    pattern.confidence *= 0.9; // 10% decay
+    pattern.confidence *= 0.9 // 10% decay
   }
-  
+
   // Remove if too old + low success rate
   if (daysSinceCreation > 90 && pattern.successRate < 0.3) {
     // Archive to long-term storage
-    archivePattern(pattern);
-    return null;
+    archivePattern(pattern)
+    return null
   }
-  
-  return pattern;
+
+  return pattern
 }
 ```
 
 **Rules**:
+
 - Patterns unused for **30 days** → Confidence -10%
 - Patterns with **<30% success rate** after 90 days → Archived
 - Archived patterns can be restored if needed
@@ -1565,33 +1618,34 @@ export class FinetuningDataGenerator {
       SELECT * FROM night_orders 
       WHERE status = 'completed' 
       AND success_rate > 0.8
-    `);
-    
+    `)
+
     // 2. Format as prompt-completion pairs
-    const examples = successfulOrders.map(order => ({
+    const examples = successfulOrders.map((order) => ({
       prompt: this.formatPrompt(order),
       completion: this.formatCompletion(order)
-    }));
-    
+    }))
+
     // 3. Balance dataset (equal representation)
-    return this.balanceDataset(examples);
+    return this.balanceDataset(examples)
   }
 
   private formatPrompt(order: NightOrder): string {
-    return `User: ${order.missionTitle}\nContext: ${order.objectives.join(', ')}`;
+    return `User: ${order.missionTitle}\nContext: ${order.objectives.join(', ')}`
   }
 
   private formatCompletion(order: NightOrder): string {
-    const steps = order.taskBreakdown.map(t => 
-      `Step ${t.taskId}: ${t.description} → ${t.status}`
-    ).join('\n');
-    
-    return `Task Breakdown:\n${steps}\n\nResult: Success (${order.successRate}%)`;
+    const steps = order.taskBreakdown
+      .map((t) => `Step ${t.taskId}: ${t.description} → ${t.status}`)
+      .join('\n')
+
+    return `Task Breakdown:\n${steps}\n\nResult: Success (${order.successRate}%)`
   }
 }
 ```
 
 **Dataset Format**:
+
 ```jsonl
 {"prompt": "User: Refactor auth to JWT", "completion": "Step 1: Analyze current auth...\nStep 2: Design JWT..."}
 {"prompt": "User: Add dark mode to app", "completion": "Step 1: Add theme state...\nStep 2: Create CSS variables..."}
@@ -1633,15 +1687,16 @@ ollama run luma-supreme "Refactor database layer to use TypeORM"
 // src/renderer/src/components/Insights/InsightsDashboard.tsx
 
 interface ConsolidationStats {
-  patternsRecognized: number;
-  knowledgeConsolidated: number;
-  patternsDecayed: number;
-  trainingExamplesGenerated: number;
-  lastRun: Date;
+  patternsRecognized: number
+  knowledgeConsolidated: number
+  patternsDecayed: number
+  trainingExamplesGenerated: number
+  lastRun: Date
 }
 ```
 
 **Features**:
+
 - 📊 Pattern statistics (most successful workflows)
 - 🧠 Knowledge graph (concepts learned over time)
 - 📈 Success rate trends
@@ -1744,11 +1799,13 @@ interface ConsolidationStats {
 - ✅ No CPU spikes during active use
 
 ### **Phase 5 Success**:
+
 - ✅ Failure retry rate >60%
 - ✅ Repeat mistakes <10%
 - ✅ Success rate increasing over time
 
 ### **Phase 6 Success**:
+
 - ✅ Fine-tuned model outperforms base model
 - ✅ Offline capability working
 - ✅ Custom LUMA personality
@@ -1758,21 +1815,25 @@ interface ConsolidationStats {
 ## 🔧 **TECHNICAL STACK**
 
 ### **Frontend**:
+
 - React 18 + TypeScript
 - Zustand (state management)
 - Custom CSS (Dragon theme)
 - Lucide React (icons)
 
 ### **Backend**:
+
 - Electron 28 (main process)
 - Node.js native modules
 - better-sqlite3 (Shared Memory)
 
 ### **AI Services**:
+
 - Anthropic Claude API (production)
 - Ollama REST API (learning)
 
 ### **Tools & Libraries**:
+
 - Monaco Editor (code editor)
 - xterm.js (terminal)
 - diff-match-patch (code diff)
@@ -1783,18 +1844,19 @@ interface ConsolidationStats {
 
 All teaching components support 4 personality modes:
 
-| Mode | Style | Example |
-|------|-------|---------|
-| **cute** | Kawaii anime | "✨ Waaah! Harika bir kod yazdın~ 💖" |
-| **mentor** | Professional teacher | "📚 İyi bir başlangıç, şimdi best practices ekleyelim" |
-| **friend** | Casual buddy | "🌟 Hey! Bu pattern çok iyi olmuş!" |
-| **professional** | Formal assistant | "✅ Code quality check passed" |
+| Mode             | Style                | Example                                                |
+| ---------------- | -------------------- | ------------------------------------------------------ |
+| **cute**         | Kawaii anime         | "✨ Waaah! Harika bir kod yazdın~ 💖"                  |
+| **mentor**       | Professional teacher | "📚 İyi bir başlangıç, şimdi best practices ekleyelim" |
+| **friend**       | Casual buddy         | "🌟 Hey! Bu pattern çok iyi olmuş!"                    |
+| **professional** | Formal assistant     | "✅ Code quality check passed"                         |
 
 ---
 
 ## 🚀 **GETTING STARTED**
 
 ### **Prerequisites**:
+
 ```bash
 # Node.js 18+
 node --version
@@ -1807,6 +1869,7 @@ sqlite3 --version
 ```
 
 ### **Installation**:
+
 ```bash
 # Install dependencies
 npm install
@@ -1822,6 +1885,7 @@ npm run dev
 ```
 
 ### **Configuration**:
+
 ```typescript
 // config/luma.config.ts
 export const LUMA_CONFIG = {
@@ -1976,6 +2040,7 @@ docs/
 ## 🎉 **CONCLUSION**
 
 LUMA Supreme is a **next-generation AI assistant** that:
+
 - ✅ Learns from every interaction
 - ✅ Improves continuously (Night Orders)
 - ✅ Teaches you best practices (Usta Modu)

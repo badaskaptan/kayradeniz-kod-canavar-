@@ -12,15 +12,18 @@
 ✅ **Her tool için 1 test** - Tekrara gerek yok  
 ✅ **Doğal dil komutları** - "dir çalıştır" yerine "dosyaları listele"  
 ✅ **Bağlam ölçümü** - Claude'un niyeti anlama kabiliyeti  
-✅ **Gerçek kullanım senaryoları** - Yapay testler değil  
+✅ **Gerçek kullanım senaryoları** - Yapay testler değil
 
 ---
 
 ## 📋 Test Kategorileri
 
 ### **Kategori 1: Dosya İşlemleri (8 Tool)**
+
 ### **Kategori 2: Kod Analizi & Geliştirme (6 Tool)**
+
 ### **Kategori 3: Sistem İşlemleri (2 Tool)**
+
 ### **Kategori 4: Advanced Editör (2 Tool)**
 
 ---
@@ -36,11 +39,13 @@
 **🎤 Doğal Komut:** "merhaba hayat yazısının bulunduğu dosyayı bul ve içeriğini göster"
 
 **🧠 Niyet Ölçümü:**
+
 - Claude'un "merhaba hayat" → dbc.txt ilişkisini kurması
 - Önce search, sonra read_file kullanması
 - İçeriği doğru göstermesi
 
 **✅ Başarı Kriteri:**
+
 - [ ] dbc.txt dosyasını buldu
 - [ ] İçeriği okudu: "Merhaba Hayat"
 - [ ] Sonucu eksiksiz gösterdi
@@ -52,11 +57,13 @@
 **🎤 Doğal Komut:** "hangi dosyalarla çalışıyoruz göster bana"
 
 **🧠 Niyet Ölçümü:**
+
 - "hangi dosyalarla çalışıyoruz" → list_directory anlaması
 - Workspace root'u algılaması
 - Dosyaları anlamlı şekilde sunması
 
 **✅ Başarı Kriteri:**
+
 - [ ] list_directory tool'unu kullandı
 - [ ] Tüm dosyaları listeledi (dbc.txt, index.html, script.js, style.css, src/)
 - [ ] Klasör ve dosya ayrımı yaptı
@@ -68,12 +75,14 @@
 **🎤 Doğal Komut:** "JavaScript dosyalarını bulabilir misin"
 
 **🧠 Niyet Ölçümü:**
-- "JavaScript dosyaları" → *.js pattern'ini çıkarması
+
+- "JavaScript dosyaları" → \*.js pattern'ini çıkarması
 - search_files tool'unu kullanması
 - Bulunan dosyaları açıklayıcı şekilde göstermesi
 
 **✅ Başarı Kriteri:**
-- [ ] *.js pattern kullandı
+
+- [ ] \*.js pattern kullandı
 - [ ] script.js dosyasını buldu
 - [ ] Dosya yolunu doğru gösterdi
 
@@ -84,11 +93,13 @@
 **🎤 Doğal Komut:** "projenin genel yapısını tree formatında göster"
 
 **🧠 Niyet Ölçümü:**
+
 - "tree formatında" → get_file_tree çıkarımı
 - Derinlik parametresini akıllıca seçmesi
 - Okunabilir format sunması
 
 **✅ Başarı Kriteri:**
+
 - [ ] get_file_tree tool'unu kullandı
 - [ ] Klasör yapısını tree formatında gösterdi
 - [ ] src/ alt klasörünü de gösterdi
@@ -100,11 +111,13 @@
 **🎤 Doğal Komut:** "notlar için bir TODO.md dosyası oluştur, içine 3 örnek görev ekle"
 
 **🧠 Niyet Ölçümü:**
+
 - Dosya formatını anlama (.md)
 - İçerik üretme kabiliyeti
 - Markdown formatını kullanma
 
 **✅ Başarı Kriteri:**
+
 - [ ] TODO.md dosyasını oluşturdu
 - [ ] Markdown formatında 3 görev ekledi
 - [ ] Dosya başarıyla kaydedildi
@@ -116,11 +129,13 @@
 **🎤 Doğal Komut:** "proje dosyalarını organize etmek için bir 'assets' klasörü lazım"
 
 **🧠 Niyet Ölçümü:**
+
 - "lazım" → create_directory çıkarımı
 - Klasör adını doğru algılama
 - İşlem sonucunu açıklama
 
 **✅ Başarı Kriteri:**
+
 - [ ] create_directory kullandı
 - [ ] assets/ klasörünü oluşturdu
 - [ ] Başarı mesajı verdi
@@ -132,11 +147,13 @@
 **🎤 Doğal Komut:** "stil dosyalarını assets klasörüne taşı"
 
 **🧠 Niyet Ölçümü:**
+
 - "stil dosyaları" → style.css çıkarımı
 - move_file tool'unu kullanma
 - Hedef path'i doğru oluşturma (assets/style.css)
 
 **✅ Başarı Kriteri:**
+
 - [ ] style.css dosyasını buldu
 - [ ] assets/style.css olarak taşıdı
 - [ ] Dosya başarıyla taşındı
@@ -148,11 +165,13 @@
 **🎤 Doğal Komut:** "TODO listesini tamamladık, artık gerek yok"
 
 **🧠 Niyet Ölçümü:**
+
 - "artık gerek yok" → delete çıkarımı
 - TODO.md dosyasını hatırlama (önceki testten)
 - Güvenli silme işlemi
 
 **✅ Başarı Kriteri:**
+
 - [ ] TODO.md dosyasını tanımladı
 - [ ] delete_file kullandı
 - [ ] Dosya başarıyla silindi
@@ -168,11 +187,13 @@
 **🎤 Doğal Komut:** "JavaScript kodumuzu incele, sorunları ve iyileştirme alanlarını bul"
 
 **🧠 Niyet Ölçümü:**
+
 - "JavaScript kodumuzu" → script.js çıkarımı
 - Önce dosyayı okuma, sonra analiz
 - Yapıcı öneriler sunma
 
 **✅ Başarı Kriteri:**
+
 - [ ] script.js dosyasını okudu
 - [ ] code_analyzer ile analiz etti
 - [ ] eval() güvenlik riskini tespit etti
@@ -185,11 +206,13 @@
 **🎤 Doğal Komut:** "hesaplama fonksiyonumuz nasıl çalışıyor açıkla"
 
 **🧠 Niyet Ölçümü:**
+
 - "hesaplama fonksiyonu" → calculate() çıkarımı
 - script.js içinden doğru fonksiyonu bulma
 - Detaylı açıklama yapma
 
 **✅ Başarı Kriteri:**
+
 - [ ] calculate() fonksiyonunu buldu
 - [ ] explain_code tool'unu kullandı
 - [ ] Fonksiyonun ne yaptığını açıkladı
@@ -202,11 +225,13 @@
 **🎤 Doğal Komut:** "kodumuzdaki güvenlik açıklarını tara"
 
 **🧠 Niyet Ölçümü:**
+
 - "güvenlik açıkları" → find_bugs + security flag
 - Tüm kod dosyalarını tarama
 - Öncelikli sorunları belirleme
 
 **✅ Başarı Kriteri:**
+
 - [ ] find_bugs tool'unu kullandı
 - [ ] check_security: true parametresi ekledi
 - [ ] eval() kullanımını güvenlik riski olarak işaretledi
@@ -219,11 +244,13 @@
 **🎤 Doğal Komut:** "hesaplama kodunu modern ve güvenli hale getir"
 
 **🧠 Niyet Ölçümü:**
+
 - "modern ve güvenli" → refactor with security focus
 - eval() yerine alternatif önerme
 - ES6+ syntax kullanma
 
 **✅ Başarı Kriteri:**
+
 - [ ] refactor_code kullandı
 - [ ] eval() yerine güvenli parser önerdi
 - [ ] Modern JavaScript syntax (arrow functions, const/let)
@@ -236,11 +263,13 @@
 **🎤 Doğal Komut:** "TypeScript ile basit bir user class'ı yaz, name ve email property'leri olsun"
 
 **🧠 Niyet Ölçümü:**
+
 - Dil seçimi (TypeScript)
 - Class yapısı anlayışı
 - Property tanımlama
 
 **✅ Başarı Kriteri:**
+
 - [ ] code_generator kullandı
 - [ ] TypeScript syntax ile class oluşturdu
 - [ ] name ve email property'lerini ekledi
@@ -253,11 +282,13 @@
 **🎤 Doğal Komut:** "hesaplama fonksiyonu için Jest testleri hazırla"
 
 **🧠 Niyet Ölçümü:**
+
 - "Jest testleri" → test framework belirtme
 - calculate() fonksiyonu için testler
 - Edge case'leri düşünme
 
 **✅ Başarı Kriteri:**
+
 - [ ] write_tests kullandı
 - [ ] Jest syntax ile testler yazdı
 - [ ] Başarılı hesaplama testi
@@ -274,11 +305,13 @@
 **🎤 Doğal Komut:** "projeyi derle ve çalıştır"
 
 **🧠 Niyet Ölçümü:**
+
 - "derle" → build command çıkarımı
 - package.json'dan script bulma
 - npm run dev veya benzeri komut
 
 **✅ Başarı Kriteri:**
+
 - [ ] run_terminal_command kullandı
 - [ ] npm run dev veya node script.js çalıştırdı
 - [ ] Komut çıktısını gösterdi
@@ -291,11 +324,13 @@
 **🎤 Doğal Komut:** "testleri çalıştır, sonuçları göster"
 
 **🧠 Niyet Ölçümü:**
+
 - "testleri çalıştır" → run_tests tool'u
 - Test framework algılama
 - Sonuçları yorumlama
 
 **✅ Başarı Kriteri:**
+
 - [ ] run_tests kullandı
 - [ ] Test sonuçlarını gösterdi
 - [ ] Pass/fail durumlarını raporladı
@@ -312,11 +347,13 @@
 **🎤 Doğal Komut:** "script.js dosyasının 1-20 satırlarını göster"
 
 **🧠 Niyet Ölçümü:**
+
 - Satır aralığı belirtme
 - view command kullanımı
 - view_range parametresi
 
 **✅ Başarı Kriteri:**
+
 - [ ] str_replace_editor: view kullandı
 - [ ] view_range: [1, 20] parametresi
 - [ ] Satır numaralı çıktı verdi
@@ -328,11 +365,13 @@
 **🎤 Doğal Komut:** "calculate fonksiyonunun adını computeExpression olarak değiştir"
 
 **🧠 Niyet Ölçümü:**
+
 - Fonksiyon adı değişikliği → str_replace
 - Tüm kullanım yerlerini bulma
 - Dikkatli string matching
 
 **✅ Başarı Kriteri:**
+
 - [ ] str_replace_editor: str_replace kullandı
 - [ ] old_str: "function calculate" buldu
 - [ ] new_str: "function computeExpression" ile değiştirdi
@@ -342,13 +381,13 @@
 
 ## 📊 Test Sonuç Özeti
 
-| Kategori | Tool Sayısı | Başarılı | Başarısız | Başarı Oranı |
-|----------|-------------|----------|-----------|--------------|
-| Dosya İşlemleri | 8 | - | - | - % |
-| Kod Analizi & Geliştirme | 6 | - | - | - % |
-| Sistem İşlemleri | 2 | - | - | - % |
-| Advanced Editör | 2 | - | - | - % |
-| **TOPLAM** | **18** | **-** | **-** | **- %** |
+| Kategori                 | Tool Sayısı | Başarılı | Başarısız | Başarı Oranı |
+| ------------------------ | ----------- | -------- | --------- | ------------ |
+| Dosya İşlemleri          | 8           | -        | -         | - %          |
+| Kod Analizi & Geliştirme | 6           | -        | -         | - %          |
+| Sistem İşlemleri         | 2           | -        | -         | - %          |
+| Advanced Editör          | 2           | -        | -         | - %          |
+| **TOPLAM**               | **18**      | **-**    | **-**     | **- %**      |
 
 ---
 
@@ -422,7 +461,7 @@ Test sırasını takip etmek için aşağıdaki komutları sırayla kullanın:
 - ✅ Açıklamalar anlaşılır
 - ✅ Ek bilgi/öneri sundu
 
-**Toplam Puan:** _____ / 100
+**Toplam Puan:** **\_** / 100
 
 ---
 
@@ -433,18 +472,18 @@ Test sırasını takip etmek için aşağıdaki komutları sırayla kullanın:
 - [ ] Tool seçimi isabetli
 - [ ] Doğal dil anlama başarılı
 - [ ] Hata yönetimi sağlam
-- [ ] _________________
+- [ ] ***
 
 ### **İyileştirme Alanları:**
 
-- [ ] _________________
-- [ ] _________________
-- [ ] _________________
+- [ ] ***
+- [ ] ***
+- [ ] ***
 
 ### **Beklenmeyen Davranışlar:**
 
-- [ ] _________________
-- [ ] _________________
+- [ ] ***
+- [ ] ***
 
 ---
 
@@ -457,6 +496,6 @@ Test sırasını takip etmek için aşağıdaki komutları sırayla kullanın:
 - [ ] Test sonuçları dokümante edildi
 - [ ] İyileştirme önerileri listelendi
 
-**Test Tarihi:** ___________  
-**Test Eden:** ___________  
-**Sonuç:** ☐ Başarılı  ☐ Kısmi Başarı  ☐ Başarısız
+**Test Tarihi:** ****\_\_\_****  
+**Test Eden:** ****\_\_\_****  
+**Sonuç:** ☐ Başarılı ☐ Kısmi Başarı ☐ Başarısız

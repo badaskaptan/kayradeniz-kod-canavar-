@@ -162,11 +162,7 @@ export function TerminalPanel(): React.JSX.Element {
       </div>
 
       {/* Output Area */}
-      <div
-        ref={outputRef}
-        onClick={focusInput}
-        className="terminal-content"
-      >
+      <div ref={outputRef} onClick={focusInput} className="terminal-content">
         {history.map((entry) => (
           <div key={entry.id} className="terminal-entry">
             {/* Command line */}
@@ -178,12 +174,7 @@ export function TerminalPanel(): React.JSX.Element {
 
             {/* Output */}
             {entry.output && (
-              <pre
-                className={cn(
-                  'terminal-output',
-                  entry.exitCode !== 0 && 'terminal-error'
-                )}
-              >
+              <pre className={cn('terminal-output', entry.exitCode !== 0 && 'terminal-error')}>
                 {entry.output}
               </pre>
             )}

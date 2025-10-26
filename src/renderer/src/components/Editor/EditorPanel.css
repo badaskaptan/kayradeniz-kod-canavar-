@@ -139,7 +139,8 @@
 }
 
 @keyframes bgDragonFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(-50%, -50%) scale(1) rotate(0deg);
   }
   25% {
@@ -183,7 +184,8 @@
 }
 
 @keyframes dragonWelcomePulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1) rotate(0deg);
     filter: drop-shadow(0 0 40px rgba(255, 133, 82, 0.9)) brightness(1.2);
   }
@@ -194,7 +196,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     filter: drop-shadow(0 0 20px rgba(255, 107, 53, 0.5));
   }
@@ -337,7 +340,8 @@
 }
 
 @keyframes subtleDragonFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) rotate(0deg);
   }
   50% {

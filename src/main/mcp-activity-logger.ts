@@ -174,7 +174,8 @@ export class MCPActivityLogger {
       // Update existing pattern
       existingPattern.successCount++
       existingPattern.avgDuration =
-        (existingPattern.avgDuration * (existingPattern.successCount - 1) + activity.totalDuration) /
+        (existingPattern.avgDuration * (existingPattern.successCount - 1) +
+          activity.totalDuration) /
         existingPattern.successCount
       existingPattern.confidence = Math.min(
         0.95,
@@ -332,7 +333,9 @@ export class MCPActivityLogger {
       console.log(`\n🎯 PATTERN MATCH FOUND!`)
       console.log(`   Pattern ID: ${bestMatch.id}`)
       console.log(`   Confidence: ${(bestScore * 100).toFixed(1)}%`)
-      console.log(`   Success Rate: ${bestMatch.successCount}/${bestMatch.successCount + bestMatch.failureCount}`)
+      console.log(
+        `   Success Rate: ${bestMatch.successCount}/${bestMatch.successCount + bestMatch.failureCount}`
+      )
       console.log(`   Action Sequence: ${bestMatch.actionSequence.map((a) => a.tool).join(' → ')}`)
     }
 

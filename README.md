@@ -2,7 +2,7 @@
 
 **Version**: 2.0 Supreme  
 **Architecture**: Dual-Brain AI System (Claude Production + Ollama Learning)  
-**Status**: Phase 1 In Development  
+**Status**: Phase 1 In Development
 
 ---
 
@@ -50,6 +50,7 @@ ollama --version
 ### **Ollama Performance Tips**
 
 **For best performance:**
+
 - ✅ **Minimize Ollama Desktop** (don't close!) - runs 20-30% faster in system tray
 - ✅ **Recommended models for 8GB RAM:**
   - `gemma2:2b` - Ultra fast (1-2 sec responses)
@@ -137,6 +138,7 @@ luma-project/
 ## 🎨 **Features**
 
 ### **✅ Phase 0: Foundation (Complete)**
+
 - Dragon Theme UI (Turquoise + Orange)
 - Claude MCP with 18 tools
 - Ollama MCP integration
@@ -144,12 +146,14 @@ luma-project/
 - Settings panel (API keys, models)
 
 ### **🔄 Phase 1: Passive Learning (In Progress)**
+
 - Activity Observer (non-blocking hooks)
 - Shared Context Memory (SQLite)
 - Ollama Agent System
 - Pattern recognition
 
 ### **🌙 Phase 2-6: Advanced Features (Planned)**
+
 - Night Orders Protocol
 - Usta Modu (Teacher Mode)
 - Elysion Chamber (Deep analysis)

@@ -28,6 +28,7 @@ export interface OllamaChatRequest {
     temperature?: number
     top_p?: number
     top_k?: number
+    num_predict?: number // Max tokens to generate
   }
 }
 
@@ -132,10 +133,15 @@ export class OllamaService {
   /**
    * Chat with streaming (for real-time responses)
    */
-  async chatStream(
-    request: OllamaChatRequest,
-    onChunk: (chunk: string) => void
-  ): Promise<void> {
+  async chatStream(request: OllamaChatRequest, onChunk: (chunk: string) => void): Promise<void> {
+    // Pre-check: Ollama running?
+    const isAvailable = await this.isAvailable()
+    if (!isAvailable) {
+      throw new Error(
+        'Ollama Desktop is not running. Please start Ollama from system tray or run "ollama serve"'
+      )
+    }
+
     try {
       const response = await fetch(`${this.baseUrl}/api/chat`, {
         method: 'POST',
@@ -170,7 +176,7 @@ export class OllamaService {
               if (data.message?.content) {
                 onChunk(data.message.content)
               }
-            } catch (e) {
+            } catch {
               console.warn('[OllamaService] Failed to parse chunk:', line)
             }
           }
@@ -189,7 +195,7 @@ export class OllamaService {
   async preloadModel(modelName: string): Promise<void> {
     try {
       console.log(`[OllamaService] Preloading model: ${modelName}`)
-      
+
       // Send a minimal request to load model into RAM
       await fetch(`${this.baseUrl}/api/generate`, {
         method: 'POST',
@@ -201,7 +207,7 @@ export class OllamaService {
           keep_alive: '30m' // Keep model in RAM for 30 minutes
         })
       })
-      
+
       console.log(`[OllamaService] Model ${modelName} preloaded successfully`)
     } catch (error) {
       console.warn('[OllamaService] Preload failed (non-critical):', error)
