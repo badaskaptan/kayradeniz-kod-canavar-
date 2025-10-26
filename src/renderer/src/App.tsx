@@ -306,14 +306,19 @@ function App(): React.JSX.Element {
 
         // Ollama ile streaming chat
         let fullResponse = ''
+        
+        // Workspace bilgisi ekle
+        const workspaceContext = workspacePath
+          ? `\n\nCurrent workspace: ${workspacePath}\n\nIMPORTANT: You cannot access workspace files directly. If user asks about project files, explain that workspace integration is not yet available and suggest using Claude MCP server instead.`
+          : ''
+        
         await ollamaService.chatStream(
           {
             model: selectedModel,
             messages: [
               {
                 role: 'system',
-                content:
-                  'You are LUMA, an AI coding assistant. Be concise and helpful. Answer in Turkish if user writes in Turkish.'
+                content: `You are LUMA AI coding assistant. Answer concisely in ENGLISH ONLY. Keep responses short and technical.${workspaceContext}`
               },
               { role: 'user', content: cleanMessage }
             ],
