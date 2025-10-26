@@ -49,12 +49,10 @@ export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element 
 
     if (input.trim()) {
       console.log('[ChatPanel] Calling onSendMessage with:', input, 'server:', mcpServer)
-      
+
       // MCP server bilgisini mesaja ekle
-      const messageWithServer = mcpServer === 'local' 
-        ? `[LOCAL-MCP] ${input}` 
-        : input
-      
+      const messageWithServer = mcpServer === 'local' ? `[LOCAL-MCP] ${input}` : input
+
       onSendMessage(messageWithServer)
       setInput('')
     } else {
@@ -166,9 +164,7 @@ export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element 
           <button
             type="submit"
             disabled={isButtonDisabled}
-            title={
-              mcpServer === 'claude' && !hasApiKey ? 'Claude API key gerekli' : 'Mesaj gönder'
-            }
+            title={mcpServer === 'claude' && !hasApiKey ? 'Claude API key gerekli' : 'Mesaj gönder'}
             className="send-btn"
           >
             <Send className="w-4 h-4" />

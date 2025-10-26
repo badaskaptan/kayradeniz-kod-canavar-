@@ -330,9 +330,9 @@ function App(): React.JSX.Element {
 
     // Claude MCP Server - Direkt Claude API kullan
     console.log('[App] Using Claude MCP Server')
-    
+
     const thinkingId = startThinking('💭 Thinking...')
-    
+
     try {
       addThinkingStep(thinkingId, {
         type: 'analysis',
@@ -348,7 +348,7 @@ function App(): React.JSX.Element {
         workspacePath: workspacePath,
         timestamp: new Date().toISOString()
       })
-      
+
       if (!result?.success || !result?.response) {
         throw new Error(result?.error || 'No response from Claude API')
       }
@@ -376,7 +376,7 @@ function App(): React.JSX.Element {
       console.error('[App] Claude MCP error:', error)
       setLoading(false)
       completeThinking(thinkingId)
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       addMessage({
         role: 'assistant',
