@@ -11,7 +11,7 @@ interface ChatPanelProps {
 export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element {
   const { getActiveConversation, isLoading, loadingMessage } = useChatStore()
   const [input, setInput] = useState('')
-  const [mcpServer, setMcpServer] = useState<'claude' | 'local'>('claude')
+  const [mcpServer, setMcpServer] = useState<'claude' | 'local' | 'ollama'>('claude')
   const [hasApiKey, setHasApiKey] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -27,7 +27,7 @@ export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element 
         const hasKey = await window.claudeAPI?.hasApiKey()
         setHasApiKey(hasKey || false)
       } else {
-        setHasApiKey(true) // Local MCP doesn't need API key
+        setHasApiKey(true) // Local MCP and Ollama don't need API key
       }
     }
     checkApiKey()
@@ -51,7 +51,12 @@ export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element 
       console.log('[ChatPanel] Calling onSendMessage with:', input, 'server:', mcpServer)
 
       // MCP server bilgisini mesaja ekle
-      const messageWithServer = mcpServer === 'local' ? `[LOCAL-MCP] ${input}` : input
+      const messageWithServer =
+        mcpServer === 'ollama'
+          ? `[OLLAMA] ${input}`
+          : mcpServer === 'local'
+            ? `[LOCAL-MCP] ${input}`
+            : input
 
       onSendMessage(messageWithServer)
       setInput('')
@@ -126,9 +131,9 @@ export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element 
           </button>
           <button
             type="button"
-            className={`mcp-server-btn ${mcpServer === 'local' ? 'active' : ''}`}
-            onClick={() => setMcpServer('local')}
-            title="Ollama (Yerel)"
+            className={`mcp-server-btn ${mcpServer === 'ollama' ? 'active' : ''}`}
+            onClick={() => setMcpServer('ollama')}
+            title="Ollama (Yerel AI)"
           >
             <i className="fas fa-server"></i>
             <span>Ollama</span>

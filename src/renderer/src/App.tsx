@@ -237,10 +237,15 @@ function App(): React.JSX.Element {
     console.log('[App] Received user message:', message)
 
     // MCP Server seçimini kontrol et
+    const isOllama = message.startsWith('[OLLAMA]')
     const isLocalMCP = message.startsWith('[LOCAL-MCP]')
-    const cleanMessage = isLocalMCP ? message.replace('[LOCAL-MCP]', '').trim() : message
+    const cleanMessage = isOllama
+      ? message.replace('[OLLAMA]', '').trim()
+      : isLocalMCP
+        ? message.replace('[LOCAL-MCP]', '').trim()
+        : message
 
-    console.log('[App] MCP Server:', isLocalMCP ? 'Local' : 'Claude')
+    console.log('[App] Server Type:', isOllama ? 'Ollama' : isLocalMCP ? 'Local MCP' : 'Claude')
     console.log('[App] Clean message:', cleanMessage)
 
     const {
@@ -254,6 +259,114 @@ function App(): React.JSX.Element {
 
     // Add user message to chat (clean message without prefix)
     addMessage({ role: 'user', content: cleanMessage })
+
+    if (isOllama) {
+      // Ollama - Yerel AI modeli
+      console.log('[App] Using Ollama')
+
+      const thinkingId = startThinking('🦙 Processing with Ollama...')
+
+      try {
+        addThinkingStep(thinkingId, {
+          type: 'analysis',
+          title: 'Ollama AI',
+          content: 'Connecting to local Ollama server (localhost:11434)...',
+          status: 'running'
+        })
+
+        setLoading(true, 'Ollama düşünüyor...')
+
+        // Ollama durumunu kontrol et
+        const isOllamaAvailable = await ollamaService.isAvailable()
+
+        if (!isOllamaAvailable) {
+          throw new Error('Ollama is not running on localhost:11434')
+        }
+
+        // Mevcut modelleri listele
+        const models = await ollamaService.listModels()
+        if (models.length === 0) {
+          throw new Error('No models available. Please run: ollama pull phi3.5:3.8b')
+        }
+
+        const selectedModel = models[0].name // İlk modeli kullan (phi3.5:3.8b olmalı)
+        console.log('[App] Using model:', selectedModel)
+
+        const stepId = useChatStore
+          .getState()
+          .getActiveConversation()
+          ?.messages.find((m) => m.id === thinkingId)?.thinkingSteps?.[0]?.id
+
+        if (stepId) {
+          updateThinkingStep(thinkingId, stepId, {
+            content: `Model: ${selectedModel}\nGenerating response...`,
+            status: 'running'
+          })
+        }
+
+        // Ollama ile streaming chat
+        let fullResponse = ''
+        await ollamaService.chatStream(
+          {
+            model: selectedModel,
+            messages: [
+              {
+                role: 'system',
+                content:
+                  'You are LUMA, an AI coding assistant. Be concise and helpful. Answer in Turkish if user writes in Turkish.'
+              },
+              { role: 'user', content: cleanMessage }
+            ],
+            options: {
+              temperature: 0.7,
+              top_p: 0.9,
+              num_ctx: 4096, // 8GB RAM için optimize (daha hızlı)
+              num_thread: 4 // i5-1135G7 için optimize
+            }
+          },
+          (chunk) => {
+            fullResponse += chunk
+            // Real-time update (her 10 chunk'ta bir)
+            if (fullResponse.length % 10 === 0) {
+              console.log('[App] Ollama chunk:', chunk)
+            }
+          }
+        )
+
+        if (stepId) {
+          updateThinkingStep(thinkingId, stepId, {
+            status: 'completed',
+            content: `✅ Response generated (${fullResponse.length} characters)`
+          })
+        }
+
+        completeThinking(thinkingId)
+        setLoading(false)
+
+        addMessage({
+          role: 'assistant',
+          content: fullResponse
+        })
+      } catch (error) {
+        console.error('[App] Ollama error:', error)
+        setLoading(false)
+        completeThinking(thinkingId)
+
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        addMessage({
+          role: 'assistant',
+          content:
+            `❌ **Ollama Error**\n\n${errorMessage}\n\n` +
+            `**Troubleshooting:**\n` +
+            `1. Ollama Desktop uygulaması çalışıyor mu?\n` +
+            `2. Model indirildi mi? → \`ollama pull phi3.5:3.8b\`\n` +
+            `3. http://localhost:11434 erişilebilir mi?\n\n` +
+            `**Hızlı Test:**\n` +
+            `Terminal'de \`ollama list\` çalıştır`
+        })
+      }
+      return
+    }
 
     if (isLocalMCP) {
       // Local MCP Server - Ollama kullanarak işle
@@ -278,14 +391,20 @@ function App(): React.JSX.Element {
           throw new Error('Ollama is not running on localhost:11434')
         }
 
+        // Mevcut modelleri listele
+        const models = await ollamaService.listModels()
+        const selectedModel = models.length > 0 ? models[0].name : 'phi3.5:3.8b'
+
         const response = await ollamaService.chat({
-          model: 'llama2', // veya 'mistral', 'codellama' vb.
+          model: selectedModel,
           messages: [
-            { role: 'system', content: 'You are a helpful AI coding assistant.' },
+            { role: 'system', content: 'You are LUMA AI assistant. Be helpful and concise.' },
             { role: 'user', content: cleanMessage }
           ],
           options: {
-            temperature: 0.7
+            temperature: 0.7,
+            num_ctx: 4096,
+            num_thread: 4
           }
         })
 
