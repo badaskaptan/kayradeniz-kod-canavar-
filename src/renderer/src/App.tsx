@@ -286,11 +286,19 @@ function App(): React.JSX.Element {
         // Mevcut modelleri listele
         const models = await ollamaService.listModels()
         if (models.length === 0) {
-          throw new Error('No models available. Please run: ollama pull phi3.5:3.8b')
+          throw new Error('No models available. Please run: ollama pull gemma2:2b')
         }
 
-        const selectedModel = models[0].name // İlk modeli kullan (phi3.5:3.8b olmalı)
+        // Varsayılan model: gemma2:2b (8GB RAM için optimize)
+        const DEFAULT_MODEL = 'gemma2:2b'
+        const selectedModel = models.find((m) => m.name === DEFAULT_MODEL)?.name || models[0].name
+
         console.log('[App] Using model:', selectedModel)
+        if (selectedModel !== DEFAULT_MODEL) {
+          console.warn(
+            `[App] Default model '${DEFAULT_MODEL}' not found, using '${selectedModel}' instead`
+          )
+        }
 
         const stepId = useChatStore
           .getState()
@@ -324,9 +332,7 @@ function App(): React.JSX.Element {
             ],
             options: {
               temperature: 0.7,
-              top_p: 0.9,
-              num_ctx: 4096, // 8GB RAM için optimize (daha hızlı)
-              num_thread: 4 // i5-1135G7 için optimize
+              top_p: 0.9
             }
           },
           (chunk) => {
@@ -407,9 +413,7 @@ function App(): React.JSX.Element {
             { role: 'user', content: cleanMessage }
           ],
           options: {
-            temperature: 0.7,
-            num_ctx: 4096,
-            num_thread: 4
+            temperature: 0.7
           }
         })
 
