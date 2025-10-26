@@ -1,9 +1,11 @@
 /* ============================================
    LUMA THEME SYSTEM - Liman Renk Paletleri
+   Dark/Light Mode Support
    ============================================ */
 
-/* DRAGON THEME (Mevcut - Turuncu Ateş Ejderhası) */
-[data-theme="dragon"] {
+/* DRAGON THEME - DARK MODE (Varsayılan) */
+[data-theme="dragon"],
+[data-theme="dragon"][data-mode="dark"] {
     --primary: #ff8552;
     --secondary: #ffb347;
     --accent: #ffc061;
@@ -25,8 +27,32 @@
     --shadow-glow: 0 0 20px rgba(255, 107, 53, 0.4);
 }
 
-/* OCEAN THEME (Okyanus Mavisi - Derin Su) */
-[data-theme="ocean"] {
+/* DRAGON THEME - LIGHT MODE */
+[data-theme="dragon"][data-mode="light"] {
+    --primary: #ff6b35;
+    --secondary: #ff8c42;
+    --accent: #ffaa33;
+    
+    --bg-primary: #fff5f0;
+    --bg-secondary: #ffe8dd;
+    --bg-tertiary: #ffd5c2;
+    --bg-card: #fff0e6;
+    --bg-hover: #ffddc7;
+
+    --text-primary: #2d1810;
+    --text-secondary: #5a3520;
+    --text-muted: #8a6040;
+
+    --border-primary: #ffccaa;
+    --border-secondary: #ff8552;
+    
+    --gradient-primary: linear-gradient(135deg, #ff6b35, #ff8c42);
+    --shadow-glow: 0 0 20px rgba(255, 107, 53, 0.2);
+}
+
+/* OCEAN THEME - DARK MODE (Varsayılan) */
+[data-theme="ocean"],
+[data-theme="ocean"][data-mode="dark"] {
     --primary: #0ea5e9;
     --secondary: #38bdf8;
     --accent: #7dd3fc;
@@ -48,8 +74,32 @@
     --shadow-glow: 0 0 20px rgba(14, 165, 233, 0.4);
 }
 
-/* SUNSET THEME (Gün Batımı - Pembe/Mor) */
-[data-theme="sunset"] {
+/* OCEAN THEME - LIGHT MODE */
+[data-theme="ocean"][data-mode="light"] {
+    --primary: #0284c7;
+    --secondary: #0ea5e9;
+    --accent: #38bdf8;
+    
+    --bg-primary: #f0f9ff;
+    --bg-secondary: #e0f2fe;
+    --bg-tertiary: #bae6fd;
+    --bg-card: #e6f7ff;
+    --bg-hover: #d4ebfa;
+
+    --text-primary: #0c4a6e;
+    --text-secondary: #075985;
+    --text-muted: #0369a1;
+
+    --border-primary: #7dd3fc;
+    --border-secondary: #0ea5e9;
+    
+    --gradient-primary: linear-gradient(135deg, #0284c7, #0ea5e9);
+    --shadow-glow: 0 0 20px rgba(14, 165, 233, 0.2);
+}
+
+/* SUNSET THEME - DARK MODE (Varsayılan) */
+[data-theme="sunset"],
+[data-theme="sunset"][data-mode="dark"] {
     --primary: #ec4899;
     --secondary: #f472b6;
     --accent: #f9a8d4;
@@ -71,8 +121,32 @@
     --shadow-glow: 0 0 20px rgba(236, 72, 153, 0.4);
 }
 
-/* FOREST THEME (Orman Yeşili - Doğa) */
-[data-theme="forest"] {
+/* SUNSET THEME - LIGHT MODE */
+[data-theme="sunset"][data-mode="light"] {
+    --primary: #db2777;
+    --secondary: #ec4899;
+    --accent: #f472b6;
+    
+    --bg-primary: #fdf2f8;
+    --bg-secondary: #fce7f3;
+    --bg-tertiary: #fbcfe8;
+    --bg-card: #fef3f8;
+    --bg-hover: #fae1f0;
+
+    --text-primary: #831843;
+    --text-secondary: #9f1239;
+    --text-muted: #be185d;
+
+    --border-primary: #f9a8d4;
+    --border-secondary: #ec4899;
+    
+    --gradient-primary: linear-gradient(135deg, #db2777, #ec4899);
+    --shadow-glow: 0 0 20px rgba(236, 72, 153, 0.2);
+}
+
+/* FOREST THEME - DARK MODE */
+[data-theme="forest"],
+[data-theme="forest"][data-mode="dark"] {
     --primary: #10b981;
     --secondary: #34d399;
     --accent: #6ee7b7;
@@ -94,8 +168,32 @@
     --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.4);
 }
 
-/* MIDNIGHT THEME (Gece Mavisi - Koyu Tema) */
-[data-theme="midnight"] {
+/* FOREST THEME - LIGHT MODE */
+[data-theme="forest"][data-mode="light"] {
+    --primary: #059669;
+    --secondary: #10b981;
+    --accent: #34d399;
+    
+    --bg-primary: #f0fdf4;
+    --bg-secondary: #dcfce7;
+    --bg-tertiary: #bbf7d0;
+    --bg-card: #ecfdf5;
+    --bg-hover: #d1fae5;
+
+    --text-primary: #064e3b;
+    --text-secondary: #065f46;
+    --text-muted: #047857;
+
+    --border-primary: #a7f3d0;
+    --border-secondary: #10b981;
+    
+    --gradient-primary: linear-gradient(135deg, #10b981, #34d399);
+    --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+/* MIDNIGHT THEME - DARK MODE */
+[data-theme="midnight"],
+[data-theme="midnight"][data-mode="dark"] {
     --primary: #6366f1;
     --secondary: #818cf8;
     --accent: #a5b4fc;
@@ -117,8 +215,32 @@
     --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.4);
 }
 
-/* AMBER THEME (Kehribar - Sıcak Sarı/Turuncu) */
-[data-theme="amber"] {
+/* MIDNIGHT THEME - LIGHT MODE */
+[data-theme="midnight"][data-mode="light"] {
+    --primary: #4f46e5;
+    --secondary: #6366f1;
+    --accent: #818cf8;
+    
+    --bg-primary: #eef2ff;
+    --bg-secondary: #e0e7ff;
+    --bg-tertiary: #c7d2fe;
+    --bg-card: #f5f7ff;
+    --bg-hover: #ddd6fe;
+
+    --text-primary: #1e1b4b;
+    --text-secondary: #312e81;
+    --text-muted: #4338ca;
+
+    --border-primary: #c7d2fe;
+    --border-secondary: #6366f1;
+    
+    --gradient-primary: linear-gradient(135deg, #6366f1, #818cf8);
+    --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.2);
+}
+
+/* AMBER THEME - DARK MODE */
+[data-theme="amber"],
+[data-theme="amber"][data-mode="dark"] {
     --primary: #f59e0b;
     --secondary: #fbbf24;
     --accent: #fcd34d;
@@ -140,8 +262,32 @@
     --shadow-glow: 0 0 20px rgba(245, 158, 11, 0.4);
 }
 
-/* CYBER THEME (Siber Neon - Yeşil/Mavi Matrix) */
-[data-theme="cyber"] {
+/* AMBER THEME - LIGHT MODE */
+[data-theme="amber"][data-mode="light"] {
+    --primary: #d97706;
+    --secondary: #f59e0b;
+    --accent: #fbbf24;
+    
+    --bg-primary: #fffbeb;
+    --bg-secondary: #fef3c7;
+    --bg-tertiary: #fde68a;
+    --bg-card: #fefce8;
+    --bg-hover: #fef3c7;
+
+    --text-primary: #78350f;
+    --text-secondary: #92400e;
+    --text-muted: #b45309;
+
+    --border-primary: #fde68a;
+    --border-secondary: #f59e0b;
+    
+    --gradient-primary: linear-gradient(135deg, #f59e0b, #fbbf24);
+    --shadow-glow: 0 0 20px rgba(245, 158, 11, 0.2);
+}
+
+/* CYBER THEME - DARK MODE */
+[data-theme="cyber"],
+[data-theme="cyber"][data-mode="dark"] {
     --primary: #00ff88;
     --secondary: #00ffcc;
     --accent: #00ffee;
@@ -163,8 +309,32 @@
     --shadow-glow: 0 0 20px rgba(0, 255, 136, 0.6);
 }
 
-/* LAVENDER THEME (Lavanta - Mor/Pembe Pastel) */
-[data-theme="lavender"] {
+/* CYBER THEME - LIGHT MODE */
+[data-theme="cyber"][data-mode="light"] {
+    --primary: #00cc66;
+    --secondary: #00ddaa;
+    --accent: #00eebb;
+    
+    --bg-primary: #f0fdf9;
+    --bg-secondary: #ccfff0;
+    --bg-tertiary: #99ffdd;
+    --bg-card: #e6fff7;
+    --bg-hover: #ccfff0;
+
+    --text-primary: #004d33;
+    --text-secondary: #006644;
+    --text-muted: #008055;
+
+    --border-primary: #99ffdd;
+    --border-secondary: #00cc66;
+    
+    --gradient-primary: linear-gradient(135deg, #00cc66, #00ddaa);
+    --shadow-glow: 0 0 20px rgba(0, 204, 102, 0.3);
+}
+
+/* LAVENDER THEME - DARK MODE */
+[data-theme="lavender"],
+[data-theme="lavender"][data-mode="dark"] {
     --primary: #a78bfa;
     --secondary: #c4b5fd;
     --accent: #ddd6fe;
@@ -186,8 +356,32 @@
     --shadow-glow: 0 0 20px rgba(167, 139, 250, 0.4);
 }
 
-/* ROSE THEME (Gül Kırmızısı - Zarif Kırmızı) */
-[data-theme="rose"] {
+/* LAVENDER THEME - LIGHT MODE */
+[data-theme="lavender"][data-mode="light"] {
+    --primary: #8b5cf6;
+    --secondary: #a78bfa;
+    --accent: #c4b5fd;
+    
+    --bg-primary: #faf5ff;
+    --bg-secondary: #f5f3ff;
+    --bg-tertiary: #ede9fe;
+    --bg-card: #fdfcff;
+    --bg-hover: #f5f3ff;
+
+    --text-primary: #4c1d95;
+    --text-secondary: #5b21b6;
+    --text-muted: #6d28d9;
+
+    --border-primary: #ede9fe;
+    --border-secondary: #a78bfa;
+    
+    --gradient-primary: linear-gradient(135deg, #a78bfa, #c4b5fd);
+    --shadow-glow: 0 0 20px rgba(167, 139, 250, 0.2);
+}
+
+/* ROSE THEME - DARK MODE */
+[data-theme="rose"],
+[data-theme="rose"][data-mode="dark"] {
     --primary: #fb7185;
     --secondary: #fda4af;
     --accent: #fecdd3;
@@ -209,8 +403,32 @@
     --shadow-glow: 0 0 20px rgba(251, 113, 133, 0.4);
 }
 
-/* EMERALD THEME (Zümrüt Yeşili - Parlak Yeşil) */
-[data-theme="emerald"] {
+/* ROSE THEME - LIGHT MODE */
+[data-theme="rose"][data-mode="light"] {
+    --primary: #f43f5e;
+    --secondary: #fb7185;
+    --accent: #fda4af;
+    
+    --bg-primary: #fff1f2;
+    --bg-secondary: #ffe4e6;
+    --bg-tertiary: #fecdd3;
+    --bg-card: #fef5f7;
+    --bg-hover: #ffe4e6;
+
+    --text-primary: #881337;
+    --text-secondary: #9f1239;
+    --text-muted: #be123c;
+
+    --border-primary: #fecdd3;
+    --border-secondary: #fb7185;
+    
+    --gradient-primary: linear-gradient(135deg, #fb7185, #fda4af);
+    --shadow-glow: 0 0 20px rgba(251, 113, 133, 0.2);
+}
+
+/* EMERALD THEME - DARK MODE */
+[data-theme="emerald"],
+[data-theme="emerald"][data-mode="dark"] {
     --primary: #059669;
     --secondary: #10b981;
     --accent: #34d399;
@@ -230,6 +448,29 @@
     
     --gradient-primary: linear-gradient(135deg, #059669, #10b981);
     --shadow-glow: 0 0 20px rgba(5, 150, 105, 0.4);
+}
+
+/* EMERALD THEME - LIGHT MODE */
+[data-theme="emerald"][data-mode="light"] {
+    --primary: #047857;
+    --secondary: #059669;
+    --accent: #10b981;
+    
+    --bg-primary: #ecfdf5;
+    --bg-secondary: #d1fae5;
+    --bg-tertiary: #a7f3d0;
+    --bg-card: #f0fdf7;
+    --bg-hover: #d1fae5;
+
+    --text-primary: #064e3b;
+    --text-secondary: #065f46;
+    --text-muted: #047857;
+
+    --border-primary: #a7f3d0;
+    --border-secondary: #059669;
+    
+    --gradient-primary: linear-gradient(135deg, #059669, #10b981);
+    --shadow-glow: 0 0 20px rgba(5, 150, 105, 0.2);
 }
 
 /* Ortak Stiller - Tüm Temalar */

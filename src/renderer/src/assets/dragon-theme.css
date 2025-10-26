@@ -305,13 +305,15 @@ body {
    SIDEBAR (Left & Right)
    ============================================ */
 .sidebar {
-    width: 300px;
+    min-width: 200px;
+    max-width: 800px;
     background: var(--bg-secondary);
     border-right: 1px solid var(--border-primary);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     flex-shrink: 0;
+    transition: width var(--transition-fast);
 }
 
 .sidebar.right-sidebar {
@@ -407,12 +409,14 @@ body {
 
 /* Terminal Section */
 .terminal-section {
-    height: 250px;
+    min-height: 150px;
+    max-height: 600px;
     background: var(--bg-secondary);
     border-top: 1px solid var(--border-primary);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    transition: height var(--transition-fast);
 }
 
 /* ============================================
@@ -438,12 +442,16 @@ body {
     background: var(--border-primary);
     position: relative;
     z-index: 10;
-    cursor: col-resize;
     transition: background var(--transition-fast);
+    flex-shrink: 0;
 }
 
 .resizer:hover {
     background: var(--dragon-primary);
+}
+
+.resizer:active {
+    background: var(--dragon-secondary);
 }
 
 .left-resizer,
@@ -452,9 +460,18 @@ body {
     cursor: col-resize;
 }
 
+.left-resizer:hover,
+.right-resizer:hover {
+    width: 6px;
+}
+
 .bottom-resizer {
     height: 4px;
     cursor: row-resize;
+}
+
+.bottom-resizer:hover {
+    height: 6px;
 }
 
 /* ============================================

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Claude MCP Service - API Key Management + Conversation
 import Anthropic from '@anthropic-ai/sdk'
 import { BrowserWindow, app } from 'electron'
@@ -13,6 +14,16 @@ interface ConversationMessage {
   content: string
 }
 
+interface ToolDefinition {
+  name: string
+  description: string
+  input_schema: {
+    type: 'object'
+    properties: Record<string, unknown>
+    required: string[]
+  }
+}
+
 interface StoreSchema {
   apiKey?: string
 }
@@ -24,7 +35,7 @@ export class ClaudeMCPService {
   private workspacePath: string = ''
   private activityLogger: MCPActivityLogger
   private currentActivityId: string | null = null
-  
+
   // str_replace_editor undo history
   private fileEditHistory: Map<string, string> = new Map()
 
@@ -101,7 +112,7 @@ export class ClaudeMCPService {
   }
 
   // Claude'un built-in tool'ları
-  private getAvailableTools() {
+  private getAvailableTools(): ToolDefinition[] {
     return [
       {
         name: 'code_analyzer',
@@ -290,7 +301,7 @@ export class ClaudeMCPService {
             },
             destination_path: {
               type: 'string',
-              description: "Hedef path (klasör içine taşıma veya yeni isim)"
+              description: 'Hedef path (klasör içine taşıma veya yeni isim)'
             }
           },
           required: ['source_path', 'destination_path']
@@ -341,7 +352,7 @@ export class ClaudeMCPService {
             },
             path: {
               type: 'string',
-              description: "File path relative to workspace root"
+              description: 'File path relative to workspace root'
             },
             file_text: {
               type: 'string',
@@ -750,7 +761,10 @@ export class ClaudeMCPService {
           }
 
           // Count occurrences
-          const occurrences = (content.match(new RegExp(params.old_str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length
+          const occurrences = (
+            content.match(new RegExp(params.old_str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) ||
+            []
+          ).length
 
           // Replace all occurrences
           const newContent = content.replaceAll(params.old_str, params.new_str)
@@ -944,13 +958,13 @@ export class ClaudeMCPService {
         if (event.type === 'content_block_delta' && event.delta.type === 'input_json_delta') {
           if (toolCalls.length > 0) {
             const lastTool = toolCalls[toolCalls.length - 1]
-            
+
             // 🔧 FIX: Accumulate partial JSON strings, don't try to parse yet
             if (!lastTool.inputJsonStr) {
               lastTool.inputJsonStr = ''
             }
             lastTool.inputJsonStr += event.delta.partial_json
-            
+
             // Try to parse the accumulated JSON
             try {
               lastTool.input = JSON.parse(lastTool.inputJsonStr)
@@ -1213,19 +1227,19 @@ export class ClaudeMCPService {
   }
 
   // 🧠 MCP Learning API
-  getLearningStatistics() {
+  getLearningStatistics(): unknown {
     return this.activityLogger.getStatistics()
   }
 
-  getLearnedPatterns() {
+  getLearnedPatterns(): unknown {
     return this.activityLogger.getPatterns()
   }
 
-  getRecentActivities(count = 10) {
+  getRecentActivities(count = 10): unknown {
     return this.activityLogger.getRecentActivities(count)
   }
 
-  async findMatchingPattern(userRequest: string) {
+  async findMatchingPattern(userRequest: string): Promise<unknown> {
     return await this.activityLogger.findMatchingPattern(userRequest)
   }
 }

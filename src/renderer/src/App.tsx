@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { ChatPanel } from './components/Chat/ChatPanel'
 import { EditorPanel } from './components/Editor/EditorPanel'
 import { AgentPanel } from './components/AgentPanel/AgentPanel'
@@ -29,7 +29,89 @@ function App(): React.JSX.Element {
 
   const [showApiKeyManager, setShowApiKeyManager] = useState(false)
   const [currentTheme, setCurrentTheme] = useState('dragon')
+  const [colorMode, setColorMode] = useState<'dark' | 'light'>('dark')
   const [agentMode, setAgentMode] = useState(false)
+
+  // 🎨 Theme change callback for ProfileManager (memoized to prevent re-renders)
+  const handleThemeChange = useCallback((theme: string): void => {
+    setCurrentTheme(theme)
+  }, [])
+
+  // 🎨 Apply theme and mode
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', currentTheme)
+    document.documentElement.setAttribute('data-mode', colorMode)
+    localStorage.setItem('luma-theme', currentTheme)
+    localStorage.setItem('luma-color-mode', colorMode)
+  }, [currentTheme, colorMode])
+
+  // 🎨 Load saved theme/mode on mount
+  useEffect(() => {
+    // Priority: localStorage > userProfile
+    const savedTheme = localStorage.getItem('luma-theme')
+    const savedMode = localStorage.getItem('luma-color-mode') as 'dark' | 'light' | null
+
+    // If no localStorage theme, check userProfile
+    if (!savedTheme) {
+      const savedProfile = localStorage.getItem('userProfile')
+      if (savedProfile) {
+        try {
+          const profile = JSON.parse(savedProfile)
+          if (profile.theme?.current) {
+            setCurrentTheme(profile.theme.current)
+          }
+        } catch (e) {
+          console.error('Profile parse error:', e)
+        }
+      }
+    } else {
+      setCurrentTheme(savedTheme)
+    }
+
+    if (savedMode) setColorMode(savedMode)
+  }, [])
+
+  // 🎨 Resizable panels
+  const [leftPanelWidth, setLeftPanelWidth] = useState(300)
+  const [rightPanelWidth, setRightPanelWidth] = useState(400)
+  const [bottomPanelHeight, setBottomPanelHeight] = useState(250)
+  const [isResizing, setIsResizing] = useState<'left' | 'right' | 'bottom' | null>(null)
+
+  // Resize handlers
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent): void => {
+      if (!isResizing) return
+
+      if (isResizing === 'left') {
+        const newWidth = Math.max(200, Math.min(600, e.clientX))
+        setLeftPanelWidth(newWidth)
+      } else if (isResizing === 'right') {
+        const newWidth = Math.max(300, Math.min(800, window.innerWidth - e.clientX))
+        setRightPanelWidth(newWidth)
+      } else if (isResizing === 'bottom') {
+        const newHeight = Math.max(150, Math.min(600, window.innerHeight - e.clientY - 28))
+        setBottomPanelHeight(newHeight)
+      }
+    }
+
+    const handleMouseUp = (): void => {
+      setIsResizing(null)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    if (isResizing) {
+      document.body.style.cursor = isResizing === 'bottom' ? 'row-resize' : 'col-resize'
+      document.body.style.userSelect = 'none'
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isResizing])
 
   // Menu event listeners
   useEffect(() => {
@@ -157,7 +239,7 @@ function App(): React.JSX.Element {
     // MCP Server seçimini kontrol et
     const isLocalMCP = message.startsWith('[LOCAL-MCP]')
     const cleanMessage = isLocalMCP ? message.replace('[LOCAL-MCP]', '').trim() : message
-    
+
     console.log('[App] MCP Server:', isLocalMCP ? 'Local' : 'Claude')
     console.log('[App] Clean message:', cleanMessage)
 
@@ -176,9 +258,9 @@ function App(): React.JSX.Element {
     if (isLocalMCP) {
       // Local MCP Server - Ollama kullanarak işle
       console.log('[App] Using Local MCP Server with Ollama')
-      
+
       const thinkingId = startThinking('🖥️ Processing with Local MCP...')
-      
+
       try {
         addThinkingStep(thinkingId, {
           type: 'analysis',
@@ -191,7 +273,7 @@ function App(): React.JSX.Element {
 
         // Ollama ile sohbet et
         const isOllamaAvailable = await ollamaService.isAvailable()
-        
+
         if (!isOllamaAvailable) {
           throw new Error('Ollama is not running on localhost:11434')
         }
@@ -210,8 +292,7 @@ function App(): React.JSX.Element {
         const stepId = useChatStore
           .getState()
           .getActiveConversation()
-          ?.messages.find((m) => m.id === thinkingId)
-          ?.thinkingSteps?.[0]?.id
+          ?.messages.find((m) => m.id === thinkingId)?.thinkingSteps?.[0]?.id
 
         if (stepId) {
           updateThinkingStep(thinkingId, stepId, {
@@ -231,7 +312,7 @@ function App(): React.JSX.Element {
         console.error('[App] Local MCP error:', error)
         setLoading(false)
         completeThinking(thinkingId)
-        
+
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
         addMessage({
           role: 'assistant',
@@ -275,8 +356,7 @@ function App(): React.JSX.Element {
       const stepId = useChatStore
         .getState()
         .getActiveConversation()
-        ?.messages.find((m) => m.id === thinkingId)
-        ?.thinkingSteps?.[0]?.id
+        ?.messages.find((m) => m.id === thinkingId)?.thinkingSteps?.[0]?.id
 
       if (stepId) {
         updateThinkingStep(thinkingId, stepId, {
@@ -328,18 +408,16 @@ function App(): React.JSX.Element {
           </div>
         </div>
 
-        <div className="header-center">
-          {/* Workspace Info */}
-        </div>
+        <div className="header-center">{/* Workspace Info */}</div>
 
         <div className="header-right">
           <button
             className="header-btn theme-toggle-btn"
-            onClick={() => setCurrentTheme(currentTheme === 'dragon' ? 'light' : 'dragon')}
-            title="Tema Değiştir"
+            onClick={() => setColorMode(colorMode === 'dark' ? 'light' : 'dark')}
+            title={colorMode === 'dark' ? 'Light Moda Geç' : 'Dark Moda Geç'}
           >
-            <i className="fas fa-palette"></i>
-            <span className="theme-name">{currentTheme === 'dragon' ? 'Dragon' : 'Light'}</span>
+            <i className={`fas fa-${colorMode === 'dark' ? 'sun' : 'moon'}`}></i>
+            <span className="theme-name">{colorMode === 'dark' ? 'Light' : 'Dark'}</span>
           </button>
           <button
             className="header-btn agent-mode-btn"
@@ -359,7 +437,7 @@ function App(): React.JSX.Element {
       <main className="main-layout">
         {/* Left Sidebar */}
         {layout.panels.explorer.visible && !layout.panels.explorer.minimized && (
-          <div className="sidebar left-sidebar">
+          <div className="sidebar left-sidebar" style={{ width: `${leftPanelWidth}px` }}>
             <div className="file-explorer">
               <div className="sidebar-header">
                 <h3>
@@ -390,7 +468,7 @@ function App(): React.JSX.Element {
 
         {/* Left Resizer */}
         {layout.panels.explorer.visible && !layout.panels.explorer.minimized && (
-          <div className="resizer left-resizer"></div>
+          <div className="resizer left-resizer" onMouseDown={() => setIsResizing('left')}></div>
         )}
 
         {/* Center Area */}
@@ -402,12 +480,15 @@ function App(): React.JSX.Element {
 
           {/* Bottom Resizer */}
           {layout.panels.terminal.visible && !layout.panels.terminal.minimized && (
-            <div className="resizer bottom-resizer"></div>
+            <div
+              className="resizer bottom-resizer"
+              onMouseDown={() => setIsResizing('bottom')}
+            ></div>
           )}
 
           {/* Terminal Section */}
           {layout.panels.terminal.visible && !layout.panels.terminal.minimized && (
-            <div className="terminal-section">
+            <div className="terminal-section" style={{ height: `${bottomPanelHeight}px` }}>
               <TerminalPanel />
             </div>
           )}
@@ -415,12 +496,12 @@ function App(): React.JSX.Element {
 
         {/* Right Resizer */}
         {layout.panels.chat.visible && !layout.panels.chat.minimized && (
-          <div className="resizer right-resizer"></div>
+          <div className="resizer right-resizer" onMouseDown={() => setIsResizing('right')}></div>
         )}
 
         {/* Right Sidebar */}
         {layout.panels.chat.visible && !layout.panels.chat.minimized && (
-          <div className="sidebar right-sidebar">
+          <div className="sidebar right-sidebar" style={{ width: `${rightPanelWidth}px` }}>
             <div className="ai-chat-panel">
               <div className="sidebar-header">
                 <h3>
@@ -464,6 +545,7 @@ function App(): React.JSX.Element {
             setShowApiKeyManager(false)
           }}
           onCancel={() => setShowApiKeyManager(false)}
+          onThemeChange={handleThemeChange}
         />
       )}
     </div>

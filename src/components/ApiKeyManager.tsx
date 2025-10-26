@@ -8,9 +8,14 @@ import './ApiKeyManager.css'
 interface ApiKeyManagerProps {
   onSave: (apiKey: string) => void
   onCancel: () => void
+  onThemeChange?: (theme: string) => void
 }
 
-export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ onSave, onCancel }) => {
+export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({
+  onSave,
+  onCancel,
+  onThemeChange
+}) => {
   const [apiKey, setApiKey] = useState('')
   const [isValid, setIsValid] = useState<boolean | null>(null)
   const [isValidating, setIsValidating] = useState(false)
@@ -60,14 +65,20 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ onSave, onCancel }
     })
 
     // Kayıtlı profili yükle (localStorage + Claude Service)
-    const loadProfile = async () => {
+    const loadProfile = async (): Promise<void> => {
       try {
         const savedProfile = localStorage.getItem('userProfile')
         if (savedProfile) {
           const profile = JSON.parse(savedProfile)
           setUserProfile(profile)
-          // Temayı uygula
-          document.documentElement.setAttribute('data-theme', profile.theme.current)
+          // 🎨 Temayı uygula ve App.tsx'i bilgilendir
+          const theme = profile.theme.current
+          document.documentElement.setAttribute('data-theme', theme)
+          // Get saved color mode (dark/light)
+          const savedMode = localStorage.getItem('luma-color-mode') || 'dark'
+          document.documentElement.setAttribute('data-mode', savedMode)
+          // Notify App.tsx
+          onThemeChange?.(theme)
           // 🎭 Claude Service'e de gönder (IPC)
           await window.claudeAPI?.setUserProfile(profile)
           console.log('✅ Profile loaded and sent to Claude Service')
@@ -76,9 +87,9 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ onSave, onCancel }
         console.error('Profil yüklenirken hata:', error)
       }
     }
-    
+
     loadProfile()
-  }, [])
+  }, [onThemeChange])
 
   const validateAndSave = async (): Promise<void> => {
     if (!apiKey.trim()) {
@@ -255,8 +266,14 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({ onSave, onCancel }
                 profile={userProfile}
                 onProfileUpdate={async (newProfile) => {
                   setUserProfile(newProfile)
-                  // Apply theme
-                  document.documentElement.setAttribute('data-theme', newProfile.theme.current)
+                  // 🎨 Apply theme and notify parent (App.tsx)
+                  const theme = newProfile.theme.current
+                  document.documentElement.setAttribute('data-theme', theme)
+                  // Get current color mode from localStorage (don't override it)
+                  const savedMode = localStorage.getItem('luma-color-mode') || 'dark'
+                  document.documentElement.setAttribute('data-mode', savedMode)
+                  // Notify App.tsx to update its state
+                  onThemeChange?.(theme)
                   // Save to localStorage (for persistence)
                   localStorage.setItem('userProfile', JSON.stringify(newProfile))
                   // 🎭 SEND TO CLAUDE SERVICE via IPC (for AI behavior)

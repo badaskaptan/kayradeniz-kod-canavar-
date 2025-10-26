@@ -121,7 +121,7 @@ export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element 
             type="button"
             className={`mcp-server-btn ${mcpServer === 'claude' ? 'active' : ''}`}
             onClick={() => setMcpServer('claude')}
-            title="Claude MCP Server (Anthropic API)"
+            title="Claude API"
           >
             <i className="fas fa-cloud"></i>
             <span>Claude MCP</span>
@@ -130,10 +130,10 @@ export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element 
             type="button"
             className={`mcp-server-btn ${mcpServer === 'local' ? 'active' : ''}`}
             onClick={() => setMcpServer('local')}
-            title="Local MCP Server"
+            title="Ollama (Yerel)"
           >
             <i className="fas fa-server"></i>
-            <span>Local MCP</span>
+            <span>Ollama</span>
           </button>
         </div>
 
@@ -141,12 +141,6 @@ export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element 
           <div className="chat-warning">
             <AlertCircle className="w-4 h-4" />
             <span>Claude API key gerekli. Lütfen Settings&apos;ten API key ekleyin.</span>
-          </div>
-        )}
-        {mcpServer === 'local' && (
-          <div className="chat-info">
-            <i className="fas fa-info-circle"></i>
-            <span>Local MCP Server (Ollama) - localhost:11434</span>
           </div>
         )}
         <div className="chat-input-wrapper">
