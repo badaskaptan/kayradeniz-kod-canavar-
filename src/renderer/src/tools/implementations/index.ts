@@ -10,6 +10,7 @@ export { multiEditTool, multiEditImpl } from './multiEdit'
 export { lsTool, lsImpl } from './lsTool'
 export { readFileRangeTool, readFileRangeImpl } from './readFileRange'
 export { runTerminalCommandTool, runTerminalCommandImpl } from './runTerminalCommand'
+export { changeDirectoryTool, changeDirectoryImpl } from './changeDirectory'
 export { grepSearchTool, grepSearchImpl } from './grepSearch'
 export { globSearchTool, globSearchImpl } from './globSearch'
 
@@ -28,6 +29,7 @@ import { multiEditTool } from './multiEdit'
 import { lsTool } from './lsTool'
 import { readFileRangeTool } from './readFileRange'
 import { runTerminalCommandTool } from './runTerminalCommand'
+import { changeDirectoryTool } from './changeDirectory'
 import { grepSearchTool } from './grepSearch'
 import { globSearchTool } from './globSearch'
 import { gitStatusTool } from './gitStatus'
@@ -45,8 +47,9 @@ export const BASE_TOOLS = [
   multiEditTool,
   lsTool,
 
-  // Terminal (1 tool)
+  // Terminal (2 tools)
   runTerminalCommandTool,
+  changeDirectoryTool,
 
   // Search (2 tools)
   grepSearchTool,
