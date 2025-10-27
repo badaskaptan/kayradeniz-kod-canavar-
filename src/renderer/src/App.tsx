@@ -11,6 +11,8 @@ import { useLayoutStore } from './stores/layoutStore'
 import { useEditorStore } from './stores/editorStore'
 import { useWorkspaceStore } from './stores/workspaceStore'
 import { ollamaService } from './services/ollamaService'
+import { getToolRegistry } from './tools/registry'
+import { BASE_TOOLS } from './tools/implementations'
 import type { ToolBridgeAPI } from './types'
 import DragonLogo from './assets/dragon_logo.svg'
 
@@ -30,7 +32,20 @@ function App(): React.JSX.Element {
   const [showApiKeyManager, setShowApiKeyManager] = useState(false)
   const [currentTheme, setCurrentTheme] = useState('dragon')
   const [colorMode, setColorMode] = useState<'dark' | 'light'>('dark')
-  const [agentMode, setAgentMode] = useState(false)
+  const [agentMode, setAgentMode] = useState(true) // 🔧 TOOL MODE ENABLED by default
+
+  // 🔧 Initialize Tool Registry
+  const toolRegistry = getToolRegistry()
+
+  // Register all tools on mount
+  useEffect(() => {
+    toolRegistry.registerAll(BASE_TOOLS)
+    console.log(`[ToolBridge] ✅ Registered ${BASE_TOOLS.length} tools`)
+    console.log(
+      '[ToolBridge] Available:',
+      toolRegistry.getAll().map((t) => t.function.name)
+    )
+  }, [toolRegistry])
 
   // 🎨 Theme change callback for ProfileManager (memoized to prevent re-renders)
   const handleThemeChange = useCallback((theme: string): void => {
@@ -347,35 +362,108 @@ function App(): React.JSX.Element {
         // Ollama ile streaming chat
         let fullResponse = ''
 
-        // Workspace bilgisi ekle (ultra kısa!)
-        const workspaceContext = workspacePath
-          ? `\nWorkspace: ${workspacePath}\nNote: File access not available yet.`
-          : ''
+        // Workspace bilgisi ekle
+        const workspaceContext = workspacePath ? `\nWorkspace: ${workspacePath}` : ''
 
-        await ollamaService.chatStream(
-          {
-            model: selectedModel,
-            messages: [
-              {
-                role: 'system',
-                content: `LUMA AI - Local assistant. English only. Concise answers.${workspaceContext}`
-              },
-              { role: 'user', content: cleanMessage }
-            ],
-            options: {
-              temperature: 0.7,
-              top_p: 0.9,
-              num_predict: 150 // Max 150 tokens per response (hızlandırır)
+        // 🔧 TOOL BRIDGE: Agent mode ile tool calling
+        if (agentMode) {
+          console.log('[App] 🤖 Agent Mode: Tool calling enabled')
+
+          const toolBridge = getToolBridge()
+
+          // Prepare tools for Llama3.2
+          const availableTools = toolRegistry.getForAI().map((tool) => ({
+            type: 'function',
+            function: {
+              name: tool.name,
+              description: tool.description,
+              parameters: tool.parameters
             }
-          },
-          (chunk) => {
-            fullResponse += chunk
-            // Real-time update (her 10 chunk'ta bir)
-            if (fullResponse.length % 10 === 0) {
-              console.log('[App] Ollama chunk:', chunk)
+          }))
+
+          console.log(`[App] 📦 Sending ${availableTools.length} tools to model`)
+
+          // Tool execution callback
+          const handleToolCall = async (
+            toolName: string,
+            args: Record<string, unknown>
+          ): Promise<string> => {
+            console.log(`[ToolBridge] 🔧 Executing: ${toolName}`)
+            console.log('[ToolBridge] Args:', args)
+
+            const tool = toolRegistry.get(toolName)
+            if (!tool) {
+              return `ERROR: Tool ${toolName} not found`
+            }
+
+            try {
+              const result = await tool.implementation(args, {
+                ide: toolBridge,
+                workspaceDir: workspacePath || undefined
+              })
+
+              // Format result
+              const formatted = result.map((item) => `${item.name}:\n${item.content}`).join('\n\n')
+
+              console.log(`[ToolBridge] ✅ ${toolName} completed`)
+              return formatted
+            } catch (error) {
+              const errorMsg = error instanceof Error ? error.message : String(error)
+              console.error(`[ToolBridge] ❌ ${toolName} failed:`, errorMsg)
+              return `ERROR: ${errorMsg}`
             }
           }
-        )
+
+          // Use chatWithTools instead of chatStream
+          fullResponse = await ollamaService.chatWithTools(
+            {
+              model: selectedModel,
+              messages: [
+                {
+                  role: 'system',
+                  content: `LUMA AI - Local coding assistant with tool access.${workspaceContext}\n\nYou can use tools to read files, list directories, run git commands, and more. Always use tools instead of guessing.`
+                },
+                { role: 'user', content: cleanMessage }
+              ],
+              tools: availableTools,
+              options: {
+                temperature: 0.7,
+                top_p: 0.9,
+                num_predict: 300 // More tokens for tool calling
+              }
+            },
+            handleToolCall,
+            (chunk) => {
+              console.log('[App] Response chunk:', chunk.substring(0, 50))
+            }
+          )
+        } else {
+          // Simple chat mode (no tools)
+          await ollamaService.chatStream(
+            {
+              model: selectedModel,
+              messages: [
+                {
+                  role: 'system',
+                  content: `LUMA AI - Local assistant. English only. Concise answers.${workspaceContext}\nNote: File access not available yet.`
+                },
+                { role: 'user', content: cleanMessage }
+              ],
+              options: {
+                temperature: 0.7,
+                top_p: 0.9,
+                num_predict: 150 // Max 150 tokens per response (hızlandırır)
+              }
+            },
+            (chunk) => {
+              fullResponse += chunk
+              // Real-time update (her 10 chunk'ta bir)
+              if (fullResponse.length % 10 === 0) {
+                console.log('[App] Ollama chunk:', chunk)
+              }
+            }
+          )
+        }
 
         // ⚠️ Boş response kontrolü
         if (!fullResponse || fullResponse.trim().length === 0) {

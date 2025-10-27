@@ -24,6 +24,14 @@ export interface OllamaChatRequest {
   model: string
   messages: OllamaMessage[]
   stream?: boolean
+  tools?: Array<{
+    type: 'function'
+    function: {
+      name: string
+      description: string
+      parameters: Record<string, unknown>
+    }
+  }> // Function calling tools (Llama3.2+ format)
   options?: {
     temperature?: number
     top_p?: number
@@ -36,7 +44,16 @@ export interface OllamaResponse {
   model: string
   created_at: string
   response?: string
-  message?: OllamaMessage
+  message?: OllamaMessage & {
+    tool_calls?: Array<{
+      id?: string
+      type: 'function'
+      function: {
+        name: string
+        arguments: Record<string, unknown> | string // JSON object or string
+      }
+    }>
+  }
   done: boolean
 }
 
@@ -212,6 +229,105 @@ export class OllamaService {
     } catch (error) {
       console.warn('[OllamaService] Preload failed (non-critical):', error)
     }
+  }
+
+  /**
+   * 🔧 TOOL BRIDGE: Chat with function calling support
+   * Llama3.2:3b can call tools - this orchestrates the flow:
+   * 1. Send tools to model
+   * 2. Detect tool calls in response
+   * 3. Execute tools via callback
+   * 4. Feed results back to model
+   * 5. Get final answer
+   */
+  async chatWithTools(
+    request: OllamaChatRequest,
+    onToolCall: (toolName: string, args: Record<string, unknown>) => Promise<string>,
+    onChunk?: (chunk: string) => void
+  ): Promise<string> {
+    const isAvailable = await this.isAvailable()
+    if (!isAvailable) {
+      throw new Error(
+        'Ollama Desktop is not running. Please start Ollama from system tray or run "ollama serve"'
+      )
+    }
+
+    let fullResponse = ''
+    const maxIterations = 5 // Prevent infinite tool calling loops
+
+    for (let iteration = 0; iteration < maxIterations; iteration++) {
+      console.log(`[ToolBridge] Iteration ${iteration + 1}/${maxIterations}`)
+
+      // Send request to model
+      const response = await fetch(`${this.baseUrl}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...request,
+          stream: false
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`Tool chat failed: ${response.statusText}`)
+      }
+
+      const data: OllamaResponse = await response.json()
+      const message = data.message
+
+      if (!message) {
+        throw new Error('No message in response')
+      }
+
+      // Check for tool calls
+      if (message.tool_calls && message.tool_calls.length > 0) {
+        console.log(`[ToolBridge] 🔧 Detected ${message.tool_calls.length} tool call(s)`)
+
+        // Execute each tool call
+        for (const toolCall of message.tool_calls) {
+          const toolName = toolCall.function.name
+          let args = toolCall.function.arguments
+
+          // Parse arguments if string
+          if (typeof args === 'string') {
+            try {
+              args = JSON.parse(args)
+            } catch {
+              console.error('[ToolBridge] Failed to parse tool arguments:', args)
+              args = {}
+            }
+          }
+
+          console.log(`[ToolBridge] Executing: ${toolName}(${JSON.stringify(args)})`)
+
+          // Execute tool via callback
+          const result = await onToolCall(toolName, args as Record<string, unknown>)
+
+          console.log(`[ToolBridge] ✅ Result: ${result.substring(0, 100)}...`)
+
+          // Add tool result to message history
+          request.messages.push(message) // Model's tool call request
+          request.messages.push({
+            role: 'assistant',
+            content: `[Tool: ${toolName}]\n${result}`
+          })
+        }
+
+        // Continue loop to get final answer
+        continue
+      }
+
+      // No tool calls - this is the final answer
+      fullResponse = message.content || ''
+
+      if (onChunk && fullResponse) {
+        onChunk(fullResponse)
+      }
+
+      break
+    }
+
+    return fullResponse
   }
 }
 
