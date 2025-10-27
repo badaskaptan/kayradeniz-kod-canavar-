@@ -203,10 +203,19 @@ export const ClaudePanel: React.FC<ClaudePanelProps> = ({
   }
 
   const clearConversation = async (): Promise<void> => {
-    if (confirm('Tüm konuşmayı silmek istediğinizden emin misiniz?')) {
+    if (confirm('Yeni sohbet başlatılsın mı? (Mevcut konuşma silinecek)')) {
+      // Clear Claude's conversation history
       await window.claudeAPI?.clearHistory()
+      
+      // Clear UI messages
       setMessages([])
       setStreamingResponse('')
+      
+      // Reset Night Orders tracking
+      currentToolCallsRef.current = []
+      currentQueryRef.current = ''
+      
+      console.log('[ClaudePanel] ✅ New conversation started - history cleared')
     }
   }
 
@@ -222,10 +231,10 @@ export const ClaudePanel: React.FC<ClaudePanelProps> = ({
           <button
             onClick={clearConversation}
             className="claude-btn-icon"
-            title="Konuşmayı temizle"
+            title="Yeni Sohbet Başlat (Geçmişi Temizle)"
             disabled={messages.length === 0}
           >
-            🗑️
+            �
           </button>
           <button onClick={onSettingsClick} className="claude-btn-icon" title="API Key Ayarları">
             ⚙️
