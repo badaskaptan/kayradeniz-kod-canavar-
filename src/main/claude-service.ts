@@ -91,6 +91,14 @@ export class ClaudeMCPService {
     this.anthropic = null
     this.store.delete('apiKey')
     this.conversationHistory = []
+    this.currentWorkingDir = ''
+  }
+
+  // Clear conversation history (for new chat)
+  clearConversation(): void {
+    this.conversationHistory = []
+    this.currentWorkingDir = this.workspacePath // Reset to workspace root
+    console.log('🗑️ Conversation history cleared')
   }
 
   async validateApiKey(apiKey: string): Promise<boolean> {
@@ -917,6 +925,8 @@ export class ClaudeMCPService {
 3. ALWAYS use 'read_file' tool to read files - NEVER use cat commands
 4. You CAN use 'run_terminal_command' for: npm, git, compilation, tests
 5. For changing directory: Use run_terminal_command with command='cd' and args=['folder-name']
+6. ❌ NEVER use <boltArtifact>, <boltAction>, or any special UI formatting in responses
+7. ❌ NEVER write code in the chat - ALWAYS use write_file tool to save code to workspace
 
 Example CORRECT usage:
 - Create file: write_file(file_path="index.html", content="...")
@@ -928,20 +938,22 @@ Example WRONG usage (DO NOT DO THIS):
 - ❌ run_terminal_command(command="cat > index.html << 'EOF'...")
 - ❌ run_terminal_command(command="touch", args=["file.js"])
 - ❌ run_terminal_command(command="ls", args=["-la"])
-- ❌ Using bash heredoc syntax for file creation`
+- ❌ Using bash heredoc syntax for file creation
+- ❌ <boltArtifact> or <boltAction> tags
+- ❌ Writing full code in chat messages instead of using write_file`
 
-      // 🎭 Profil kontrolü - Artık context'ten değil, service'in kendi state'inden al
+      // 🎭 Profil kontrolü - HER ZAMAN profil bilgisini gönder
       if (this.profileInitialized && this.currentUserProfile) {
-        // İlk mesaj - kısa hatırlatma
-        if (this.conversationHistory.length === 0) {
-          const profile = this.currentUserProfile as any
-          systemMessage += `\n\nRemember: You are "${profile.ai.name}", speaking with ${profile.user.name}. `
-          systemMessage += `Follow the personality and teaching preferences:`
-          systemMessage += ` ${profile.ai.personality} personality,`
-          systemMessage += ` ${profile.ai.emojiUsage} emoji usage,`
-          systemMessage += ` ${profile.teaching.mode} teaching mode.`
-        }
-        // Sonraki mesajlarda profil bilgisi GÖNDERİLMEZ - Claude zaten hatırlıyor
+        const profile = this.currentUserProfile as any
+        systemMessage += `\n\n🎭 YOUR IDENTITY:
+You are "${profile.ai.name}", an AI assistant speaking with ${profile.user.name}.
+
+Personality: ${profile.ai.personality}
+Emoji Usage: ${profile.ai.emojiUsage}
+Teaching Mode: ${profile.teaching.mode}
+Explanation Level: ${profile.teaching.explanationLevel}
+
+ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.ai.name}" personality consistently throughout the conversation.`
       }
 
       if (context?.workspacePath) {
