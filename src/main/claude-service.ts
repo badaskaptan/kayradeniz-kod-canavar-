@@ -1023,6 +1023,17 @@ export class ClaudeMCPService {
                 duration
               )
             }
+
+            // 🌙 NIGHT ORDERS: Send tool execution details to renderer for learning
+            if (mainWindow && success) {
+              mainWindow.webContents.send('claude:toolExecuted', {
+                name: toolCall.name,
+                args: toolCall.input,
+                result: result,
+                success: true,
+                duration: duration
+              })
+            }
           }
         }
 

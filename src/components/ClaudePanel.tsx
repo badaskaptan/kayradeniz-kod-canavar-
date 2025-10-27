@@ -1,5 +1,6 @@
 // Claude AI Chat Panel Component
 import React, { useState, useEffect, useRef } from 'react'
+import { nightOrders } from '../renderer/src/services/nightOrdersService'
 import './ClaudePanel.css'
 
 interface Message {
@@ -33,6 +34,16 @@ export const ClaudePanel: React.FC<ClaudePanelProps> = ({
   const [hasApiKey, setHasApiKey] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  // 🌙 NIGHT ORDERS: Track Claude's tool calls for learning
+  const currentToolCallsRef = useRef<
+    Array<{
+      name: string
+      args: Record<string, unknown>
+      result: string
+    }>
+  >([])
+  const currentQueryRef = useRef<string>('')
+
   useEffect(() => {
     // Workspace path'i Claude service'e gönder
     if (workspacePath) {
@@ -55,12 +66,36 @@ export const ClaudePanel: React.FC<ClaudePanelProps> = ({
     })
 
     const cleanupToolUsed = window.claudeAPI?.onToolUsed((tool) => {
-      console.log('Tool kullanıldı:', tool.name)
+      console.log('[ClaudePanel] 🔧 Tool kullanıldı:', tool.name)
     })
+
+    // 🌙 NIGHT ORDERS: Listen for tool execution details
+    const handleToolExecuted = (
+      _event: Electron.IpcRendererEvent,
+      data: { name: string; args: Record<string, unknown>; result: string }
+    ): void => {
+      console.log('[ClaudePanel] 🌙 Tool executed for Night Orders:', data.name)
+
+      currentToolCallsRef.current.push({
+        name: data.name,
+        args: data.args,
+        result: data.result
+      })
+    }
+
+    // Add IPC listener
+    if (window.electron?.ipcRenderer) {
+      window.electron.ipcRenderer.on('claude:toolExecuted', handleToolExecuted)
+    }
 
     return () => {
       cleanupStreaming?.()
       cleanupToolUsed?.()
+
+      // Remove IPC listener
+      if (window.electron?.ipcRenderer) {
+        window.electron.ipcRenderer.removeListener('claude:toolExecuted', handleToolExecuted)
+      }
     }
   }, [refreshKey, workspacePath]) // refreshKey ve workspacePath değişince yeniden kontrol et
 
@@ -88,6 +123,10 @@ export const ClaudePanel: React.FC<ClaudePanelProps> = ({
     setIsLoading(true)
     setStreamingResponse('')
 
+    // 🌙 NIGHT ORDERS: Store current query and reset tool calls
+    currentQueryRef.current = input
+    currentToolCallsRef.current = []
+
     try {
       const result = await window.claudeAPI?.sendMessage(input)
 
@@ -98,6 +137,17 @@ export const ClaudePanel: React.FC<ClaudePanelProps> = ({
           timestamp: new Date()
         }
         setMessages((prev) => [...prev, assistantMessage])
+
+        // 🌙 NIGHT ORDERS: If tools were used successfully, teach Llama3.2!
+        if (currentToolCallsRef.current.length > 0) {
+          console.log(
+            `[ClaudePanel] 🌙 Teaching Night Orders: ${currentToolCallsRef.current.length} tool calls from Claude`
+          )
+
+          nightOrders.observeClaudeSuccess(currentQueryRef.current, currentToolCallsRef.current)
+
+          console.log('[ClaudePanel] ✅ Night Orders updated with Claude patterns')
+        }
       } else {
         alert('Hata: ' + (result?.error || 'Bilinmeyen hata'))
       }
