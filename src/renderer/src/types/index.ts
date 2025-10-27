@@ -21,8 +21,6 @@ export interface AIConfig {
 
 // ==================== Night Orders Protocol ====================
 export interface NightOrder {
-  id: string
-  timestamp: Date
   type: 'reflection' | 'knowledge_update' | 'pattern_recognition' | 'self_improvement'
   trigger: 'user_feedback' | 'error_pattern' | 'success_pattern' | 'scheduled'
   data: {
@@ -31,7 +29,35 @@ export interface NightOrder {
     learnings: string[]
     actionItems: string[]
   }
-  status: 'pending' | 'processing' | 'completed' | 'failed'
+  timestamp: number
+}
+
+export interface LearningPattern {
+  id: string
+  type: 'success_pattern' | 'error_pattern'
+  trigger: 'claude_observation' | 'llama_failure' | 'user_feedback'
+  query: string
+  keywords: string[]
+  toolSequence: Array<{
+    tool: string
+    args: Record<string, unknown>
+    order: number
+  }>
+  outcome: 'success' | 'failure'
+  timestamp: number
+  confidence: number
+  usageCount: number
+  errorContext?: {
+    attemptedTools: string[]
+    errorMessage: string
+  }
+}
+
+export interface ToolCallPattern {
+  query: string
+  tools: string[]
+  sequence: number
+  frequency: number
 }
 
 export interface ReflexionEntry {

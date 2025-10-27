@@ -11,6 +11,7 @@ import { useLayoutStore } from './stores/layoutStore'
 import { useEditorStore } from './stores/editorStore'
 import { useWorkspaceStore } from './stores/workspaceStore'
 import { ollamaService } from './services/ollamaService'
+import { nightOrders } from './services/nightOrdersService'
 import { getToolRegistry } from './tools/registry'
 import { BASE_TOOLS } from './tools/implementations'
 import type { ToolBridgeAPI } from './types'
@@ -365,6 +366,13 @@ function App(): React.JSX.Element {
         // Workspace bilgisi ekle
         const workspaceContext = workspacePath ? `\nWorkspace: ${workspacePath}` : ''
 
+        // Track tool calls for learning (outside agentMode block for access later)
+        const toolCallHistory: Array<{
+          name: string
+          args: Record<string, unknown>
+          result: string
+        }> = []
+
         // 🔧 TOOL BRIDGE: Agent mode ile tool calling
         if (agentMode) {
           console.log('[App] 🤖 Agent Mode: Tool calling enabled')
@@ -372,12 +380,19 @@ function App(): React.JSX.Element {
           const toolBridge = getToolBridge()
 
           // Prepare tools for Llama3.2
-          const availableTools = toolRegistry.getForAI().map((tool) => ({
-            type: 'function',
+          const availableTools: Array<{
+            type: 'function'
+            function: {
+              name: string
+              description: string
+              parameters: Record<string, unknown>
+            }
+          }> = toolRegistry.getForAI().map((tool) => ({
+            type: 'function' as const,
             function: {
               name: tool.name,
               description: tool.description,
-              parameters: tool.parameters
+              parameters: tool.parameters as Record<string, unknown>
             }
           }))
 
@@ -406,10 +421,27 @@ function App(): React.JSX.Element {
               const formatted = result.map((item) => `${item.name}:\n${item.content}`).join('\n\n')
 
               console.log(`[ToolBridge] ✅ ${toolName} completed`)
+
+              // 🌙 NIGHT ORDERS: Record successful tool call
+              toolCallHistory.push({
+                name: toolName,
+                args,
+                result: formatted
+              })
+
               return formatted
             } catch (error) {
               const errorMsg = error instanceof Error ? error.message : String(error)
               console.error(`[ToolBridge] ❌ ${toolName} failed:`, errorMsg)
+
+              // 🌙 NIGHT ORDERS: Learn from failure
+              nightOrders.observeFailure(
+                cleanMessage,
+                [toolName],
+                [], // We don't know correct tools yet
+                errorMsg
+              )
+
               return `ERROR: ${errorMsg}`
             }
           }
@@ -479,6 +511,13 @@ function App(): React.JSX.Element {
 
         completeThinking(thinkingId)
         setLoading(false)
+
+        // 🌙 NIGHT ORDERS: If tools were used successfully, record pattern
+        if (toolCallHistory.length > 0) {
+          console.log(`[NightOrders] 📚 Recording ${toolCallHistory.length} successful tool calls`)
+          // We'll use this in AŞAMA 3 to learn from Claude
+          // For now, just log that Llama used tools successfully
+        }
 
         addMessage({
           role: 'assistant',
