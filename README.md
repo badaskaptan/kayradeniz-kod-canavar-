@@ -53,7 +53,7 @@ ollama --version
 
 - ✅ **Minimize Ollama Desktop** (don't close!) - runs 20-30% faster in system tray
 - ✅ **Recommended models for 8GB RAM:**
-  - `gemma2:2b` - Ultra fast (1-2 sec responses)
+  - `llama3.2:3b` - Best balance (tool calling, 5-7 sec responses)
   - `qwen2.5:7b` - Better quality (requires 16GB+ RAM)
 - ⚠️ **Avoid heavy models** like `llama3:70b` on limited RAM
 

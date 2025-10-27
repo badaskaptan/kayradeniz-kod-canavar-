@@ -87,11 +87,11 @@ function App(): React.JSX.Element {
         const models = await ollamaService.listModels()
         
         if (models.length === 0) {
-          console.warn('[App] ⚠️ No models installed - run: ollama pull gemma2:2b')
+          console.warn('[App] ⚠️ No models installed - run: ollama pull llama3.2:3b')
           return
         }
 
-        const modelToPreload = models.find((m) => m.name === 'gemma2:2b') || models[0]
+        const modelToPreload = models.find((m) => m.name === 'llama3.2:3b') || models[0]
         console.log(`[App] 🚀 Preloading model: ${modelToPreload.name}`)
         
         await ollamaService.preloadModel(modelToPreload.name)
@@ -318,11 +318,11 @@ function App(): React.JSX.Element {
         // Mevcut modelleri listele
         const models = await ollamaService.listModels()
         if (models.length === 0) {
-          throw new Error('No models available. Please run: ollama pull gemma2:2b')
+          throw new Error('No models available. Please run: ollama pull llama3.2:3b')
         }
 
-        // Varsayılan model: gemma2:2b (8GB RAM için optimize)
-        const DEFAULT_MODEL = 'gemma2:2b'
+        // Varsayılan model: llama3.2:3b (8GB RAM + Tool Calling)
+        const DEFAULT_MODEL = 'llama3.2:3b'
         const selectedModel = models.find((m) => m.name === DEFAULT_MODEL)?.name || models[0].name
 
         console.log('[App] Using model:', selectedModel)
