@@ -43,6 +43,9 @@ export class ClaudeMCPService {
   private currentUserProfile: unknown = null
   private profileInitialized: boolean = false
 
+  // 📂 Persistent working directory for terminal commands
+  private currentWorkingDir: string = ''
+
   constructor() {
     // electron-store ile şifreli saklama
     this.store = new Store<StoreSchema>({
@@ -65,6 +68,8 @@ export class ClaudeMCPService {
   // Workspace path ayarla
   setWorkspacePath(workspacePath: string): void {
     this.workspacePath = workspacePath
+    // Reset working directory to workspace root
+    this.currentWorkingDir = workspacePath
   }
 
   // API Key yönetimi
@@ -309,15 +314,20 @@ export class ClaudeMCPService {
       },
       {
         name: 'run_terminal_command',
-        description: "Terminal'de komut çalıştırır (npm, git, vb.)",
+        description:
+          "Terminal'de komut çalıştırır (npm, git, ls, dir, vb.). SPECIAL: 'cd' komutu ile working directory kalıcı olarak değiştirilebilir - sonraki tüm komutlar bu dizinde çalışır.",
         input_schema: {
           type: 'object' as const,
           properties: {
-            command: { type: 'string', description: 'Çalıştırılacak komut' },
+            command: {
+              type: 'string',
+              description:
+                "Çalıştırılacak komut (npm, git, ls, dir, cd). 'cd' komutu working directory'yi kalıcı değiştirir."
+            },
             args: {
               type: 'array',
               items: { type: 'string' },
-              description: 'Komut argümanları (opsiyonel)'
+              description: 'Komut argümanları (opsiyonel). Örnek: cd için ["mayin-tarlasi-oyunu"]'
             }
           },
           required: ['command']
@@ -628,9 +638,34 @@ export class ClaudeMCPService {
 
   private async handleRunTerminalCommand(command: string, args: string[] = []): Promise<string> {
     try {
+      // 🔧 SPECIAL HANDLING: cd command changes working directory
+      if (command === 'cd' && args.length > 0) {
+        const targetDir = args[0].replace(/['"]/g, '') // Remove quotes
+        const fullPath = path.isAbsolute(targetDir)
+          ? targetDir
+          : path.join(this.currentWorkingDir || this.workspacePath, targetDir)
+
+        // Verify directory exists
+        try {
+          const stats = await fs.stat(fullPath)
+          if (!stats.isDirectory()) {
+            return `❌ Hata: '${targetDir}' bir klasör değil`
+          }
+
+          // Update persistent working directory
+          this.currentWorkingDir = fullPath
+          return `✅ Çalışma dizini değiştirildi:\n${fullPath}\n\nBundan sonraki tüm terminal komutları bu dizinde çalışacak.`
+        } catch (error: any) {
+          return `❌ Hata: Klasör bulunamadı - ${targetDir}\n${error.message}`
+        }
+      }
+
+      // Normal command execution
+      const workingDir = this.currentWorkingDir || this.workspacePath
+
       return new Promise((resolve) => {
         const proc = spawn(command, args, {
-          cwd: this.workspacePath,
+          cwd: workingDir,
           shell: true
         })
 
@@ -875,6 +910,25 @@ export class ClaudeMCPService {
       // Workspace path varsa system message olarak ekle
       let systemMessage =
         'You are a helpful AI coding assistant with access to powerful tools for file operations, terminal commands, and code analysis.'
+
+      systemMessage += `\n\n⚠️ IMPORTANT TOOL USAGE RULES:
+1. ALWAYS use 'write_file' tool to create or modify files - NEVER use bash/cat/echo commands
+2. ALWAYS use 'list_directory' tool to list folders - NEVER use ls/dir commands
+3. ALWAYS use 'read_file' tool to read files - NEVER use cat commands
+4. You CAN use 'run_terminal_command' for: npm, git, compilation, tests
+5. For changing directory: Use run_terminal_command with command='cd' and args=['folder-name']
+
+Example CORRECT usage:
+- Create file: write_file(file_path="index.html", content="...")
+- Read file: read_file(file_path="package.json")
+- Change dir: run_terminal_command(command="cd", args=["mayin-tarlasi-oyunu"])
+- List dir: list_directory(dir_path="src")
+
+Example WRONG usage (DO NOT DO THIS):
+- ❌ run_terminal_command(command="cat > index.html << 'EOF'...")
+- ❌ run_terminal_command(command="touch", args=["file.js"])
+- ❌ run_terminal_command(command="ls", args=["-la"])
+- ❌ Using bash heredoc syntax for file creation`
 
       // 🎭 Profil kontrolü - Artık context'ten değil, service'in kendi state'inden al
       if (this.profileInitialized && this.currentUserProfile) {
