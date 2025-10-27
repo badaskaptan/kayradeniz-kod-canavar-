@@ -496,6 +496,6 @@ Test sırasını takip etmek için aşağıdaki komutları sırayla kullanın:
 - [ ] Test sonuçları dokümante edildi
 - [ ] İyileştirme önerileri listelendi
 
-**Test Tarihi:** ****\_\_\_****  
-**Test Eden:** ****\_\_\_****  
+**Test Tarihi:** \***\*\_\_\_\*\***  
+**Test Eden:** \***\*\_\_\_\*\***  
 **Sonuç:** ☐ Başarılı ☐ Kısmi Başarı ☐ Başarısız

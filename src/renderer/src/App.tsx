@@ -93,7 +93,7 @@ function App(): React.JSX.Element {
       try {
         console.log('[App] 🦙 Checking Ollama availability...')
         const isAvailable = await ollamaService.isAvailable()
-        
+
         if (!isAvailable) {
           console.warn('[App] ⚠️ Ollama Desktop not running - skipping preload')
           return
@@ -101,7 +101,7 @@ function App(): React.JSX.Element {
 
         console.log('[App] ✅ Ollama Desktop detected')
         const models = await ollamaService.listModels()
-        
+
         if (models.length === 0) {
           console.warn('[App] ⚠️ No models installed - run: ollama pull llama3.2:3b')
           return
@@ -109,7 +109,7 @@ function App(): React.JSX.Element {
 
         const modelToPreload = models.find((m) => m.name === 'llama3.2:3b') || models[0]
         console.log(`[App] 🚀 Preloading model: ${modelToPreload.name}`)
-        
+
         await ollamaService.preloadModel(modelToPreload.name)
         console.log(`[App] ✅ Model ${modelToPreload.name} ready in RAM`)
       } catch (error) {

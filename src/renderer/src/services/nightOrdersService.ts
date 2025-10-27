@@ -1,13 +1,13 @@
 /**
  * 🌙 NIGHT ORDERS PROTOCOL
  * Learning system that improves Llama3.2 by observing Claude's tool calling patterns
- * 
+ *
  * CORE CONCEPT:
  * - Watch Claude's successful tool calls
  * - Extract patterns (query → tools → sequence)
  * - Teach Llama3.2 to mimic successful approaches
  * - Improve over time through reinforcement
- * 
+ *
  * LEARNING TRIGGERS:
  * 1. Success Pattern: Claude completes task perfectly
  * 2. Error Pattern: Llama3.2 fails, Claude fixes
@@ -74,7 +74,10 @@ export class NightOrdersService {
     }
 
     this.addPattern(pattern)
-    this.updateSuccessRate(toolCalls.map((tc) => tc.name), true)
+    this.updateSuccessRate(
+      toolCalls.map((tc) => tc.name),
+      true
+    )
   }
 
   /**
@@ -347,8 +350,7 @@ Memory Size: ${this.memory.patterns.length}/${this.MAX_PATTERNS}
       // Exponential moving average
       const alpha = 0.1
       const newValue = success ? 1 : 0
-      this.memory.successRate[tool] =
-        alpha * newValue + (1 - alpha) * this.memory.successRate[tool]
+      this.memory.successRate[tool] = alpha * newValue + (1 - alpha) * this.memory.successRate[tool]
     })
 
     this.saveMemory()
