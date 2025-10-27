@@ -411,6 +411,60 @@
   z-index: 1;
 }
 
+/* ✅ Real-time File Update Flash */
+.file-update-flash {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(0, 212, 170, 0.9), rgba(0, 150, 120, 0.9));
+  border: 1px solid rgba(0, 255, 200, 0.5);
+  border-radius: 8px;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 212, 170, 0.4);
+  animation: flashSlideIn 0.3s ease-out, flashFadeOut 0.5s ease-in 0.3s;
+  pointer-events: none;
+}
+
+.file-update-flash i {
+  animation: flashSpin 0.8s linear;
+}
+
+@keyframes flashSlideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes flashFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes flashSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .line-numbers {
   width: 50px;
   background: var(--bg-secondary);
@@ -443,7 +497,8 @@
 .editor-wrapper {
   flex: 1;
   position: relative;
-  overflow: auto;
+  overflow: auto; /* ✅ Scroll enabled - tüm kodu görebilme */
+  max-height: 100%; /* ✅ Panel boyutu kadar scroll */
 }
 
 .indent-guides {
@@ -474,19 +529,20 @@
 }
 
 .code-highlight {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: relative; /* ✅ Changed from absolute - scroll için gerekli */
+  display: block; /* ✅ Block display for proper scrolling */
   padding: 10px;
   margin: 0;
   font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
   font-size: 14px;
   line-height: 1.6;
-  pointer-events: none;
+  pointer-events: none; /* ✅ READ-ONLY - dokunulamaz */
+  -webkit-user-select: text; /* ✅ Copy edilebilir */
+  user-select: text;
   z-index: 0;
-  overflow: hidden;
+  overflow: visible; /* ✅ İçerik görünür */
+  white-space: pre; /* ✅ Kod formatını koru */
+  word-wrap: break-word; /* ✅ Uzun satırları kır */
 }
 
 /* Minimap */

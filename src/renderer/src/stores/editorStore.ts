@@ -78,7 +78,15 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   updateTabContent: (id, content) =>
     set((state) => ({
-      tabs: state.tabs.map((t) => (t.id === id ? { ...t, content, modified: true } : t))
+      tabs: state.tabs.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              content,
+              modified: false // ✅ Disk'ten okunan değişiklik, modified=false
+            }
+          : t
+      )
     })),
 
   markTabAsModified: (id, modified) =>

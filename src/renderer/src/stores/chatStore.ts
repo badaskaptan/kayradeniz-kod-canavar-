@@ -244,11 +244,32 @@ export const useChatStore = create<ChatStore>((set, get) => ({
           return c
         }
 
+        // 🎭 PRESERVE PROFILE & SYSTEM MESSAGES
+        // Extract profile/system messages from the beginning (usually first 1-3 messages)
+        const profileMessages = messages.slice(0, Math.min(5, userIndices[0])).filter((msg) => {
+          const content = typeof msg.content === 'string' ? msg.content : ''
+          return (
+            msg.role === 'system' ||
+            msg.role === 'assistant' && (
+              content.includes('🎭') ||
+              content.includes('YOUR IDENTITY') ||
+              content.includes('LUMA') ||
+              content.includes('Personality') ||
+              content.includes('adın ne') || // First greeting response
+              content.includes('Ben LUMA') ||
+              content.toLowerCase().includes('luma')
+            )
+          )
+        })
+
         // Keep from earliest user message index to end
-        const trimmedMessages = messages.slice(userIndices[0])
+        const conversationMessages = messages.slice(userIndices[0])
+
+        // Combine: [profile messages] + [trimmed conversation]
+        const trimmedMessages = [...profileMessages, ...conversationMessages]
 
         console.log(
-          `[SessionMemory] Trimmed from ${messages.length} to ${trimmedMessages.length} messages`
+          `[SessionMemory] Trimmed from ${messages.length} to ${trimmedMessages.length} messages (${profileMessages.length} profile messages preserved)`
         )
 
         return {

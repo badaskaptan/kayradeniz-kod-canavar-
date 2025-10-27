@@ -1,11 +1,51 @@
 import { useEditorStore } from '../../stores/editorStore'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
+import { useEffect, useRef, useState } from 'react'
 import './EditorPanel.css'
 
 export function EditorPanel(): React.JSX.Element {
-  const { tabs, getActiveTab, openTab, closeTab, setActiveTab, saveActiveTab } = useEditorStore()
+  const { tabs, getActiveTab, openTab, closeTab, setActiveTab, saveActiveTab, updateTabContent } =
+    useEditorStore()
   const { setWorkspacePath } = useWorkspaceStore()
   const activeTab = getActiveTab()
+  const fileWatcherIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const [fileUpdated, setFileUpdated] = useState(false) // ✅ Flash animation için
+
+  // 🔄 Real-time File Watcher - Dosya değişikliklerini izle
+  useEffect(() => {
+    if (!activeTab?.path) {
+      if (fileWatcherIntervalRef.current) {
+        clearInterval(fileWatcherIntervalRef.current)
+        fileWatcherIntervalRef.current = null
+      }
+      return
+    }
+
+    // Her 1 saniyede bir dosyayı kontrol et
+    fileWatcherIntervalRef.current = setInterval(async () => {
+      if (!activeTab?.path) return
+
+      const fileResult = await window.api.fs.readFile(activeTab.path, 'utf-8')
+
+      if (fileResult.success && typeof fileResult.data === 'string') {
+        // Dosya içeriği değiştiyse güncelle
+        if (fileResult.data !== activeTab.content) {
+          console.log('[EditorPanel] 🔄 File changed on disk, reloading:', activeTab.path)
+          updateTabContent(activeTab.id, fileResult.data)
+
+          // ✅ Flash animation tetikle
+          setFileUpdated(true)
+          setTimeout(() => setFileUpdated(false), 800) // 800ms sonra kaldır
+        }
+      }
+    }, 1000) // 1 saniye interval
+
+    return () => {
+      if (fileWatcherIntervalRef.current) {
+        clearInterval(fileWatcherIntervalRef.current)
+      }
+    }
+  }, [activeTab?.path, activeTab?.id, activeTab?.content, updateTabContent])
 
   // Tab kapat - Welcome ekranına dön
   const handleCloseTab = (tabId: string): void => {
@@ -170,6 +210,14 @@ export function EditorPanel(): React.JSX.Element {
             </div>
 
             <div className="editor-container">
+              {/* ✅ Real-time Update Indicator */}
+              {fileUpdated && (
+                <div className="file-update-flash">
+                  <i className="fas fa-sync-alt"></i>
+                  <span>Dosya güncellendi</span>
+                </div>
+              )}
+
               <div className="line-numbers">
                 {activeTab.content.split('\n').map((_, i) => (
                   <div key={i}>{i + 1}</div>

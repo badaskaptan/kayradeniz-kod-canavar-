@@ -127,7 +127,7 @@ const FileNode = ({
   <button
     type="button"
     onClick={() => onOpen(node)}
-    className={cn('tree-item', `depth-${depth + 1}`)}
+    className={cn('tree-item', `depth-${depth}`)}
   >
     <FileIcon className="tree-item-icon file-icon" size={16} />
     <span className="tree-item-name">{node.name}</span>
@@ -240,7 +240,7 @@ export function FileExplorer(): React.JSX.Element {
         )
       }
 
-      return <FileNode key={child.path} node={child} depth={depth} onOpen={handleOpenFile} />
+      return <FileNode key={child.path} node={child} depth={depth + 1} onOpen={handleOpenFile} />
     })
   }
 

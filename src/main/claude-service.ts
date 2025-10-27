@@ -942,6 +942,23 @@ Example WRONG usage (DO NOT DO THIS):
 - ❌ <boltArtifact> or <boltAction> tags
 - ❌ Writing full code in chat messages instead of using write_file`
 
+      systemMessage += `\n\n🚀 MULTI-STEP WORKFLOW RULES:
+1. ✅ When user asks you to complete a task, DO ALL STEPS WITHOUT STOPPING
+2. ✅ Use multiple tools in sequence automatically - NO NEED to wait for user confirmation
+3. ✅ If task has 5 steps, complete all 5 steps in ONE response
+4. ✅ Only ask for confirmation if there's ambiguity or risk
+5. ❌ NEVER stop after each tool and say "shall I continue?" - JUST CONTINUE!
+
+Example CORRECT multi-step workflow:
+User: "Create a minesweeper game"
+You: [write_file index.html] → [write_file style.css] → [write_file game.js] → "All done! 3 files created."
+
+Example WRONG workflow (DO NOT DO THIS):
+User: "Create a minesweeper game"
+You: [write_file index.html] → "HTML created. Should I continue with CSS?"  ❌ NO! Just continue!
+
+🎯 REMEMBER: Complete the ENTIRE task in one go unless user explicitly asks for step-by-step confirmation.`
+
       // 🎭 Profil kontrolü - HER ZAMAN profil bilgisini gönder
       if (this.profileInitialized && this.currentUserProfile) {
         const profile = this.currentUserProfile as any
@@ -1106,14 +1123,21 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
         // Tool results'u conversation'a ekle ve Claude'a tekrar sor
         console.log(`\n📝 Adding tool results to history...`)
 
+        // 🔧 CRITICAL FIX: Add assistant message with tool_use blocks
         this.conversationHistory.push({
           role: 'assistant',
-          content: finalResponse || 'Tool kullanılıyor...'
+          content: toolCalls.map((tc) => ({
+            type: 'tool_use',
+            id: tc.id,
+            name: tc.name,
+            input: tc.input
+          }))
         })
 
+        // 🔧 Add user message with tool_result blocks (NOT JSON string!)
         this.conversationHistory.push({
           role: 'user',
-          content: JSON.stringify(toolResults)
+          content: toolResults
         })
 
         console.log(`\n🔵 === CLAUDE REQUEST (with tool results) ===`)
@@ -1122,10 +1146,11 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
           console.log(`   ${i + 1}. ${tr.tool_use_id}: ${tr.content.substring(0, 100)}...`)
         })
 
-        // Claude'dan final yanıtı al
+        // Claude'dan final yanıtı al (SAME system message to maintain profile!)
         const finalStream = await this.anthropic.messages.create({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 4096,
+          system: systemMessage, // 🎭 CRITICAL: Profil bilgisini tekrar gönder!
           messages: this.conversationHistory,
           stream: true
         })
