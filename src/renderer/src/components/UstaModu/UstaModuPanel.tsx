@@ -23,11 +23,23 @@ interface TeachingMoment {
   confidence: number
 }
 
+interface SigmaMetricData {
+  timestamp: Date
+  confidence: number
+  relevance: number
+  consistency: number
+  integrity: number
+  wasRevised: boolean
+  responseLength: number
+  reasoning: string
+}
+
 export function UstaModuPanel(): React.JSX.Element {
   const [teachingMoments, setTeachingMoments] = useState<TeachingMoment[]>([])
   const [activeLesson, setActiveLesson] = useState<TeachingMoment | null>(null)
   const [isExpanded, setIsExpanded] = useState(true)
   const [isLiveMode, setIsLiveMode] = useState(true) // Real-time tracking
+  const [sigmaMetric, setSigmaMetric] = useState<SigmaMetricData | null>(null)
 
   const toggleLiveMode = (): void => {
     setIsLiveMode(!isLiveMode)
@@ -65,12 +77,54 @@ export function UstaModuPanel(): React.JSX.Element {
       console.log('[UstaModu] 📝 Claude thinking:', data.chunk.substring(0, 50))
     }
 
+    // 🎯 Listen for Sigma Reflexion metrics
+    const handleSigmaMetric = (_event: unknown, data: SigmaMetricData): void => {
+      if (!isLiveMode) return
+
+      console.log('[UstaModu] 📊 Sigma metric received:', data)
+      setSigmaMetric(data)
+
+      // Create teaching moment from Sigma analysis
+      if (data.confidence < 0.75) {
+        const sigmaLesson: TeachingMoment = {
+          id: `sigma-${Date.now()}`,
+          timestamp: new Date(),
+          concept: '⚠️ Sigma Reflexion: Düşük Güven Uyarısı',
+          explanation: data.reasoning,
+          why: `Claude'un cevabı ${(data.confidence * 100).toFixed(1)}% güvenilirlik skoruna sahip. Bu, cevabın yeniden değerlendirilmesi gerekebileceği anlamına gelir.`,
+          how: 'Sigma Reflexion Engine, cevabı sigmoid fonksiyonu σ(x) = 1/(1+e^(-x)) ile normalize etti ve 3 bileşeni analiz etti: Bağlam Uyumu, Tutarlılık, Semantik Bütünlük.',
+          alternatives: [
+            'Daha detaylı prompt yaz',
+            'Workspace context ekle',
+            "Önceki başarılı pattern'leri kullan"
+          ],
+          bestPractices: [
+            `✅ Bağlam Uyumu: ${(data.relevance * 100).toFixed(1)}%`,
+            `✅ Tutarlılık: ${(data.consistency * 100).toFixed(1)}%`,
+            `✅ Semantik Bütünlük: ${(data.integrity * 100).toFixed(1)}%`
+          ],
+          pitfalls: [
+            '❌ Belirsiz sorular sorma',
+            '❌ Context olmadan dosya değişikliği isteme',
+            "❌ Çok kısa veya çok uzun prompt'lar"
+          ],
+          difficulty: data.confidence < 0.5 ? 'advanced' : 'intermediate',
+          confidence: data.confidence
+        }
+
+        setTeachingMoments((prev) => [sigmaLesson, ...prev].slice(0, 10))
+        setActiveLesson(sigmaLesson)
+      }
+    }
+
     ipc.on('claude:toolUsed', handleToolUsed)
     ipc.on('claude:streamingChunk', handleStreamingChunk)
+    ipc.on('sigma:metric', handleSigmaMetric)
 
     return () => {
       ipc.removeAllListeners('claude:toolUsed')
       ipc.removeAllListeners('claude:streamingChunk')
+      ipc.removeAllListeners('sigma:metric')
     }
   }, [isLiveMode])
 
@@ -272,103 +326,139 @@ export function UstaModuPanel(): React.JSX.Element {
         </div>
       </div>
 
-      {isExpanded && activeLesson && (
+      {isExpanded && (
         <div className="usta-content">
-          {/* Lesson Header */}
-          <div className="lesson-header">
-            <div className="lesson-title">
-              <BookOpen size={18} />
-              <h4>{activeLesson.concept}</h4>
-            </div>
-            <div className="lesson-meta">
-              <span className={`difficulty-badge difficulty-${activeLesson.difficulty}`}>
-                {getDifficultyLabel(activeLesson.difficulty)}
-              </span>
-              <span className="confidence-badge">
-                Güven: {Math.round(activeLesson.confidence * 100)}%
-              </span>
-            </div>
-          </div>
-
-          {/* Main Explanation */}
-          <div className="lesson-section">
-            <div className="section-header">
-              <BookOpen size={16} />
-              <h5>📖 Ne Olduğu</h5>
-            </div>
-            <p className="section-content">{activeLesson.explanation}</p>
-          </div>
-
-          {/* Why (Neden) */}
-          <div className="lesson-section">
-            <div className="section-header">
-              <Lightbulb size={16} />
-              <h5>💡 Neden Böyle Yapılır?</h5>
-            </div>
-            <p className="section-content">{activeLesson.why}</p>
-          </div>
-
-          {/* How (Nasıl) */}
-          <div className="lesson-section">
-            <div className="section-header">
-              <CheckCircle size={16} />
-              <h5>⚙️ Nasıl Çalışır?</h5>
-            </div>
-            <p className="section-content">{activeLesson.how}</p>
-          </div>
-
-          {/* Alternatives */}
-          {activeLesson.alternatives.length > 0 && (
-            <div className="lesson-section">
-              <div className="section-header">
-                <ChevronRight size={16} />
-                <h5>🔀 Alternatif Yöntemler</h5>
+          {/* Sigma Reflexion Metrics */}
+          {sigmaMetric && (
+            <div className="sigma-metrics-card">
+              <div className="sigma-header">
+                <h4>📊 Sigma Reflexion Engine</h4>
+                <span
+                  className={`confidence-score ${sigmaMetric.confidence >= 0.75 ? 'high' : 'low'}`}
+                >
+                  {(sigmaMetric.confidence * 100).toFixed(1)}%
+                </span>
               </div>
-              <ul className="alternatives-list">
-                {activeLesson.alternatives.map((alt, index) => (
-                  <li key={index}>{alt}</li>
-                ))}
-              </ul>
+              <div className="sigma-scores">
+                <div className="score-item">
+                  <span className="score-label">🎯 Bağlam Uyumu:</span>
+                  <span className="score-value">{(sigmaMetric.relevance * 100).toFixed(1)}%</span>
+                </div>
+                <div className="score-item">
+                  <span className="score-label">🔗 Tutarlılık:</span>
+                  <span className="score-value">{(sigmaMetric.consistency * 100).toFixed(1)}%</span>
+                </div>
+                <div className="score-item">
+                  <span className="score-label">🧬 Semantik Bütünlük:</span>
+                  <span className="score-value">{(sigmaMetric.integrity * 100).toFixed(1)}%</span>
+                </div>
+              </div>
+              {sigmaMetric.wasRevised && (
+                <div className="sigma-warning">⚠️ Yanıt yeniden yapılandırıldı (düşük güven)</div>
+              )}
             </div>
           )}
 
-          {/* Best Practices */}
-          {activeLesson.bestPractices.length > 0 && (
-            <div className="lesson-section best-practices">
-              <div className="section-header">
-                <CheckCircle size={16} />
-                <h5>✅ En İyi Uygulamalar</h5>
+          {/* Teaching Lesson */}
+          {activeLesson && (
+            <>
+              {/* Lesson Header */}
+              <div className="lesson-header">
+                <div className="lesson-title">
+                  <BookOpen size={18} />
+                  <h4>{activeLesson.concept}</h4>
+                </div>
+                <div className="lesson-meta">
+                  <span className={`difficulty-badge difficulty-${activeLesson.difficulty}`}>
+                    {getDifficultyLabel(activeLesson.difficulty)}
+                  </span>
+                  <span className="confidence-badge">
+                    Güven: {Math.round(activeLesson.confidence * 100)}%
+                  </span>
+                </div>
               </div>
-              <ul className="practices-list">
-                {activeLesson.bestPractices.map((practice, index) => (
-                  <li key={index}>{practice}</li>
-                ))}
-              </ul>
-            </div>
-          )}
 
-          {/* Pitfalls */}
-          {activeLesson.pitfalls.length > 0 && (
-            <div className="lesson-section pitfalls">
-              <div className="section-header">
-                <AlertTriangle size={16} />
-                <h5>⚠️ Kaçınılması Gerekenler</h5>
+              {/* Main Explanation */}
+              <div className="lesson-section">
+                <div className="section-header">
+                  <BookOpen size={16} />
+                  <h5>📖 Ne Olduğu</h5>
+                </div>
+                <p className="section-content">{activeLesson.explanation}</p>
               </div>
-              <ul className="pitfalls-list">
-                {activeLesson.pitfalls.map((pitfall, index) => (
-                  <li key={index}>{pitfall}</li>
-                ))}
-              </ul>
-            </div>
-          )}
 
-          {/* Navigation */}
-          {teachingMoments.length > 1 && (
-            <div className="lesson-navigation">
-              <button className="nav-button">← Önceki Ders</button>
-              <span className="lesson-count">1 / {teachingMoments.length}</span>
-              <button className="nav-button">Sonraki Ders →</button>
-            </div>
+              {/* Why (Neden) */}
+              <div className="lesson-section">
+                <div className="section-header">
+                  <Lightbulb size={16} />
+                  <h5>💡 Neden Böyle Yapılır?</h5>
+                </div>
+                <p className="section-content">{activeLesson.why}</p>
+              </div>
+
+              {/* How (Nasıl) */}
+              <div className="lesson-section">
+                <div className="section-header">
+                  <CheckCircle size={16} />
+                  <h5>⚙️ Nasıl Çalışır?</h5>
+                </div>
+                <p className="section-content">{activeLesson.how}</p>
+              </div>
+
+              {/* Alternatives */}
+              {activeLesson.alternatives.length > 0 && (
+                <div className="lesson-section">
+                  <div className="section-header">
+                    <ChevronRight size={16} />
+                    <h5>🔀 Alternatif Yöntemler</h5>
+                  </div>
+                  <ul className="alternatives-list">
+                    {activeLesson.alternatives.map((alt, index) => (
+                      <li key={index}>{alt}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Best Practices */}
+              {activeLesson.bestPractices.length > 0 && (
+                <div className="lesson-section best-practices">
+                  <div className="section-header">
+                    <CheckCircle size={16} />
+                    <h5>✅ En İyi Uygulamalar</h5>
+                  </div>
+                  <ul className="practices-list">
+                    {activeLesson.bestPractices.map((practice, index) => (
+                      <li key={index}>{practice}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Pitfalls */}
+              {activeLesson.pitfalls.length > 0 && (
+                <div className="lesson-section pitfalls">
+                  <div className="section-header">
+                    <AlertTriangle size={16} />
+                    <h5>⚠️ Kaçınılması Gerekenler</h5>
+                  </div>
+                  <ul className="pitfalls-list">
+                    {activeLesson.pitfalls.map((pitfall, index) => (
+                      <li key={index}>{pitfall}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Navigation */}
+              {teachingMoments.length > 1 && (
+                <div className="lesson-navigation">
+                  <button className="nav-button">← Önceki Ders</button>
+                  <span className="lesson-count">1 / {teachingMoments.length}</span>
+                  <button className="nav-button">Sonraki Ders →</button>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
