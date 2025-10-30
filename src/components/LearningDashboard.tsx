@@ -181,20 +181,16 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({ onClose })
                       width: `${Math.min((stats.totalPatterns / 50) * 100, 100)}%`
                     }}
                   >
-                    <span className="progress-text">{stats.totalPatterns}/50 Pattern (Hedef)</span>
+                    <span className="progress-text">
+                      {stats.totalPatterns}/50 Pattern (Hedef)
+                    </span>
                   </div>
                 </div>
                 <p className="progress-description">
-                  {stats.totalPatterns < 10 &&
-                    '🌱 Başlangıç seviyesi - Daha fazla öğrenmeye devam edin!'}
-                  {stats.totalPatterns >= 10 &&
-                    stats.totalPatterns < 30 &&
-                    '🌿 Gelişiyor - İyi bir başlangıç yaptınız!'}
-                  {stats.totalPatterns >= 30 &&
-                    stats.totalPatterns < 50 &&
-                    '🌳 İleri seviye - Sistem çok iyi öğreniyor!'}
-                  {stats.totalPatterns >= 50 &&
-                    '🚀 Uzman seviye - Sistem neredeyse her şeyi biliyor!'}
+                  {stats.totalPatterns < 10 && '🌱 Başlangıç seviyesi - Daha fazla öğrenmeye devam edin!'}
+                  {stats.totalPatterns >= 10 && stats.totalPatterns < 30 && '🌿 Gelişiyor - İyi bir başlangıç yaptınız!'}
+                  {stats.totalPatterns >= 30 && stats.totalPatterns < 50 && '🌳 İleri seviye - Sistem çok iyi öğreniyor!'}
+                  {stats.totalPatterns >= 50 && '🚀 Uzman seviye - Sistem neredeyse her şeyi biliyor!'}
                 </p>
               </div>
             </div>
@@ -207,9 +203,7 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({ onClose })
                 <div className="empty-state">
                   <div className="empty-icon">🎯</div>
                   <h3>Henüz Pattern Öğrenilmedi</h3>
-                  <p>
-                    Claude'u kullanmaya başladıkça sistem otomatik olarak pattern'leri öğrenecek.
-                  </p>
+                  <p>Claude'u kullanmaya başladıkça sistem otomatik olarak pattern'leri öğrenecek.</p>
                 </div>
               ) : (
                 <div className="patterns-grid">
@@ -242,9 +236,7 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({ onClose })
                           </span>
                         ))}
                         {pattern.triggerKeywords.length > 3 && (
-                          <span className="keyword-badge">
-                            +{pattern.triggerKeywords.length - 3}
-                          </span>
+                          <span className="keyword-badge">+{pattern.triggerKeywords.length - 3}</span>
                         )}
                       </div>
 
@@ -254,9 +246,7 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({ onClose })
                           {pattern.actionSequence.map((action, i) => (
                             <React.Fragment key={i}>
                               <span className="action-tool">{action.tool}</span>
-                              {i < pattern.actionSequence.length - 1 && (
-                                <span className="arrow">→</span>
-                              )}
+                              {i < pattern.actionSequence.length - 1 && <span className="arrow">→</span>}
                             </React.Fragment>
                           ))}
                         </div>
@@ -285,7 +275,10 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({ onClose })
               ) : (
                 <div className="activities-list">
                   {activities.map((activity) => (
-                    <div key={activity.id} className={`activity-card ${activity.finalResult}`}>
+                    <div
+                      key={activity.id}
+                      className={`activity-card ${activity.finalResult}`}
+                    >
                       <div className="activity-header">
                         <div className="activity-status">
                           {activity.finalResult === 'success' && '✅'}
@@ -298,10 +291,7 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({ onClose })
 
                       <div className="activity-tools">
                         {activity.toolCalls.map((tool, i) => (
-                          <div
-                            key={i}
-                            className={`tool-call ${tool.success ? 'success' : 'failure'}`}
-                          >
+                          <div key={i} className={`tool-call ${tool.success ? 'success' : 'failure'}`}>
                             <span className="tool-name">{tool.name}</span>
                             <span className="tool-duration">{formatDuration(tool.duration)}</span>
                           </div>
@@ -339,9 +329,7 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({ onClose })
                   <h4>Keywords</h4>
                   <div className="keywords-list">
                     {selectedPattern.triggerKeywords.map((kw, i) => (
-                      <span key={i} className="keyword-badge">
-                        {kw}
-                      </span>
+                      <span key={i} className="keyword-badge">{kw}</span>
                     ))}
                   </div>
                 </div>

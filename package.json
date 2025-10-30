@@ -24,7 +24,6 @@
     "@anthropic-ai/sdk": "^0.32.1",
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
-    "@fortawesome/fontawesome-free": "^7.1.0",
     "@monaco-editor/react": "^4.7.0",
     "clsx": "^2.1.1",
     "electron-store": "^8.1.0",

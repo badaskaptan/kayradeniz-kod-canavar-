@@ -105,6 +105,9 @@ const mockExtras: ToolExtras = {
       add: async () => ({ success: true, data: '' }),
       commit: async () => ({ success: true, data: '' })
     },
+    shell: {
+      openUrl: async () => ({ success: true })
+    },
     dialog: {
       openFile: async () => ({ success: true, data: null }),
       openDirectory: async () => ({ success: true, data: null }),

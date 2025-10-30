@@ -250,15 +250,14 @@ export const useChatStore = create<ChatStore>((set, get) => ({
           const content = typeof msg.content === 'string' ? msg.content : ''
           return (
             msg.role === 'system' ||
-            msg.role === 'assistant' && (
-              content.includes('🎭') ||
-              content.includes('YOUR IDENTITY') ||
-              content.includes('LUMA') ||
-              content.includes('Personality') ||
-              content.includes('adın ne') || // First greeting response
-              content.includes('Ben LUMA') ||
-              content.toLowerCase().includes('luma')
-            )
+            (msg.role === 'assistant' &&
+              (content.includes('🎭') ||
+                content.includes('YOUR IDENTITY') ||
+                content.includes('LUMA') ||
+                content.includes('Personality') ||
+                content.includes('adın ne') || // First greeting response
+                content.includes('Ben LUMA') ||
+                content.toLowerCase().includes('luma')))
           )
         })
 

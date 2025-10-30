@@ -7,15 +7,32 @@ const execAsync = promisify(exec)
 /**
  * Terminal IPC Handlers
  * Tool Bridge için terminal komutlarını çalıştırma
+ * Supports ALL terminal commands including:
+ * - PowerShell commands (Windows)
+ * - Bash/Zsh commands (macOS/Linux)
+ * - npm, git, python, node, etc.
+ * - Interactive commands (with streaming support)
  */
 
-// Execute command
+// Execute command with full shell support
 ipcMain.handle('terminal:exec', async (_, command: string, cwd?: string) => {
   try {
     const startTime = Date.now()
+
+    // Determine shell based on platform
+    const shell = process.platform === 'win32' ? 'powershell.exe' : '/bin/bash'
+
+    // Execute with proper shell and larger buffer
     const { stdout, stderr } = await execAsync(command, {
       cwd: cwd || process.cwd(),
-      maxBuffer: 10 * 1024 * 1024 // 10MB
+      maxBuffer: 50 * 1024 * 1024, // 50MB buffer for large outputs
+      shell: shell,
+      env: {
+        ...process.env,
+        FORCE_COLOR: '1', // Enable colored output
+        TERM: 'xterm-256color'
+      },
+      timeout: 30000 // 30 second timeout (enough for most commands)
     })
 
     const executionTime = Date.now() - startTime

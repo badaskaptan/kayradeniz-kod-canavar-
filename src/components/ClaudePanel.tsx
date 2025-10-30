@@ -206,15 +206,15 @@ export const ClaudePanel: React.FC<ClaudePanelProps> = ({
     if (confirm('Yeni sohbet başlatılsın mı? (Mevcut konuşma silinecek)')) {
       // Clear Claude's conversation history
       await window.claudeAPI?.clearHistory()
-      
+
       // Clear UI messages
       setMessages([])
       setStreamingResponse('')
-      
+
       // Reset Night Orders tracking
       currentToolCallsRef.current = []
       currentQueryRef.current = ''
-      
+
       console.log('[ClaudePanel] ✅ New conversation started - history cleared')
     }
   }

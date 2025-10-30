@@ -122,6 +122,9 @@ export interface ToolBridgeAPI {
     add: (options: ToolBridgeGitAddOptions) => Promise<ToolBridgeResult<string>>
     commit: (options: ToolBridgeGitCommitOptions) => Promise<ToolBridgeResult<string>>
   }
+  shell: {
+    openUrl: (url: string) => Promise<ToolBridgeResult<void>>
+  }
   dialog: {
     openFile(options?: OpenFileDialogOptions): Promise<ToolBridgeResult<string[] | null>>
     openDirectory(options?: OpenDirectoryDialogOptions): Promise<ToolBridgeResult<string | null>>

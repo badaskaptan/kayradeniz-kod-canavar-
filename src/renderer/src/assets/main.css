@@ -20,6 +20,11 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
+    /* Dynamic panel dimensions */
+    --left-panel-width: 300px;
+    --right-panel-width: 400px;
+    --bottom-panel-height: 200px;
+
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
@@ -83,4 +88,17 @@ code {
     Liberation Mono,
     monospace;
   font-size: 85%;
+}
+
+/* Dynamic panel sizing classes */
+.dynamic-left-panel {
+  width: var(--left-panel-width) !important;
+}
+
+.dynamic-right-panel {
+  width: var(--right-panel-width) !important;
+}
+
+.dynamic-bottom-panel {
+  height: var(--bottom-panel-height) !important;
 }

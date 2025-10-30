@@ -124,11 +124,7 @@ const FileNode = ({
   depth: number
   onOpen: (node: ToolBridgeDirectoryItem) => void
 }): React.JSX.Element => (
-  <button
-    type="button"
-    onClick={() => onOpen(node)}
-    className={cn('tree-item', `depth-${depth}`)}
-  >
+  <button type="button" onClick={() => onOpen(node)} className={cn('tree-item', `depth-${depth}`)}>
     <FileIcon className="tree-item-icon file-icon" size={16} />
     <span className="tree-item-name">{node.name}</span>
   </button>

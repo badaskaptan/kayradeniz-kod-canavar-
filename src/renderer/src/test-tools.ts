@@ -135,6 +135,9 @@ Date:   Today
         data: `Committed with message: ${options.message}`
       })
     },
+    shell: {
+      openUrl: async () => ({ success: true })
+    },
     dialog: {
       openFile: async () => ({ success: true, data: null }),
       openDirectory: async () => ({ success: true, data: null }),

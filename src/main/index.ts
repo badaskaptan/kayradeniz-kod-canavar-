@@ -1,6 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { exec } from 'child_process'
 import icon from '../../resources/icon.png?asset'
 
 // Import IPC Handlers (Tool Bridge)
@@ -10,6 +11,44 @@ import './ipc'
 import { ClaudeMCPService } from './claude-service'
 
 let claudeService: ClaudeMCPService
+
+/**
+ * Open URL - uses Microsoft Edge for localhost, default browser for others
+ * This ensures localhost dev servers open in Edge while external URLs use system default
+ */
+function openUrl(url: string): void {
+  // Check if URL is localhost or 127.0.0.1
+  const isLocalhost = url.includes('localhost') || url.includes('127.0.0.1')
+  
+  if (!isLocalhost) {
+    // Not localhost - use default browser (supports exe, bat, file:// etc.)
+    shell.openExternal(url)
+    return
+  }
+
+  // Localhost - prefer Microsoft Edge
+  if (process.platform === 'win32') {
+    // Windows: Use Microsoft Edge
+    const edgePath = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'
+    exec(`"${edgePath}" "${url}"`, (error) => {
+      if (error) {
+        // Fallback to default browser if Edge not found
+        console.log('Edge not found, using default browser')
+        shell.openExternal(url)
+      }
+    })
+  } else if (process.platform === 'darwin') {
+    // macOS: Try to use Edge, fallback to Safari or default
+    exec(`open -a "Microsoft Edge" "${url}"`, (error) => {
+      if (error) {
+        shell.openExternal(url)
+      }
+    })
+  } else {
+    // Linux or other: Use default browser
+    shell.openExternal(url)
+  }
+}
 
 function createApplicationMenu(mainWindow: BrowserWindow): void {
   const template: Electron.MenuItemConstructorOptions[] = [
@@ -129,14 +168,14 @@ function createApplicationMenu(mainWindow: BrowserWindow): void {
       submenu: [
         {
           label: 'Documentation',
-          click: () => {
-            shell.openExternal('https://github.com/luma-ai/docs')
+          click: async () => {
+            openUrl('https://github.com/luma-ai/docs')
           }
         },
         {
           label: 'Report Issue',
-          click: () => {
-            shell.openExternal('https://github.com/luma-ai/issues')
+          click: async () => {
+            openUrl('https://github.com/luma-ai/issues')
           }
         },
         { type: 'separator' },
@@ -176,7 +215,8 @@ function createWindow(): void {
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    // Use Edge for localhost URLs, default browser for others
+    openUrl(details.url)
     return { action: 'deny' }
   })
 
@@ -198,6 +238,16 @@ app.whenReady().then(() => {
 
   // Initialize Claude MCP Service
   claudeService = new ClaudeMCPService()
+
+  // IPC: Open URL in Edge (preferred browser)
+  ipcMain.handle('shell:openUrl', async (_, url: string) => {
+    try {
+      openUrl(url)
+      return { success: true }
+    } catch (error) {
+      return { success: false, error: (error as Error).message }
+    }
+  })
 
   // Setup Claude IPC Handlers
   setupClaudeHandlers()

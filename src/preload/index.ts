@@ -45,6 +45,11 @@ const api: ToolBridgeAPI = {
     log: (options) => ipcRenderer.invoke('toolbridge:git:log', options),
     add: (options) => ipcRenderer.invoke('toolbridge:git:add', options),
     commit: (options) => ipcRenderer.invoke('toolbridge:git:commit', options)
+  },
+
+  // Shell APIs
+  shell: {
+    openUrl: (url: string) => ipcRenderer.invoke('shell:openUrl', url)
   }
 }
 

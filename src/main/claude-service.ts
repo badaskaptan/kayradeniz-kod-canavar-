@@ -11,7 +11,8 @@ import { RewrittenFileParser } from './rewritten-file-parser'
 
 interface ConversationMessage {
   role: 'user' | 'assistant'
-  content: string
+  // content can be a plain text string or a structured payload (tool_use, tool_result, etc.)
+  content: string | any
 }
 
 interface ToolDefinition {
@@ -26,6 +27,7 @@ interface ToolDefinition {
 
 interface StoreSchema {
   apiKey?: string
+  userProfile?: unknown
 }
 
 export class ClaudeMCPService {
@@ -48,8 +50,11 @@ export class ClaudeMCPService {
 
   constructor() {
     // electron-store ile şifreli saklama
+    // Use fixed cwd to ensure same storage location in dev and production
+    const configPath = path.join(app.getPath('userData'), 'config')
     this.store = new Store<StoreSchema>({
       name: 'claude-config',
+      cwd: configPath, // Force same location for dev and production
       encryptionKey: 'luma-secure-key-v1' // Değiştirilebilir
     })
 
@@ -62,6 +67,14 @@ export class ClaudeMCPService {
     const savedKey = this.store.get('apiKey')
     if (savedKey) {
       this.setApiKey(savedKey)
+    }
+
+    // Başlangıçta user profile varsa yükle
+    const savedProfile = this.store.get('userProfile')
+    if (savedProfile) {
+      this.currentUserProfile = savedProfile
+      this.profileInitialized = true
+      console.log('📂 User profile auto-loaded from disk')
     }
   }
 
@@ -668,6 +681,16 @@ export class ClaudeMCPService {
         }
       }
 
+      // 🎯 Notify UI to show command in terminal panel
+      const fullCommand = args.length > 0 ? `${command} ${args.join(' ')}` : command
+      const windows = BrowserWindow.getAllWindows()
+      if (windows.length > 0) {
+        windows[0].webContents.send('terminal:executeCommand', {
+          command: fullCommand,
+          cwd: this.currentWorkingDir || this.workspacePath
+        })
+      }
+
       // Normal command execution
       const workingDir = this.currentWorkingDir || this.workspacePath
 
@@ -689,6 +712,19 @@ export class ClaudeMCPService {
         })
 
         proc.on('close', (code) => {
+          const output = stdout || stderr
+          const success = code === 0
+
+          // 🎯 Send result to UI terminal
+          if (windows.length > 0) {
+            windows[0].webContents.send('terminal:commandResult', {
+              command: fullCommand,
+              output: output,
+              exitCode: code,
+              success: success
+            })
+          }
+
           if (code === 0) {
             resolve(`✅ Komut başarılı:\n${stdout}`)
           } else {
@@ -958,6 +994,12 @@ User: "Create a minesweeper game"
 You: [write_file index.html] → "HTML created. Should I continue with CSS?"  ❌ NO! Just continue!
 
 🎯 REMEMBER: Complete the ENTIRE task in one go unless user explicitly asks for step-by-step confirmation.`
+
+      systemMessage += `\n\n📺 TERMINAL VISIBILITY:
+When you use 'run_terminal_command' tool, the command and its output will be AUTOMATICALLY displayed in the user's Terminal panel.
+You don't need to repeat the command or output in your response - user can see it in the terminal.
+Just mention what you're doing briefly, like: "Running npm install..." or "Starting the dev server..."
+The terminal will show the full command and output.`
 
       // 🎭 Profil kontrolü - HER ZAMAN profil bilgisini gönder
       if (this.profileInitialized && this.currentUserProfile) {
@@ -1315,17 +1357,29 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
   setUserProfile(profile: unknown): void {
     this.currentUserProfile = profile
     this.profileInitialized = true
-    console.log('✅ User profile saved to Claude Service')
+    // Save profile to disk for persistence across restarts
+    this.store.set('userProfile', profile)
+    console.log('✅ User profile saved to Claude Service & Disk')
   }
 
   getUserProfile(): unknown {
+    // Load from disk if not in memory
+    if (!this.currentUserProfile) {
+      const savedProfile = this.store.get('userProfile')
+      if (savedProfile) {
+        this.currentUserProfile = savedProfile
+        this.profileInitialized = true
+        console.log('📂 User profile loaded from disk')
+      }
+    }
     return this.currentUserProfile
   }
 
   clearUserProfile(): void {
     this.currentUserProfile = null
     this.profileInitialized = false
-    console.log('🗑️ User profile cleared from Claude Service')
+    this.store.delete('userProfile')
+    console.log('🗑️ User profile cleared from Claude Service & Disk')
   }
 
   // 🧠 MCP Learning API

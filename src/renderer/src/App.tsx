@@ -125,6 +125,14 @@ function App(): React.JSX.Element {
   const [bottomPanelHeight, setBottomPanelHeight] = useState(250)
   const [isResizing, setIsResizing] = useState<'left' | 'right' | 'bottom' | null>(null)
 
+  // Update CSS custom properties when panel dimensions change
+  useEffect(() => {
+    const root = document.documentElement
+    root.style.setProperty('--left-panel-width', `${leftPanelWidth}px`)
+    root.style.setProperty('--right-panel-width', `${rightPanelWidth}px`)
+    root.style.setProperty('--bottom-panel-height', `${bottomPanelHeight}px`)
+  }, [leftPanelWidth, rightPanelWidth, bottomPanelHeight])
+
   // Resize handlers
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent): void => {
@@ -734,7 +742,7 @@ function App(): React.JSX.Element {
       <main className="main-layout">
         {/* Left Sidebar */}
         {layout.panels.explorer.visible && !layout.panels.explorer.minimized && (
-          <div className="sidebar left-sidebar" style={{ width: `${leftPanelWidth}px` }}>
+          <div className="sidebar left-sidebar dynamic-left-panel">
             <div className="file-explorer">
               <div className="sidebar-header">
                 <h3>
@@ -785,7 +793,7 @@ function App(): React.JSX.Element {
 
           {/* Terminal Section */}
           {layout.panels.terminal.visible && !layout.panels.terminal.minimized && (
-            <div className="terminal-section" style={{ height: `${bottomPanelHeight}px` }}>
+            <div className="terminal-section dynamic-bottom-panel">
               <TerminalPanel />
             </div>
           )}
@@ -798,7 +806,7 @@ function App(): React.JSX.Element {
 
         {/* Right Sidebar */}
         {layout.panels.chat.visible && !layout.panels.chat.minimized && (
-          <div className="sidebar right-sidebar" style={{ width: `${rightPanelWidth}px` }}>
+          <div className="sidebar right-sidebar dynamic-right-panel">
             <div className="ai-chat-panel">
               <div className="sidebar-header">
                 <h3>
