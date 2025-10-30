@@ -41,19 +41,19 @@ export interface SigmaContext {
 }
 
 export interface SigmaMetric {
-  timestamp: Date
+  timestamp: number
   confidence: number
   relevance: number
   consistency: number
   integrity: number
   wasRevised: boolean
   responseLength: number
+  toolsUsed: string[]
 }
 
 class SigmaReflexionEngine {
   private learningThreshold = 0.75 // Minimum confidence for acceptance
   private metricsHistory: SigmaMetric[] = []
-  private maxHistorySize = 100
 
   /**
    * 🧠 Main evaluation function - Analyzes AI response quality
@@ -97,6 +97,9 @@ class SigmaReflexionEngine {
       confidence: `${(sigmoidScore * 100).toFixed(1)}%`,
       needsRevision
     })
+
+    // 📊 Record metric and feed Night Orders (Seçenek B - Dual Purpose)
+    await this.recordMetric(analysis, context)
 
     return analysis
   }
@@ -291,37 +294,71 @@ class SigmaReflexionEngine {
   }
 
   /**
-   * 📊 Record metric for learning (sends to Usta Modu + Night Orders)
+   * 📊 Record evaluation metric and emit IPC event
+   * 🌙 NIGHT ORDERS: Also feed learning system (Seçenek B - Dual Purpose)
    */
-  recordMetric(analysis: SigmaAnalysis, wasRevised: boolean, responseLength: number): void {
+  private async recordMetric(analysis: SigmaAnalysis, context: SigmaContext): Promise<void> {
     const metric: SigmaMetric = {
-      timestamp: new Date(),
+      timestamp: Date.now(),
       confidence: analysis.confidence,
       relevance: analysis.relevance,
       consistency: analysis.consistency,
       integrity: analysis.integrity,
-      wasRevised,
-      responseLength
+      wasRevised: analysis.needsRevision,
+      responseLength: context.currentResponse.length,
+      toolsUsed: context.toolsUsed || []
     }
 
-    // Store in memory (limited history)
+    // Store in history (max 100)
     this.metricsHistory.push(metric)
-    if (this.metricsHistory.length > this.maxHistorySize) {
-      this.metricsHistory.shift() // Remove oldest
+    if (this.metricsHistory.length > 100) {
+      this.metricsHistory.shift()
     }
 
-    // 🎓 Send to Usta Modu via IPC
+    // 🎓 ÖĞRETMEN MODU: Emit to Usta Modu Panel (Kullanıcı öğreniyor)
     if (typeof window !== 'undefined' && window.electron?.ipcRenderer) {
-      window.electron.ipcRenderer.send('sigma:metric', {
-        ...metric,
-        reasoning: analysis.reasoning
-      })
+      window.electron.ipcRenderer.send('sigma:metric', metric)
+      console.log('[Sigma] 📊 Metric emitted to Usta Modu:', metric.confidence.toFixed(2))
     }
 
-    console.log('[Sigma] 📊 Metric recorded:', {
-      confidence: `${(metric.confidence * 100).toFixed(1)}%`,
-      wasRevised
-    })
+    // 🌙 LUMA ÖĞRENİYOR: Record to Night Orders (LUMA öğreniyor)
+    try {
+      const { nightOrders } = await import('./nightOrdersService')
+
+      if (analysis.confidence >= 0.75) {
+        // ✅ Başarılı karar - LUMA bu pattern'i öğrenir
+        nightOrders.recordSuccessPattern({
+          prompt: context.originalPrompt,
+          response: context.currentResponse,
+          toolsUsed: context.toolsUsed || [],
+          confidence: analysis.confidence,
+          metrics: {
+            relevance: analysis.relevance,
+            consistency: analysis.consistency,
+            integrity: analysis.integrity
+          },
+          workspacePath: context.workspacePath
+        })
+        console.log(
+          `[Sigma → NightOrders] ✅ Success pattern recorded (confidence: ${(analysis.confidence * 100).toFixed(1)}%)`
+        )
+      } else {
+        // ❌ Düşük güven - LUMA bu hatayı öğrenir
+        nightOrders.recordFailurePattern({
+          prompt: context.originalPrompt,
+          failedResponse: context.currentResponse,
+          revisedPrompt: analysis.revisedPrompt || context.originalPrompt,
+          reason: analysis.reasoning,
+          confidence: analysis.confidence,
+          toolsUsed: context.toolsUsed || []
+        })
+        console.log(
+          `[Sigma → NightOrders] ❌ Failure pattern recorded (confidence: ${(analysis.confidence * 100).toFixed(1)}%)`
+        )
+      }
+    } catch (error) {
+      console.warn('[Sigma → NightOrders] Learning record failed (non-critical):', error)
+    }
   }
 
   /**

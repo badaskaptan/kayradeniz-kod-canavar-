@@ -35,7 +35,12 @@ export interface NightOrder {
 export interface LearningPattern {
   id: string
   type: 'success_pattern' | 'error_pattern'
-  trigger: 'claude_observation' | 'llama_failure' | 'user_feedback'
+  trigger:
+    | 'claude_observation'
+    | 'llama_failure'
+    | 'user_feedback'
+    | 'sigma_validation'
+    | 'sigma_revision'
   query: string
   keywords: string[]
   toolSequence: Array<{
@@ -50,6 +55,13 @@ export interface LearningPattern {
   errorContext?: {
     attemptedTools: string[]
     errorMessage: string
+    revisedPrompt?: string // For Sigma Reflexion revised prompts
+  }
+  sigmaMetrics?: {
+    // For Sigma Reflexion integration
+    relevance: number
+    consistency: number
+    integrity: number
   }
 }
 

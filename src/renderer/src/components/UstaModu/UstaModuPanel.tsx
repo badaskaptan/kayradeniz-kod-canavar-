@@ -1,12 +1,5 @@
 import { useState, useEffect } from 'react'
-import {
-  BookOpen,
-  Lightbulb,
-  AlertTriangle,
-  CheckCircle,
-  ChevronRight,
-  GraduationCap
-} from 'lucide-react'
+import { BookOpen, ChevronRight, Lightbulb, Brain } from 'lucide-react'
 import './UstaModuPanel.css'
 
 interface TeachingMoment {
@@ -24,14 +17,16 @@ interface TeachingMoment {
 }
 
 interface SigmaMetricData {
-  timestamp: Date
+  timestamp: number
   confidence: number
   relevance: number
   consistency: number
   integrity: number
   wasRevised: boolean
   responseLength: number
-  reasoning: string
+  toolsUsed?: string[]
+  wasRecorded?: boolean // 🌙 LUMA öğrendi mi? (Night Orders'a kaydedildi mi?)
+  reasoning?: string // Sigma reasoning from analysis
 }
 
 export function UstaModuPanel(): React.JSX.Element {
@@ -90,7 +85,7 @@ export function UstaModuPanel(): React.JSX.Element {
           id: `sigma-${Date.now()}`,
           timestamp: new Date(),
           concept: '⚠️ Sigma Reflexion: Düşük Güven Uyarısı',
-          explanation: data.reasoning,
+          explanation: data.reasoning || 'Düşük güven skoru tespit edildi',
           why: `Claude'un cevabı ${(data.confidence * 100).toFixed(1)}% güvenilirlik skoruna sahip. Bu, cevabın yeniden değerlendirilmesi gerekebileceği anlamına gelir.`,
           how: 'Sigma Reflexion Engine, cevabı sigmoid fonksiyonu σ(x) = 1/(1+e^(-x)) ile normalize etti ve 3 bileşeni analiz etti: Bağlam Uyumu, Tutarlılık, Semantik Bütünlük.',
           alternatives: [
@@ -302,7 +297,7 @@ export function UstaModuPanel(): React.JSX.Element {
     <div className="usta-modu-panel">
       <div className="usta-header">
         <div className="usta-title" onClick={() => setIsExpanded(!isExpanded)}>
-          <GraduationCap size={20} />
+          <BookOpen size={20} />
           <h3>📚 Usta Modu - Öğretmen Paneli</h3>
         </div>
         <div className="usta-controls">
@@ -353,6 +348,32 @@ export function UstaModuPanel(): React.JSX.Element {
                   <span className="score-value">{(sigmaMetric.integrity * 100).toFixed(1)}%</span>
                 </div>
               </div>
+
+              {/* 🌙 LUMA Öğreniyor Göstergesi (Seçenek B - Dual Purpose) */}
+              <div className="luma-learning-status">
+                <div className="learning-header">
+                  <Brain className="learning-icon" size={16} />
+                  <span className="learning-title">LUMA Öğreniyor</span>
+                </div>
+                {sigmaMetric.confidence >= 0.75 ? (
+                  <div className="learning-message success">
+                    <span className="learning-emoji">✅</span>
+                    <span>
+                      Bu karar <strong>Night Orders</strong>&apos;a başarı örneği olarak kaydedildi.
+                      LUMA bu pattern&apos;i öğrendi!
+                    </span>
+                  </div>
+                ) : (
+                  <div className="learning-message failure">
+                    <span className="learning-emoji">📚</span>
+                    <span>
+                      Düşük güven nedeniyle <strong>hata pattern&apos;i</strong> olarak kaydedildi.
+                      LUMA bu durumu gelecekte önleyecek!
+                    </span>
+                  </div>
+                )}
+              </div>
+
               {sigmaMetric.wasRevised && (
                 <div className="sigma-warning">⚠️ Yanıt yeniden yapılandırıldı (düşük güven)</div>
               )}
@@ -399,7 +420,7 @@ export function UstaModuPanel(): React.JSX.Element {
               {/* How (Nasıl) */}
               <div className="lesson-section">
                 <div className="section-header">
-                  <CheckCircle size={16} />
+                  <Lightbulb size={16} />
                   <h5>⚙️ Nasıl Çalışır?</h5>
                 </div>
                 <p className="section-content">{activeLesson.how}</p>
@@ -424,7 +445,7 @@ export function UstaModuPanel(): React.JSX.Element {
               {activeLesson.bestPractices.length > 0 && (
                 <div className="lesson-section best-practices">
                   <div className="section-header">
-                    <CheckCircle size={16} />
+                    <Lightbulb size={16} />
                     <h5>✅ En İyi Uygulamalar</h5>
                   </div>
                   <ul className="practices-list">
@@ -439,7 +460,7 @@ export function UstaModuPanel(): React.JSX.Element {
               {activeLesson.pitfalls.length > 0 && (
                 <div className="lesson-section pitfalls">
                   <div className="section-header">
-                    <AlertTriangle size={16} />
+                    <Lightbulb size={16} />
                     <h5>⚠️ Kaçınılması Gerekenler</h5>
                   </div>
                   <ul className="pitfalls-list">

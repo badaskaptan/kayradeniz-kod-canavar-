@@ -119,6 +119,98 @@ export class NightOrdersService {
   }
 
   /**
+   * ✅ SIGMA → NIGHT ORDERS: Record successful decision
+   * (Seçenek B - LUMA öğreniyor)
+   */
+  recordSuccessPattern(data: {
+    prompt: string
+    response: string
+    toolsUsed: string[]
+    confidence: number
+    metrics: {
+      relevance: number
+      consistency: number
+      integrity: number
+    }
+    workspacePath?: string
+  }): void {
+    console.log('[NightOrders ← Sigma] ✅ Recording success pattern')
+
+    const keywords = this.extractKeywords(data.prompt)
+
+    const pattern: LearningPattern = {
+      id: `sigma_success_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      type: 'success_pattern',
+      trigger: 'sigma_validation',
+      query: data.prompt,
+      keywords,
+      toolSequence: data.toolsUsed.map((tool, idx) => ({
+        tool,
+        args: {},
+        order: idx
+      })),
+      outcome: 'success',
+      timestamp: Date.now(),
+      confidence: data.confidence, // Use Sigma's confidence score
+      usageCount: 0,
+      sigmaMetrics: data.metrics // Store Sigma metrics for future analysis
+    }
+
+    this.addPattern(pattern)
+    this.updateSuccessRate(data.toolsUsed, true)
+
+    console.log(
+      `[NightOrders] 🌙 LUMA learned: "${data.prompt.substring(0, 50)}..." (confidence: ${(data.confidence * 100).toFixed(1)}%)`
+    )
+  }
+
+  /**
+   * ❌ SIGMA → NIGHT ORDERS: Record failed decision (low confidence)
+   * (Seçenek B - LUMA hata pattern'ini öğreniyor)
+   */
+  recordFailurePattern(data: {
+    prompt: string
+    failedResponse: string
+    revisedPrompt: string
+    reason: string
+    confidence: number
+    toolsUsed: string[]
+  }): void {
+    console.log('[NightOrders ← Sigma] ❌ Recording failure pattern')
+
+    const keywords = this.extractKeywords(data.prompt)
+
+    const pattern: LearningPattern = {
+      id: `sigma_failure_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      type: 'error_pattern',
+      trigger: 'sigma_revision',
+      query: data.prompt,
+      keywords,
+      toolSequence: data.toolsUsed.map((tool, idx) => ({
+        tool,
+        args: {},
+        order: idx
+      })),
+      outcome: 'failure',
+      timestamp: Date.now(),
+      confidence: data.confidence,
+      usageCount: 0,
+      errorContext: {
+        attemptedTools: data.toolsUsed,
+        errorMessage: data.reason,
+        revisedPrompt: data.revisedPrompt
+      }
+    }
+
+    this.addPattern(pattern)
+    this.updateSuccessRate(data.toolsUsed, false)
+
+    console.log(
+      `[NightOrders] 📚 LUMA learned to avoid: "${data.prompt.substring(0, 50)}..." (confidence: ${(data.confidence * 100).toFixed(1)}%)`
+    )
+  }
+
+  /**
    * 🎯 SUGGEST: Get tool suggestions for Llama3.2
    */
   suggestTools(userQuery: string): string[] {
