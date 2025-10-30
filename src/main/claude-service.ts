@@ -91,7 +91,9 @@ export class ClaudeMCPService {
       apiKey: apiKey,
       defaultHeaders: {
         'anthropic-beta': 'computer-use-2025-01-24'
-      }
+      },
+      timeout: 60000, // 60 saniye timeout (önceden default ~10 saniye)
+      maxRetries: 2 // 2 kez tekrar dene
     })
     this.store.set('apiKey', apiKey)
   }
@@ -120,7 +122,9 @@ export class ClaudeMCPService {
         apiKey,
         defaultHeaders: {
           'anthropic-beta': 'computer-use-2025-01-24'
-        }
+        },
+        timeout: 30000, // 30 saniye timeout
+        maxRetries: 1 // 1 kez tekrar dene
       })
 
       // Basit bir test mesajı gönder
@@ -1059,6 +1063,7 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
         tools: tools,
         messages: this.conversationHistory,
         stream: true
+        // timeout client level'da zaten var (constructor'da 60000ms)
       })
 
       for await (const event of stream) {
@@ -1208,6 +1213,7 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
           system: systemMessage, // 🎭 CRITICAL: Profil bilgisini tekrar gönder!
           messages: this.conversationHistory,
           stream: true
+          // timeout client level'da zaten var (constructor'da 60000ms)
         })
 
         let finalText = ''
@@ -1315,6 +1321,12 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
       }
     } catch (error: any) {
       console.error('Claude API Error:', error)
+      console.error('Error details:', {
+        message: error.message,
+        status: error.status,
+        type: error.type,
+        name: error.name
+      })
 
       // 🧠 Complete activity tracking (failure)
       if (this.currentActivityId) {
@@ -1328,6 +1340,33 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
         this.conversationHistory[this.conversationHistory.length - 1].role === 'user'
       ) {
         this.conversationHistory.pop()
+      }
+
+      // Timeout hatası için özel mesaj
+      if (error.message?.includes('timeout') || error.name === 'TimeoutError') {
+        return {
+          success: false,
+          error:
+            'Claude API zaman aşımına uğradı (60 saniye). İnternet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.'
+        }
+      }
+
+      // Rate limit hatası
+      if (error.status === 429) {
+        return {
+          success: false,
+          error:
+            'API rate limit aşıldı. Lütfen birkaç saniye bekleyip tekrar deneyin. (429 Too Many Requests)'
+        }
+      }
+
+      // API key hatası
+      if (error.status === 401 || error.status === 403) {
+        return {
+          success: false,
+          error:
+            'API key geçersiz veya yetkisiz. Settings > API Key kısmından kontrol edin. (401/403 Unauthorized)'
+        }
       }
 
       return {

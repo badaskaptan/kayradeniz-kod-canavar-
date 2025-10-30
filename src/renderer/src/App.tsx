@@ -655,9 +655,12 @@ function App(): React.JSX.Element {
         timestamp: new Date().toISOString()
       })
 
-      if (!result?.success || !result?.response) {
-        throw new Error(result?.error || 'No response from Claude API')
+      if (!result?.success) {
+        throw new Error(result?.error || 'Claude API request failed')
       }
+
+      // Boş response kabul edilebilir (Claude bazen tool sonrası hiçbir şey demez)
+      const responseText = result.response || ''
 
       const stepId = useChatStore
         .getState()
@@ -674,9 +677,15 @@ function App(): React.JSX.Element {
       completeThinking(thinkingId)
       setLoading(false)
 
+      // Boş response ise bilgilendirme mesajı ekle
+      const finalMessage =
+        responseText.trim() === ''
+          ? '✅ İşlem tamamlandı (Claude herhangi bir açıklama yapmadı)'
+          : responseText
+
       addMessage({
         role: 'assistant',
-        content: result.response
+        content: finalMessage
       })
     } catch (error) {
       console.error('[App] Claude MCP error:', error)

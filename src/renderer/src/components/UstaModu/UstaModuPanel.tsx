@@ -131,9 +131,11 @@ export function UstaModuPanel(): React.JSX.Element {
     ): void => {
       if (!isLiveMode) return
 
-      console.log('[UstaModu] 🎓 Claude used tool:', data.tool)
+      console.log('[UstaModu] 🎓 Claude used tool:', data?.tool)
 
-      // Generate teaching moment from tool usage
+      // Generate teaching moment from tool usage (only if tool is defined)
+      if (!data?.tool) return
+      
       const lesson = generateTeachingMoment(data.tool)
 
       setTeachingMoments((prev) => [lesson, ...prev].slice(0, 10)) // Keep last 10
@@ -144,8 +146,10 @@ export function UstaModuPanel(): React.JSX.Element {
     const handleStreamingChunk = (_event: unknown, data: { chunk: string }): void => {
       if (!isLiveMode) return
 
-      // Update active lesson with real-time context
-      console.log('[UstaModu] 📝 Claude thinking:', data.chunk.substring(0, 50))
+      // Update active lesson with real-time context (only if chunk is defined)
+      if (data?.chunk) {
+        console.log('[UstaModu] 📝 Claude thinking:', data.chunk.substring(0, 50))
+      }
     }
 
     // 🎯 Listen for Sigma Reflexion metrics

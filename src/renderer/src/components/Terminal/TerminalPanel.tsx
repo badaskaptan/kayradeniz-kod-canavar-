@@ -217,7 +217,7 @@ export function TerminalPanel(): React.JSX.Element {
     setIsExecuting(true)
 
     const entry: CommandHistoryEntry = {
-      id: `cmd-${Date.now()}`,
+      id: `cmd-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       command: cmd,
       output: '',
       exitCode: -1,
