@@ -899,7 +899,20 @@ export class ClaudeMCPService {
   }
 
   // Tool execution handler
-  private async executeToolInternal(toolName: string, params: any): Promise<string> {
+  private async executeToolInternal(
+    toolName: string,
+    params: any,
+    mainWindow?: BrowserWindow
+  ): Promise<string> {
+    // 🎓 Emit tool usage event to Usta Modu
+    if (mainWindow) {
+      mainWindow.webContents.send('claude:toolUsed', {
+        tool: toolName,
+        args: params,
+        timestamp: Date.now()
+      })
+    }
+
     switch (toolName) {
       case 'read_file':
         return await this.handleReadFile(params.file_path)
@@ -1053,9 +1066,9 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
           const chunk = event.delta.text
           finalResponse += chunk
 
-          // Streaming chunk'ları renderer'a gönder
+          // 🎓 Streaming chunk'ları Usta Modu'na gönder
           if (mainWindow) {
-            mainWindow.webContents.send('claude:streamingChunk', chunk)
+            mainWindow.webContents.send('claude:streamingChunk', { chunk })
           }
         }
 
@@ -1114,7 +1127,7 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
             console.log(`\n🔧 Executing: ${toolCall.name}`)
             console.log(`   Input:`, JSON.stringify(toolCall.input, null, 2))
 
-            result = await this.executeToolInternal(toolCall.name, toolCall.input)
+            result = await this.executeToolInternal(toolCall.name, toolCall.input, mainWindow)
             success = !result.includes('Hata:') && !result.includes('Error:')
 
             console.log(`✅ Result (${result.length} chars):`, result.substring(0, 200) + '...')
