@@ -4,6 +4,7 @@ import { EditorPanel } from './components/Editor/EditorPanel'
 import { AgentPanel } from './components/AgentPanel/AgentPanel'
 import { FileExplorer } from './components/Explorer/FileExplorer'
 import { TerminalPanel } from './components/Terminal/TerminalPanel'
+import { UstaModuPanel } from './components/UstaModu/UstaModuPanel'
 import { WorkspaceSelector } from './components/Workspace/WorkspaceSelector'
 import { ApiKeyManager } from '../../components/ApiKeyManager'
 import { useChatStore } from './stores/chatStore'
@@ -820,6 +821,13 @@ function App(): React.JSX.Element {
               </div>
               <ChatPanel onSendMessage={handleUserMessage} />
             </div>
+
+            {/* Usta Modu Panel */}
+            {layout.panels.ustaModu?.visible && !layout.panels.ustaModu?.minimized && (
+              <div className="usta-modu-container">
+                <UstaModuPanel />
+              </div>
+            )}
           </div>
         )}
       </main>

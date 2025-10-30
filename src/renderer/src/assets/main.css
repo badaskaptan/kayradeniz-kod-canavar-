@@ -102,3 +102,10 @@ code {
 .dynamic-bottom-panel {
   height: var(--bottom-panel-height) !important;
 }
+
+/* Usta Modu Container */
+.usta-modu-container {
+  flex: 1;
+  min-height: 0;
+  border-top: 1px solid var(--border-color);
+}

@@ -285,7 +285,7 @@ export interface EditorState {
 }
 
 // ==================== Layout Types ====================
-export type PanelId = 'explorer' | 'editor' | 'chat' | 'terminal' | 'reflexion'
+export type PanelId = 'explorer' | 'editor' | 'chat' | 'terminal' | 'reflexion' | 'ustaModu'
 
 export interface PanelConfig {
   id: PanelId

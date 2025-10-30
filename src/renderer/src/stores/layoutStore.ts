@@ -19,7 +19,8 @@ const defaultLayout: LayoutConfig = {
     editor: { id: 'editor', visible: true, size: 50, minimized: false },
     chat: { id: 'chat', visible: true, size: 30, minimized: false },
     terminal: { id: 'terminal', visible: true, size: 30, minimized: false },
-    reflexion: { id: 'reflexion', visible: true, size: 30, minimized: false }
+    reflexion: { id: 'reflexion', visible: true, size: 30, minimized: false },
+    ustaModu: { id: 'ustaModu', visible: true, size: 30, minimized: false }
   },
   orientation: 'horizontal'
 }
@@ -84,7 +85,21 @@ export const useLayoutStore = create<LayoutStore>()(
       resetLayout: () => set({ layout: defaultLayout })
     }),
     {
-      name: 'luma-layout-storage'
+      name: 'luma-layout-storage',
+      version: 1,
+      migrate: (persistedState: unknown) => {
+        // Migrate old layout to include ustaModu panel
+        const state = persistedState as { layout?: { panels?: Record<string, unknown> } }
+        if (state?.layout?.panels && !state.layout.panels.ustaModu) {
+          state.layout.panels.ustaModu = {
+            id: 'ustaModu',
+            visible: true,
+            size: 30,
+            minimized: false
+          }
+        }
+        return persistedState
+      }
     }
   )
 )

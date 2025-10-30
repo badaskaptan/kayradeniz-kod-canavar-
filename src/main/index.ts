@@ -19,7 +19,7 @@ let claudeService: ClaudeMCPService
 function openUrl(url: string): void {
   // Check if URL is localhost or 127.0.0.1
   const isLocalhost = url.includes('localhost') || url.includes('127.0.0.1')
-  
+
   if (!isLocalhost) {
     // Not localhost - use default browser (supports exe, bat, file:// etc.)
     shell.openExternal(url)

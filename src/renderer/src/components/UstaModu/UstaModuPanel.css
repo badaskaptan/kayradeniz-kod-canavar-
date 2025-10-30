@@ -1,0 +1,251 @@
+.usta-modu-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-primary);
+  border-left: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.usta-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.usta-header:hover {
+  background: var(--bg-hover);
+}
+
+.usta-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.usta-title h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.usta-toggle {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.usta-toggle svg {
+  transition: transform 0.2s ease;
+}
+
+.usta-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+/* Lesson Header */
+.lesson-header {
+  margin-bottom: 20px;
+}
+
+.lesson-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.lesson-title h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.lesson-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.difficulty-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+}
+
+.difficulty-beginner {
+  background-color: #4ade80;
+}
+
+.difficulty-intermediate {
+  background-color: #fbbf24;
+}
+
+.difficulty-advanced {
+  background-color: #f87171;
+}
+
+.confidence-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+/* Lesson Sections */
+.lesson-section {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border-left: 3px solid var(--accent-color);
+}
+
+.lesson-section.best-practices {
+  border-left-color: #4ade80;
+  background: rgba(74, 222, 128, 0.05);
+}
+
+.lesson-section.pitfalls {
+  border-left-color: #f87171;
+  background: rgba(248, 113, 113, 0.05);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.section-header h5 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.section-content {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* Lists */
+.alternatives-list,
+.practices-list,
+.pitfalls-list {
+  margin: 0;
+  padding-left: 20px;
+  list-style: none;
+}
+
+.alternatives-list li,
+.practices-list li,
+.pitfalls-list li {
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  position: relative;
+}
+
+.alternatives-list li::before {
+  content: '→';
+  position: absolute;
+  left: -20px;
+  color: var(--accent-color);
+  font-weight: bold;
+}
+
+.practices-list li::before {
+  content: '✓';
+  position: absolute;
+  left: -20px;
+  color: #4ade80;
+  font-weight: bold;
+}
+
+.pitfalls-list li::before {
+  content: '⚠';
+  position: absolute;
+  left: -20px;
+  color: #f87171;
+  font-weight: bold;
+}
+
+/* Navigation */
+.lesson-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.nav-button {
+  padding: 8px 16px;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.nav-button:hover {
+  opacity: 0.8;
+}
+
+.nav-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lesson-count {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* Scrollbar */
+.usta-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.usta-content::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+.usta-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.usta-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
