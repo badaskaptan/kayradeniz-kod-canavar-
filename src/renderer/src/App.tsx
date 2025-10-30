@@ -822,12 +822,8 @@ function App(): React.JSX.Element {
               <ChatPanel onSendMessage={handleUserMessage} />
             </div>
 
-            {/* Usta Modu Panel */}
-            {layout.panels.ustaModu?.visible && !layout.panels.ustaModu?.minimized && (
-              <div className="usta-modu-container">
-                <UstaModuPanel />
-              </div>
-            )}
+            {/* Usta Modu Panel - Floating */}
+            {layout.panels.ustaModu?.visible && <UstaModuPanel />}
           </div>
         )}
       </main>

@@ -339,6 +339,7 @@ This documentation now accurately reflects the user's true vision as explained i
 ### **📝 Scenario: Debugging Terminal Error**
 
 **User Input** (ChatBox):
+
 > "npm start yaptım ama uygulama çalışmıyor. Terminalde şu hatayı veriyor:  
 > `Error: Cannot find module 'express'`"
 
@@ -364,14 +365,15 @@ This documentation now accurately reflects the user's true vision as explained i
 ### **💬 LUMA's Response** (ChatBox - User Sees This)
 
 > **LUMA**: "Understood! Express module is missing. Let's install it:
-> 
+>
 > ```bash
 > npm install express
 > ```
-> 
+>
 > Running command..."
 
 **Terminal Output:**
+
 ```
 added 57 packages in 3.2s
 ✅ Express successfully installed!
@@ -488,30 +490,35 @@ added 57 packages in 3.2s
 ### **🎯 What the User Learns**
 
 #### **1. Immediate Technical Knowledge (Actionable Now):**
+
 - ✅ `npm install` command purpose and mechanics
 - ✅ `package.json` vs `node_modules/` relationship
 - ✅ Root cause analysis of "Cannot find module" error
 - ✅ Prevention strategies for future occurrences
 
 #### **2. Professional Best Practices (Career Growth):**
+
 - ✅ Why `package-lock.json` is critical for team projects
 - ✅ `.gitignore` usage patterns for Node.js
 - ✅ Production deployment differences (`npm ci` vs `npm install`)
 - ✅ Global vs Local installation trade-offs
 
 #### **3. Alternative Approaches (Flexibility & Options):**
+
 - ✅ Yarn as alternative package manager
 - ✅ pnpm for performance optimization
 - ✅ Single package installation with `--save` flag
 - ✅ Production-safe installation patterns
 
 #### **4. Anti-Patterns (Mistake Prevention):**
+
 - ✅ Never commit `node_modules/` (bloats repository)
 - ✅ Never delete `package-lock.json` (breaks reproducibility)
 - ✅ Avoid global install abuse (project isolation breaks)
 - ✅ Version management with nvm/volta
 
 #### **5. Advanced Connections (Deep Learning Paths):**
+
 - ✅ Semantic Versioning syntax (`^1.2.3` meaning)
 - ✅ npm scripts for task automation
 - ✅ DevDependencies vs Dependencies distinction
@@ -522,37 +529,40 @@ added 57 packages in 3.2s
 
 ### **🔄 Comparison: Traditional AI vs LUMA Usta Modu**
 
-| **Dimension** | **Traditional AI (ChatGPT/Claude)** | **LUMA Usta Modu** |
-|---------------|-------------------------------------|-------------------|
-| **Response** | "Run `npm install`" | "Run `npm install` + WHY + HOW + ALTERNATIVES + PITFALLS" |
-| **Outcome** | Problem solved ✅ | Problem solved ✅ + **User becomes expert** 🎓 |
-| **Next Similar Issue** | User asks again | **User solves independently** 💪 |
-| **Learning Model** | Passive consumption | **Active education system** |
-| **User Growth** | Stays dependent | **Becomes self-sufficient developer** |
-| **Knowledge Retention** | Temporary | **Permanent (teaching moments saved)** |
-| **Confidence Building** | No | **Yes (difficulty badges, progress tracking)** |
+| **Dimension**           | **Traditional AI (ChatGPT/Claude)** | **LUMA Usta Modu**                                        |
+| ----------------------- | ----------------------------------- | --------------------------------------------------------- |
+| **Response**            | "Run `npm install`"                 | "Run `npm install` + WHY + HOW + ALTERNATIVES + PITFALLS" |
+| **Outcome**             | Problem solved ✅                   | Problem solved ✅ + **User becomes expert** 🎓            |
+| **Next Similar Issue**  | User asks again                     | **User solves independently** 💪                          |
+| **Learning Model**      | Passive consumption                 | **Active education system**                               |
+| **User Growth**         | Stays dependent                     | **Becomes self-sufficient developer**                     |
+| **Knowledge Retention** | Temporary                           | **Permanent (teaching moments saved)**                    |
+| **Confidence Building** | No                                  | **Yes (difficulty badges, progress tracking)**            |
 
 ---
 
 ### **📈 3-Month Progression Simulation**
 
 **Month 1 (Beginner):**
+
 ```
 Same error occurs → User checks Usta Modu → "Oh yes, npm install!"
 Dependency: 80% on Usta Modu explanations
 ```
 
 **Month 2 (Intermediate):**
+
 ```
 Same error occurs → User immediately recognizes → Solves directly
 Dependency: 30% on Usta Modu (only for edge cases)
 ```
 
 **Month 3 (Expert):**
+
 ```
 Colleague: "npm start doesn't work!"
-User: "Is it in package.json? Did you run npm install? 
-       Install node_modules but gitignore it. Use npm ci 
+User: "Is it in package.json? Did you run npm install?
+       Install node_modules but gitignore it. Use npm ci
        for production. Try pnpm for faster installs..."
 Colleague: "When did you become so knowledgeable?!" 😲
 ```
@@ -571,11 +581,11 @@ Query Keywords: ["npm", "start", "error", "cannot find module", "express"]
 Solution Tools: ["terminal_command: npm install express"]
 Success Rate: 100% (3/3 historical attempts)
 Confidence: 91% (Sigma validated)
-Sigma Metrics: 
+Sigma Metrics:
   - Relevance: 0.95
-  - Consistency: 0.88  
+  - Consistency: 0.88
   - Integrity: 0.92
-Related Patterns: 
+Related Patterns:
   - "module not found" → "npm install" (6 matches)
   - "package.json" → "dependency check" (4 matches)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -627,18 +637,21 @@ Next Occurrence Prediction:
 ### **🎯 Scenario Benefits**
 
 **For User:**
+
 - ✅ Immediate problem resolution (npm error fixed)
 - ✅ Deep understanding (not just copy-paste)
 - ✅ Future self-sufficiency (won't need help next time)
 - ✅ Professional growth (can teach others)
 
 **For LUMA:**
+
 - ✅ Pattern library enriched (npm errors solved faster)
 - ✅ Sigma validation ensures quality (only good patterns stored)
 - ✅ Night Orders optimized (quicker future responses)
 - ✅ Teaching moments reusable (similar users benefit)
 
 **For Project:**
+
 - ✅ Knowledge base grows organically
 - ✅ User becomes contributor (might improve docs)
 - ✅ Competitive advantage vs traditional AI assistants

@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Settings, X, Key, Brain, Zap, History } from 'lucide-react'
+import { Settings, X, Key, Brain, Zap, History, BookOpen } from 'lucide-react'
 import { useAIStore, AI_MODELS } from '../../stores/aiStore'
+import { useLayoutStore } from '../../stores/layoutStore'
 import type { AIProvider } from '../../types'
 import { cn } from '../../lib/utils'
 import { SessionMemorySettings } from '../Settings/SessionMemorySettings'
@@ -12,6 +13,7 @@ export function Header(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<SettingsTab>('ai')
   const { config, hasHydrated, setProvider, setModel, setApiKey, setTemperature, setMaxTokens } =
     useAIStore()
+  const { togglePanel } = useLayoutStore()
 
   const handleProviderChange = (provider: AIProvider): void => {
     setProvider(provider)
@@ -49,6 +51,15 @@ export function Header(): React.JSX.Element {
               <span>API Key Required</span>
             </div>
           )}
+
+          <button
+            onClick={() => togglePanel('ustaModu')}
+            className="p-2 hover:bg-accent rounded-lg transition-colors"
+            aria-label="Toggle Usta Modu (Teacher Mode)"
+            title="Usta Modu - Öğretmen Paneli"
+          >
+            <BookOpen className="w-5 h-5" />
+          </button>
 
           <button
             onClick={() => setShowSettings(true)}

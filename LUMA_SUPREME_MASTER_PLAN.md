@@ -1188,10 +1188,10 @@ Usta Modu    Night Orders
 // Visual feedback in UstaModuPanel.tsx
 if (confidence >= 0.75) {
   // ✅ Green message: High confidence
-  "Bu karar güvenilir - öğrenmeye değer!"
+  ;('Bu karar güvenilir - öğrenmeye değer!')
 } else {
   // ⚠️ Amber message: Low confidence
-  "Düşük güven - dikkatli ol!"
+  ;('Düşük güven - dikkatli ol!')
 }
 ```
 
@@ -1201,13 +1201,19 @@ if (confidence >= 0.75) {
 // nightOrdersService.ts
 if (confidence >= 0.75) {
   recordSuccessPattern({
-    prompt, response, toolsUsed,
-    confidence, metrics: { relevance, consistency, integrity }
+    prompt,
+    response,
+    toolsUsed,
+    confidence,
+    metrics: { relevance, consistency, integrity }
   })
   // Console: "[NightOrders ← Sigma] ✅ Success pattern recorded"
 } else {
   recordFailurePattern({
-    prompt, failedResponse, revisedPrompt, reason
+    prompt,
+    failedResponse,
+    revisedPrompt,
+    reason
   })
   // Console: "[NightOrders ← Sigma] ❌ Failure pattern recorded"
 }
@@ -1236,6 +1242,7 @@ if (confidence >= 0.75) {
 ```
 
 **CSS Styling**:
+
 - Confidence >= 75%: Green gradient + pulse-success animation
 - Confidence < 75%: Amber gradient + pulse-warning animation
 - Brain icon with pulse animation (2s infinite)
@@ -1246,9 +1253,14 @@ if (confidence >= 0.75) {
 // Added to src/renderer/src/types/index.ts
 interface LearningPattern {
   // ...existing fields
-  trigger: 'claude_observation' | 'llama_failure' | 'user_feedback'
-    | 'sigma_validation' | 'sigma_revision' // NEW
-  sigmaMetrics?: {  // NEW
+  trigger:
+    | 'claude_observation'
+    | 'llama_failure'
+    | 'user_feedback'
+    | 'sigma_validation'
+    | 'sigma_revision' // NEW
+  sigmaMetrics?: {
+    // NEW
     relevance: number
     consistency: number
     integrity: number
@@ -1270,11 +1282,13 @@ interface LearningPattern {
 - [x] ✅ Git committed (1ddf290) and pushed to main
 
 **Build Info**:
+
 - Commit: `1ddf290`
 - Bundle size: 891.06 kB renderer (increased from 888.74 kB)
 - Files changed: 5 files, 278 insertions, 35 deletions
 
 **Benefits**:
+
 - ✅ User learns from Usta Modu (real-time educational feedback)
 - ✅ LUMA learns from Night Orders (long-term pattern storage)
 - ✅ Both watch Claude's decisions like students watching a professor

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { BookOpen, ChevronRight, Lightbulb, Brain } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { BookOpen, ChevronRight, Lightbulb, Brain, Minimize2, Maximize2 } from 'lucide-react'
 import './UstaModuPanel.css'
 
 interface TeachingMoment {
@@ -14,6 +14,16 @@ interface TeachingMoment {
   pitfalls: string[]
   difficulty: 'beginner' | 'intermediate' | 'advanced'
   confidence: number
+}
+
+interface Position {
+  x: number
+  y: number
+}
+
+interface Size {
+  width: number
+  height: number
 }
 
 interface SigmaMetricData {
@@ -35,10 +45,76 @@ export function UstaModuPanel(): React.JSX.Element {
   const [isExpanded, setIsExpanded] = useState(true)
   const [isLiveMode, setIsLiveMode] = useState(true) // Real-time tracking
   const [sigmaMetric, setSigmaMetric] = useState<SigmaMetricData | null>(null)
+  const [isMinimized, setIsMinimized] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isResizing, setIsResizing] = useState(false)
+  const [position, setPosition] = useState<Position>({ x: 20, y: 100 })
+  const [size, setSize] = useState<Size>({ width: 450, height: 600 })
+  const [dragStart, setDragStart] = useState<Position>({ x: 0, y: 0 })
+  const [resizeStart, setResizeStart] = useState<{ x: number; y: number; w: number; h: number }>({
+    x: 0,
+    y: 0,
+    w: 0,
+    h: 0
+  })
+  const panelRef = useRef<HTMLDivElement>(null)
 
   const toggleLiveMode = (): void => {
     setIsLiveMode(!isLiveMode)
   }
+
+  // Dragging handlers
+  const handleMouseDown = (e: React.MouseEvent): void => {
+    if ((e.target as HTMLElement).closest('.usta-controls')) return
+    setIsDragging(true)
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    })
+  }
+
+  const handleResizeMouseDown = (e: React.MouseEvent): void => {
+    e.stopPropagation()
+    setIsResizing(true)
+    setResizeStart({
+      x: e.clientX,
+      y: e.clientY,
+      w: size.width,
+      h: size.height
+    })
+  }
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent): void => {
+      if (isDragging) {
+        setPosition({
+          x: e.clientX - dragStart.x,
+          y: e.clientY - dragStart.y
+        })
+      }
+      if (isResizing) {
+        const newWidth = Math.max(300, resizeStart.w + (e.clientX - resizeStart.x))
+        const newHeight = Math.max(400, resizeStart.h + (e.clientY - resizeStart.y))
+        setSize({ width: newWidth, height: newHeight })
+      }
+    }
+
+    const handleMouseUp = (): void => {
+      setIsDragging(false)
+      setIsResizing(false)
+    }
+
+    if (isDragging || isResizing) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+    }
+
+    return undefined
+  }, [isDragging, isResizing, dragStart, resizeStart])
 
   // Listen to Claude's tool usage events
   useEffect(() => {
@@ -293,10 +369,32 @@ export function UstaModuPanel(): React.JSX.Element {
     }
   }
 
+  if (isMinimized) {
+    return (
+      <div
+        className="usta-modu-minimized"
+        style={{ top: `${position.y}px`, left: `${position.x}px` }}
+        onClick={() => setIsMinimized(false)}
+      >
+        <BookOpen size={20} />
+        <span>Usta Modu</span>
+      </div>
+    )
+  }
+
   return (
-    <div className="usta-modu-panel">
-      <div className="usta-header">
-        <div className="usta-title" onClick={() => setIsExpanded(!isExpanded)}>
+    <div
+      ref={panelRef}
+      className={`usta-modu-panel floating ${isDragging ? 'dragging' : ''} ${isResizing ? 'resizing' : ''}`}
+      style={{
+        top: `${position.y}px`,
+        left: `${position.x}px`,
+        width: `${size.width}px`,
+        height: isExpanded ? `${size.height}px` : 'auto'
+      }}
+    >
+      <div className="usta-header" onMouseDown={handleMouseDown}>
+        <div className="usta-title">
           <BookOpen size={20} />
           <h3>📚 Usta Modu - Öğretmen Paneli</h3>
         </div>
@@ -311,12 +409,15 @@ export function UstaModuPanel(): React.JSX.Element {
             </span>
             <span className="live-text">{isLiveMode ? 'Canlı' : 'Kapalı'}</span>
           </button>
+          <button className="usta-toggle" onClick={() => setIsMinimized(true)} title="Küçült">
+            <Minimize2 size={16} />
+          </button>
           <button
             className="usta-toggle"
             onClick={() => setIsExpanded(!isExpanded)}
             title="Aç/Kapat"
           >
-            <ChevronRight size={20} className={isExpanded ? 'rotated' : ''} />
+            {isExpanded ? <ChevronRight size={20} className="rotated" /> : <Maximize2 size={16} />}
           </button>
         </div>
       </div>
@@ -481,6 +582,13 @@ export function UstaModuPanel(): React.JSX.Element {
               )}
             </>
           )}
+        </div>
+      )}
+
+      {/* Resize Handle */}
+      {isExpanded && (
+        <div className="resize-handle" onMouseDown={handleResizeMouseDown}>
+          <div className="resize-icon">⋰</div>
         </div>
       )}
     </div>

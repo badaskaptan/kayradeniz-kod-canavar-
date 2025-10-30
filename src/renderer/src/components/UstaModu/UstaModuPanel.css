@@ -1,3 +1,76 @@
+/* Floating Panel */
+.usta-modu-panel.floating {
+  position: fixed;
+  z-index: 1000;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.usta-modu-panel.floating.dragging,
+.usta-modu-panel.floating.resizing {
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+  cursor: move;
+}
+
+.usta-modu-panel.floating.resizing {
+  cursor: nwse-resize;
+}
+
+/* Minimized floating button */
+.usta-modu-minimized {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--accent-color);
+  color: white;
+  border-radius: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.usta-modu-minimized:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Resize Handle */
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  cursor: nwse-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.resize-handle:hover {
+  opacity: 1;
+}
+
+.resize-icon {
+  font-size: 18px;
+  line-height: 1;
+  transform: rotate(90deg);
+}
+
 .usta-modu-panel {
   display: flex;
   flex-direction: column;
@@ -16,18 +89,16 @@
   border-bottom: 1px solid var(--border-color);
   -webkit-user-select: none;
   user-select: none;
+  cursor: move;
+  flex-shrink: 0;
 }
 
 .usta-title {
   display: flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
   flex: 1;
-}
-
-.usta-title:hover {
-  opacity: 0.8;
+  pointer-events: none;
 }
 
 .usta-title h3 {
