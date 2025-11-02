@@ -1,51 +1,198 @@
 import { useEditorStore } from '../../stores/editorStore'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
+import Editor, { OnMount, loader } from '@monaco-editor/react'
+import * as monacoEditor from 'monaco-editor'
+import type * as Monaco from 'monaco-editor'
+import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
+import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
+import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'
+import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
+import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
+
+// Configure Monaco to use local workers instead of CDN
+self.MonacoEnvironment = {
+  getWorker(_, label) {
+    if (label === 'json') {
+      return new jsonWorker()
+    }
+    if (label === 'css' || label === 'scss' || label === 'less') {
+      return new cssWorker()
+    }
+    if (label === 'html' || label === 'handlebars' || label === 'razor') {
+      return new htmlWorker()
+    }
+    if (label === 'typescript' || label === 'javascript') {
+      return new tsWorker()
+    }
+    return new editorWorker()
+  }
+}
+
+// Set Monaco to use the imported instance instead of CDN
+loader.config({ monaco: monacoEditor })
+
+// Configure TypeScript/JavaScript compiler options
+loader.init().then((monaco) => {
+  // TypeScript defaults
+  monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+    noSemanticValidation: false,
+    noSyntaxValidation: false,
+    noSuggestionDiagnostics: false
+  })
+
+  monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+    target: monaco.languages.typescript.ScriptTarget.ESNext,
+    allowNonTsExtensions: true,
+    moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+    module: monaco.languages.typescript.ModuleKind.ESNext,
+    noEmit: true,
+    esModuleInterop: true,
+    jsx: monaco.languages.typescript.JsxEmit.React,
+    allowJs: true,
+    typeRoots: ['node_modules/@types']
+  })
+
+  // JavaScript defaults
+  monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+    noSemanticValidation: false,
+    noSyntaxValidation: false,
+    noSuggestionDiagnostics: false
+  })
+
+  monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+    target: monaco.languages.typescript.ScriptTarget.ESNext,
+    allowNonTsExtensions: true,
+    allowJs: true,
+    checkJs: true
+  })
+})
+
+import { ProblemsPanel, type Diagnostic } from './ProblemsPanel'
 import './EditorPanel.css'
+
+// Detect language from file extension
+function getLanguageFromPath(filePath: string): string {
+  const ext = filePath.split('.').pop()?.toLowerCase()
+  const languageMap: Record<string, string> = {
+    ts: 'typescript',
+    tsx: 'typescript',
+    js: 'javascript',
+    jsx: 'javascript',
+    json: 'json',
+    html: 'html',
+    htm: 'html',
+    css: 'css',
+    scss: 'scss',
+    less: 'less',
+    md: 'markdown',
+    markdown: 'markdown',
+    xml: 'xml',
+    yaml: 'yaml',
+    yml: 'yaml',
+    py: 'python',
+    java: 'java',
+    c: 'c',
+    cpp: 'cpp',
+    h: 'c',
+    hpp: 'cpp',
+    cs: 'csharp',
+    go: 'go',
+    rs: 'rust',
+    rb: 'ruby',
+    php: 'php',
+    sh: 'shell',
+    bash: 'shell',
+    sql: 'sql',
+    txt: 'plaintext'
+  }
+  return languageMap[ext || ''] || 'plaintext'
+}
 
 export function EditorPanel(): React.JSX.Element {
   const { tabs, getActiveTab, openTab, closeTab, setActiveTab, saveActiveTab, updateTabContent } =
     useEditorStore()
   const { setWorkspacePath } = useWorkspaceStore()
   const activeTab = getActiveTab()
-  const fileWatcherIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const [fileUpdated, setFileUpdated] = useState(false) // ✅ Flash animation için
+  const [diagnostics, setDiagnostics] = useState<Diagnostic[]>([])
+  const [showProblems, setShowProblems] = useState(true)
+  const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null)
+  const monacoRef = useRef<typeof Monaco | null>(null)
 
-  // 🔄 Real-time File Watcher - Dosya değişikliklerini izle
-  useEffect(() => {
-    if (!activeTab?.path) {
-      if (fileWatcherIntervalRef.current) {
-        clearInterval(fileWatcherIntervalRef.current)
-        fileWatcherIntervalRef.current = null
-      }
-      return
+  // File watcher devre dışı (kullanıcı deneyimini bozuyor, dosya silme sorunu)
+  // İhtiyaç olursa manuel Reload butonu eklenebilir
+
+  // Monaco Editor setup
+  const handleEditorDidMount: OnMount = (editor, monaco) => {
+    editorRef.current = editor
+    monacoRef.current = monaco
+
+    // Configure Monaco
+    monaco.editor.setTheme('vs-dark')
+
+    // Function to update diagnostics from markers
+    const updateDiagnostics = (): void => {
+      if (!editorRef.current) return
+
+      const model = editorRef.current.getModel()
+      if (!model) return
+
+      const markers = monaco.editor.getModelMarkers({ resource: model.uri })
+      const newDiagnostics: Diagnostic[] = markers.map((marker) => ({
+        severity:
+          marker.severity === monaco.MarkerSeverity.Error
+            ? 'error'
+            : marker.severity === monaco.MarkerSeverity.Warning
+              ? 'warning'
+              : 'info',
+        message: marker.message,
+        line: marker.startLineNumber,
+        column: marker.startColumn,
+        source: marker.source || 'monaco',
+        filePath: activeTab?.path
+      }))
+
+      setDiagnostics(newDiagnostics)
+      console.log(`[EditorPanel] 🔍 Found ${newDiagnostics.length} diagnostics:`, newDiagnostics)
     }
 
-    // Her 1 saniyede bir dosyayı kontrol et
-    fileWatcherIntervalRef.current = setInterval(async () => {
-      if (!activeTab?.path) return
+    // Listen to model markers (errors/warnings)
+    monaco.editor.onDidChangeMarkers(() => {
+      updateDiagnostics()
+    })
 
-      const fileResult = await window.api.fs.readFile(activeTab.path, 'utf-8')
+    // Initial diagnostics check
+    setTimeout(() => {
+      updateDiagnostics()
+    }, 500)
 
-      if (fileResult.success && typeof fileResult.data === 'string') {
-        // Dosya içeriği değiştiyse güncelle
-        if (fileResult.data !== activeTab.content) {
-          console.log('[EditorPanel] 🔄 File changed on disk, reloading:', activeTab.path)
-          updateTabContent(activeTab.id, fileResult.data)
+    // Listen to content changes for manual validation
+    editor.onDidChangeModelContent(() => {
+      const model = editor.getModel()
+      if (!model) return
 
-          // ✅ Flash animation tetikle
-          setFileUpdated(true)
-          setTimeout(() => setFileUpdated(false), 800) // 800ms sonra kaldır
-        }
-      }
-    }, 1000) // 1 saniye interval
+      // Trigger validation after typing
+      setTimeout(() => {
+        updateDiagnostics()
+      }, 300)
+    })
+  }
 
-    return () => {
-      if (fileWatcherIntervalRef.current) {
-        clearInterval(fileWatcherIntervalRef.current)
-      }
+  // Handle editor content change
+  const handleEditorChange = (value: string | undefined): void => {
+    if (value !== undefined && activeTab) {
+      updateTabContent(activeTab.id, value)
     }
-  }, [activeTab?.path, activeTab?.id, activeTab?.content, updateTabContent])
+  }
+
+  // Jump to problem location
+  const handleProblemClick = (diagnostic: Diagnostic): void => {
+    if (editorRef.current) {
+      editorRef.current.revealLineInCenter(diagnostic.line)
+      editorRef.current.setPosition({ lineNumber: diagnostic.line, column: diagnostic.column })
+      editorRef.current.focus()
+    }
+  }
 
   // Tab kapat - Welcome ekranına dön
   const handleCloseTab = (tabId: string): void => {
@@ -55,6 +202,7 @@ export function EditorPanel(): React.JSX.Element {
   // Dosya kaydet
   const handleSave = async (): Promise<void> => {
     await saveActiveTab()
+    console.log('[EditorPanel] 💾 File saved')
   }
 
   // İçeriği panoya kopyala
@@ -200,34 +348,64 @@ export function EditorPanel(): React.JSX.Element {
                 <span className="file-path">{activeTab.path}</span>
               </div>
               <div className="editor-actions">
-                <button className="editor-btn" title="Kaydet" onClick={() => void handleSave()}>
+                <button
+                  className="editor-btn"
+                  title="Kaydet (Ctrl+S)"
+                  onClick={() => void handleSave()}
+                >
                   <i className="fas fa-save"></i>
                 </button>
                 <button className="editor-btn" title="Kopyala" onClick={handleCopy}>
                   <i className="fas fa-copy"></i>
                 </button>
+                <button
+                  className={`editor-btn ${showProblems ? 'active' : ''}`}
+                  title="Problems Panel"
+                  onClick={() => setShowProblems(!showProblems)}
+                >
+                  <i className="fas fa-exclamation-triangle"></i>
+                  {diagnostics.length > 0 && <span className="badge">{diagnostics.length}</span>}
+                </button>
               </div>
             </div>
 
-            <div className="editor-container">
-              {/* ✅ Real-time Update Indicator */}
-              {fileUpdated && (
-                <div className="file-update-flash">
-                  <i className="fas fa-sync-alt"></i>
-                  <span>Dosya güncellendi</span>
+            <div className="editor-main-area">
+              <div className="monaco-editor-wrapper">
+                <Editor
+                  height="100%"
+                  defaultLanguage={getLanguageFromPath(activeTab.path)}
+                  language={getLanguageFromPath(activeTab.path)}
+                  path={activeTab.path}
+                  value={activeTab.content}
+                  onChange={handleEditorChange}
+                  onMount={handleEditorDidMount}
+                  theme="vs-dark"
+                  options={{
+                    fontSize: 14,
+                    fontFamily: "'Fira Code', 'Consolas', 'Monaco', monospace",
+                    fontLigatures: true,
+                    minimap: { enabled: true },
+                    scrollBeyondLastLine: false,
+                    automaticLayout: true,
+                    tabSize: 2,
+                    insertSpaces: true,
+                    wordWrap: 'on',
+                    lineNumbers: 'on',
+                    renderWhitespace: 'selection',
+                    bracketPairColorization: { enabled: true },
+                    guides: {
+                      indentation: true,
+                      bracketPairs: true
+                    }
+                  }}
+                />
+              </div>
+
+              {showProblems && (
+                <div className="problems-container">
+                  <ProblemsPanel diagnostics={diagnostics} onProblemClick={handleProblemClick} />
                 </div>
               )}
-
-              <div className="line-numbers">
-                {activeTab.content.split('\n').map((_, i) => (
-                  <div key={i}>{i + 1}</div>
-                ))}
-              </div>
-              <div className="editor-wrapper">
-                <pre className="code-highlight">
-                  <code>{activeTab.content}</code>
-                </pre>
-              </div>
             </div>
           </div>
         </>

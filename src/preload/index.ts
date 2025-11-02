@@ -11,6 +11,8 @@ const api: ToolBridgeAPI = {
     writeFile: (path: string, content: string, encoding = 'utf-8') =>
       ipcRenderer.invoke('fs:writeFile', path, content, encoding),
     deleteFile: (path: string) => ipcRenderer.invoke('fs:deleteFile', path),
+    moveFile: (source: string, destination: string) =>
+      ipcRenderer.invoke('fs:moveFile', source, destination),
     createDirectory: (path: string) => ipcRenderer.invoke('fs:createDirectory', path),
     readDirectory: (path: string) => ipcRenderer.invoke('fs:readDirectory', path),
     getStats: (path: string) => ipcRenderer.invoke('fs:getStats', path),

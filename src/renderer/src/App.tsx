@@ -90,7 +90,16 @@ function App(): React.JSX.Element {
 
   // 🦙 Preload Ollama model on startup
   useEffect(() => {
+    let preloadAttempted = false
+
     const preloadOllama = async (): Promise<void> => {
+      // Prevent duplicate preload in React Strict Mode
+      if (preloadAttempted) {
+        console.log('[App] 🔒 Preload already attempted, skipping duplicate')
+        return
+      }
+      preloadAttempted = true
+
       try {
         console.log('[App] 🦙 Checking Ollama availability...')
         const isAvailable = await ollamaService.isAvailable()
@@ -117,6 +126,7 @@ function App(): React.JSX.Element {
         console.warn('[App] Ollama preload failed (non-critical):', error)
       }
     }
+
     preloadOllama()
   }, [])
 
@@ -375,6 +385,23 @@ function App(): React.JSX.Element {
         // Workspace bilgisi ekle
         const workspaceContext = workspacePath ? `\nWorkspace: ${workspacePath}` : ''
 
+        // Kullanıcı profili ekle
+        let userContext = ''
+        try {
+          const savedProfile = localStorage.getItem('userProfile')
+          if (savedProfile) {
+            const profile = JSON.parse(savedProfile)
+            if (profile.name) {
+              userContext = `\nUser: ${profile.name}`
+              if (profile.preferences?.language) {
+                userContext += ` (speaks ${profile.preferences.language})`
+              }
+            }
+          }
+        } catch (e) {
+          console.error('[App] Failed to load user profile:', e)
+        }
+
         // Track tool calls for learning (outside agentMode block for access later)
         const toolCallHistory: Array<{
           name: string
@@ -456,13 +483,45 @@ function App(): React.JSX.Element {
           }
 
           // Use chatWithTools instead of chatStream
+          // Use chatWithTools instead of chatStream
           fullResponse = await ollamaService.chatWithTools(
             {
               model: selectedModel,
               messages: [
                 {
                   role: 'system',
-                  content: `LUMA AI - Local coding assistant with tool access.${workspaceContext}\n\nYou can use tools to read files, list directories, run git commands, and more. Always use tools instead of guessing.`
+                  content: `You are LUMA AI, a helpful coding assistant.${workspaceContext}${userContext}
+
+AVAILABLE TOOLS (${availableTools.length} tools):
+${availableTools
+  .map((t, i) => `${i + 1}. ${t.function.name} - ${t.function.description.split('\n')[0]}`)
+  .join('\n')}
+
+CRITICAL TOOL USAGE RULES:
+1. ONLY use the ${availableTools.length} tools listed above
+2. NEVER mention or use tools not in this list (no code_analyzer, write_tests, etc.)
+3. If user asks for unavailable functionality, explain which AVAILABLE tool can help
+4. Simple greetings ("hi", "selam") → NO TOOLS NEEDED - just respond!
+5. ONE TOOL CALL PER TASK - After success, STOP calling tools and RESPOND
+6. NO DUPLICATE CALLS - Never call the same tool twice in one request
+
+FILE HANDLING:
+- Use str_replace_editor for: viewing files, editing files, creating files, listing directories
+- Common filename patterns:
+  * "readme" → "README.md" (auto-add .md extension)
+  * "license" → "LICENSE"
+  * "package.json" → use exact filename
+
+WORKFLOW:
+1. User asks question
+2. Call appropriate tool ONCE (if needed)
+3. Get result
+4. STOP calling tools
+5. Respond with helpful answer
+
+Available tools: ${availableTools.map((t) => t.function.name).join(', ')}
+
+Respond naturally and concisely.`
                 },
                 { role: 'user', content: cleanMessage }
               ],
@@ -486,7 +545,10 @@ function App(): React.JSX.Element {
               messages: [
                 {
                   role: 'system',
-                  content: `LUMA AI - Local assistant. English only. Concise answers.${workspaceContext}\nNote: File access not available yet.`
+                  content: `You are LUMA AI, a helpful local assistant.${workspaceContext}${userContext}
+
+Respond naturally and friendly. Keep answers concise.
+Note: Advanced file operations require tool mode.`
                 },
                 { role: 'user', content: cleanMessage }
               ],

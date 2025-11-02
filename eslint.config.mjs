@@ -15,6 +15,9 @@ export default defineConfig(
       react: {
         version: 'detect'
       }
+    },
+    rules: {
+      'no-inline-styles': 'off' // Allow inline styles for dynamic positioning
     }
   },
   {
@@ -25,7 +28,9 @@ export default defineConfig(
     },
     rules: {
       ...eslintPluginReactHooks.configs.recommended.rules,
-      ...eslintPluginReactRefresh.configs.vite.rules
+      ...eslintPluginReactRefresh.configs.vite.rules,
+      'react/forbid-component-props': 'off', // Allow inline styles for dynamic positioning
+      'react/forbid-dom-props': 'off'
     }
   },
   eslintConfigPrettier

@@ -4,8 +4,16 @@
  */
 
 export interface OllamaMessage {
-  role: 'system' | 'user' | 'assistant'
+  role: 'system' | 'user' | 'assistant' | 'tool'
   content: string
+  tool_calls?: Array<{
+    id?: string
+    type: 'function'
+    function: {
+      name: string
+      arguments: Record<string, unknown> | string
+    }
+  }>
 }
 
 export interface OllamaGenerateRequest {
@@ -214,7 +222,7 @@ export class OllamaService {
       console.log(`[OllamaService] Preloading model: ${modelName}`)
 
       // Send a minimal request to load model into RAM
-      await fetch(`${this.baseUrl}/api/generate`, {
+      const response = await fetch(`${this.baseUrl}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -224,6 +232,15 @@ export class OllamaService {
           keep_alive: '30m' // Keep model in RAM for 30 minutes
         })
       })
+
+      if (!response.ok) {
+        // Check if model is already loaded (500 error might mean model is busy/loaded)
+        if (response.status === 500) {
+          console.log(`[OllamaService] Model ${modelName} might already be loaded`)
+          return
+        }
+        throw new Error(`Preload failed with status ${response.status}`)
+      }
 
       console.log(`[OllamaService] Model ${modelName} preloaded successfully`)
     } catch (error) {
@@ -305,11 +322,17 @@ export class OllamaService {
 
           console.log(`[ToolBridge] ✅ Result: ${result.substring(0, 100)}...`)
 
-          // Add tool result to message history
-          request.messages.push(message) // Model's tool call request
+          // Add assistant message with tool call
           request.messages.push({
             role: 'assistant',
-            content: `[Tool: ${toolName}]\n${result}`
+            content: '',
+            tool_calls: [toolCall]
+          })
+
+          // Add tool response
+          request.messages.push({
+            role: 'tool',
+            content: result
           })
         }
 

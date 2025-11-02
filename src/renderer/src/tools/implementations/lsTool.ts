@@ -7,7 +7,7 @@
 import type { Tool, ToolImpl, ContextItem } from '../../types/tools'
 import { getStringArg, getBooleanArg } from '../parseArgs'
 
-const TOOL_NAME = 'ls_directory'
+const TOOL_NAME = 'list_directory'
 const TOOL_GROUP = 'built-in'
 const MAX_LS_ENTRIES = 200
 
@@ -104,7 +104,7 @@ export const lsImpl: ToolImpl = async (args, extras) => {
 /**
  * Tool definition
  */
-export const lsTool: Tool = {
+export const listDirectoryTool: Tool = {
   type: 'function',
   category: 'file',
   displayTitle: 'List Directory',

@@ -124,18 +124,18 @@ export function UstaModuPanel(): React.JSX.Element {
 
     const ipc = window.electron.ipcRenderer
 
-    // Listen for Claude tool usage
+    // Listen for Claude's tool usage
     const handleToolUsed = (
       _event: unknown,
       data: { tool: string; args: unknown; result: unknown }
     ): void => {
       if (!isLiveMode) return
 
-      console.log('[UstaModu] 🎓 Claude used tool:', data?.tool)
+      console.log('[UstaModu] 🎓 Claude used tool:', data.tool)
 
       // Generate teaching moment from tool usage (only if tool is defined)
       if (!data?.tool) return
-      
+
       const lesson = generateTeachingMoment(data.tool)
 
       setTeachingMoments((prev) => [lesson, ...prev].slice(0, 10)) // Keep last 10

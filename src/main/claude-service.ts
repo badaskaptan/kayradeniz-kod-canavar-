@@ -969,8 +969,15 @@ export class ClaudeMCPService {
       }
 
       // Workspace path varsa system message olarak ekle
-      let systemMessage =
-        'You are a helpful AI coding assistant with access to powerful tools for file operations, terminal commands, and code analysis.'
+      let systemMessage = `You are a helpful AI coding assistant with access to powerful tools for file operations, terminal commands, and code analysis.
+
+🛠️ AVAILABLE TOOLS (${tools.length} tools):
+${tools.map((t, i) => `${i + 1}. ${t.name} - ${(t.description || '').split('\n')[0]}`).join('\n')}
+
+⚠️ CRITICAL RULES:
+1. ONLY use the ${tools.length} tools listed above
+2. NEVER mention or use tools not in this list
+3. If user asks for unavailable functionality, explain which available tool can help`
 
       systemMessage += `\n\n⚠️ IMPORTANT TOOL USAGE RULES:
 1. ALWAYS use 'write_file' tool to create or modify files - NEVER use bash/cat/echo commands

@@ -44,7 +44,7 @@ export function TerminalPanel(): React.JSX.Element {
       id: 'terminal-1',
       name: 'Terminal 1',
       history: [],
-      cwd: workspacePath || process.cwd?.() || '',
+      cwd: workspacePath || '',
       commandHistory: [],
       historyIndex: -1
     }
@@ -78,7 +78,10 @@ export function TerminalPanel(): React.JSX.Element {
 
   // 🎯 Listen for Claude's terminal commands
   useEffect(() => {
-    const handleClaudeCommand = (_event: any, data: { command: string; cwd: string }): void => {
+    const handleClaudeCommand = (
+      _event: Electron.IpcRendererEvent,
+      data: { command: string; cwd: string }
+    ): void => {
       // Add command to active terminal
       const entry: CommandHistoryEntry = {
         id: `cmd-${Date.now()}`,
@@ -102,7 +105,7 @@ export function TerminalPanel(): React.JSX.Element {
     }
 
     const handleClaudeResult = (
-      _event: any,
+      _event: Electron.IpcRendererEvent,
       data: { command: string; output: string; exitCode: number; success: boolean }
     ): void => {
       // Update the last command with result

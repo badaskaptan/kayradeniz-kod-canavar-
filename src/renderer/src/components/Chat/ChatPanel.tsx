@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { useChatStore } from '../../stores/chatStore'
 import { Send, AlertCircle, Loader2, Brain } from 'lucide-react'
 import { ThinkingStepCard } from './ThinkingStepCard'
+import { MessageRenderer } from './MessageRenderer'
 import './ChatPanel.css'
 
 interface ChatPanelProps {
@@ -97,7 +98,10 @@ export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element 
               ) : (
                 // Regular message
                 <>
-                  <div className="message-content">{msg.content}</div>
+                  <MessageRenderer
+                    content={msg.content}
+                    role={msg.role === 'system' ? 'assistant' : msg.role}
+                  />
                   <div className="message-time">{msg.timestamp.toLocaleTimeString()}</div>
                 </>
               )}

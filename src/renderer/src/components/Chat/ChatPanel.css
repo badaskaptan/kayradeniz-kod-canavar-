@@ -335,3 +335,228 @@
 .message-content a:hover {
   border-bottom-color: var(--dragon-primary);
 }
+
+/* ============================================
+   VS CODE COPILOT STYLE MESSAGE RENDERING
+   ============================================ */
+
+.message-markdown {
+  width: 100%;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.message-markdown p {
+  margin: 8px 0;
+  word-wrap: break-word;
+}
+
+.message-markdown h1,
+.message-markdown h2,
+.message-markdown h3,
+.message-markdown h4,
+.message-markdown h5,
+.message-markdown h6 {
+  margin: 16px 0 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.message-markdown h1 {
+  font-size: 24px;
+  border-bottom: 1px solid var(--border-primary);
+  padding-bottom: 8px;
+}
+
+.message-markdown h2 {
+  font-size: 20px;
+}
+
+.message-markdown h3 {
+  font-size: 18px;
+}
+
+.message-markdown ul,
+.message-markdown ol {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.message-markdown li {
+  margin: 4px 0;
+}
+
+.message-markdown blockquote {
+  margin: 8px 0;
+  padding: 8px 16px;
+  border-left: 3px solid var(--dragon-primary);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.message-markdown table {
+  border-collapse: collapse;
+  margin: 12px 0;
+  width: 100%;
+}
+
+.message-markdown th,
+.message-markdown td {
+  border: 1px solid var(--border-primary);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.message-markdown th {
+  background: var(--bg-secondary);
+  font-weight: 600;
+}
+
+/* Code Block Wrapper */
+.code-block-wrapper {
+  margin: 12px 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-primary);
+  background: #0d1117;
+}
+
+.code-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #161b22;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.code-language {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.code-copy-btn {
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  transition: all var(--transition-fast);
+}
+
+.code-copy-btn:hover {
+  background: var(--bg-hover);
+  color: var(--dragon-primary);
+  border-color: var(--dragon-primary);
+}
+
+.code-copy-btn.copied {
+  color: #00d484;
+  border-color: #00d484;
+}
+
+.code-copy-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Code Block Pre */
+.code-block-wrapper pre {
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+  background: #0d1117 !important;
+  border: none;
+  border-radius: 0;
+}
+
+.code-block-wrapper code {
+  font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Inline Code */
+.message-markdown p > code,
+.message-markdown li > code {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+  color: var(--dragon-accent);
+}
+
+.inline-code-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.inline-code-copy {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  opacity: 0;
+  transition: all var(--transition-fast);
+}
+
+.inline-code-wrapper:hover .inline-code-copy {
+  opacity: 1;
+}
+
+.inline-code-copy:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-primary);
+  color: var(--dragon-primary);
+}
+
+.inline-code-copy svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Links in Markdown */
+.message-markdown a {
+  color: var(--dragon-primary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.message-markdown a:hover {
+  border-bottom-color: var(--dragon-primary);
+}
+
+/* Scrollbar for code blocks */
+.code-block-wrapper pre::-webkit-scrollbar {
+  height: 8px;
+}
+
+.code-block-wrapper pre::-webkit-scrollbar-track {
+  background: #161b22;
+}
+
+.code-block-wrapper pre::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 4px;
+}
+
+.code-block-wrapper pre::-webkit-scrollbar-thumb:hover {
+  background: var(--dragon-primary);
+}

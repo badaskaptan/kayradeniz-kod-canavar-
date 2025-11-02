@@ -83,7 +83,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
           ? {
               ...t,
               content,
-              modified: false // ✅ Disk'ten okunan değişiklik, modified=false
+              modified: true // ✅ Kullanıcı değiştirdiğinde modified=true
             }
           : t
       )
@@ -101,9 +101,14 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   saveActiveTab: async () => {
     const activeTab = get().getActiveTab()
-    if (!activeTab || !activeTab.modified) {
+    if (!activeTab) {
+      console.log('[EditorStore] ❌ No active tab to save')
       return
     }
+
+    console.log('[EditorStore] 💾 Saving file:', activeTab.path)
+    console.log('[EditorStore] 📄 Content length:', activeTab.content.length)
+    console.log('[EditorStore] 🏷️ Modified flag:', activeTab.modified)
 
     try {
       if (typeof window !== 'undefined' && window.api?.fs?.writeFile) {
@@ -113,13 +118,15 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
           set((state) => ({
             tabs: state.tabs.map((t) => (t.id === activeTab.id ? { ...t, modified: false } : t))
           }))
-          console.log('[EditorStore] File saved:', activeTab.path)
+          console.log('[EditorStore] ✅ File saved successfully:', activeTab.path)
         } else {
-          console.error('[EditorStore] Save failed:', result.error)
+          console.error('[EditorStore] ❌ Save failed:', result.error)
         }
+      } else {
+        console.error('[EditorStore] ❌ window.api.fs.writeFile not available')
       }
     } catch (error) {
-      console.error('[EditorStore] Save error:', error)
+      console.error('[EditorStore] ❌ Save error:', error)
     }
   },
 

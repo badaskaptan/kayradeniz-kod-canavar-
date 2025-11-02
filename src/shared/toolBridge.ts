@@ -94,6 +94,7 @@ export interface ToolBridgeAPI {
     readFile: (path: string, encoding?: string) => Promise<ToolBridgeResult<string>>
     writeFile: (path: string, content: string, encoding?: string) => Promise<ToolBridgeResult<void>>
     deleteFile: (path: string) => Promise<ToolBridgeResult<void>>
+    moveFile: (source: string, destination: string) => Promise<ToolBridgeResult<void>>
     createDirectory: (path: string) => Promise<ToolBridgeResult<void>>
     readDirectory: (path: string) => Promise<ToolBridgeResult<ToolBridgeDirectoryItem[]>>
     getStats: (path: string) => Promise<ToolBridgeResult<ToolBridgeFileStats>>

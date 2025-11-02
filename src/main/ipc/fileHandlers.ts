@@ -37,6 +37,16 @@ ipcMain.handle('fs:deleteFile', async (_, filePath: string) => {
   }
 })
 
+// Move/rename file
+ipcMain.handle('fs:moveFile', async (_, source: string, destination: string) => {
+  try {
+    await fs.rename(source, destination)
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: (error as Error).message }
+  }
+})
+
 // Create directory
 ipcMain.handle('fs:createDirectory', async (_, dirPath: string) => {
   try {

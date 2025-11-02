@@ -13,7 +13,17 @@ const TOOL_GROUP = 'built-in'
  * Tool implementation
  */
 export const readFileImpl: ToolImpl = async (args, extras) => {
-  const filepath = getStringArg(args, 'filepath')
+  let filepath = getStringArg(args, 'filepath')
+
+  // 🔧 Smart filename normalization
+  // "readme" → "README.md" (common patterns)
+  if (filepath.toLowerCase() === 'readme') {
+    filepath = 'README.md'
+  } else if (filepath.toLowerCase() === 'license') {
+    filepath = 'LICENSE'
+  } else if (filepath.toLowerCase() === 'changelog') {
+    filepath = 'CHANGELOG.md'
+  }
 
   try {
     // Read file using Tool Bridge API
