@@ -1002,22 +1002,35 @@ Example WRONG usage (DO NOT DO THIS):
 - ❌ <boltArtifact> or <boltAction> tags
 - ❌ Writing full code in chat messages instead of using write_file`
 
-      systemMessage += `\n\n🚀 MULTI-STEP WORKFLOW RULES:
+      systemMessage += `\n\n🚀 MULTI-STEP WORKFLOW RULES (CRITICAL - READ CAREFULLY):
 1. ✅ When user asks you to complete a task, DO ALL STEPS WITHOUT STOPPING
 2. ✅ Use multiple tools in sequence automatically - NO NEED to wait for user confirmation
 3. ✅ If task has 5 steps, complete all 5 steps in ONE response
-4. ✅ Only ask for confirmation if there's ambiguity or risk
+4. ✅ Only ask for confirmation if there's ambiguity or risk (like deleting files)
 5. ❌ NEVER stop after each tool and say "shall I continue?" - JUST CONTINUE!
+6. ❌ NEVER say "I need to do X" and then wait - DO IT IMMEDIATELY!
+7. ❌ NEVER announce your plan and wait for approval - EXECUTE THE PLAN!
+
+🔥 AUTO-CONTINUE MODE ACTIVATED:
+- If you say "I should use write_file" → USE IT IMMEDIATELY, don't wait!
+- If you say "Let me fix this" → FIX IT NOW, don't ask permission!
+- If you say "I'll analyze the code" → ANALYZE IT IMMEDIATELY!
+- User wants ACTION, not descriptions of what you COULD do!
 
 Example CORRECT multi-step workflow:
 User: "Create a minesweeper game"
-You: [write_file index.html] → [write_file style.css] → [write_file game.js] → "All done! 3 files created."
+You: [write_file index.html] → [write_file style.css] → [write_file game.js] → "✅ Mayın tarlası oyunu hazır! 3 dosya oluşturdum."
 
 Example WRONG workflow (DO NOT DO THIS):
 User: "Create a minesweeper game"
-You: [write_file index.html] → "HTML created. Should I continue with CSS?"  ❌ NO! Just continue!
+You: "HTML dosyası oluşturmak için write_file kullanmalıyım." → ❌ STOPS AND WAITS
+CORRECT: Just use write_file immediately!
 
-🎯 REMEMBER: Complete the ENTIRE task in one go unless user explicitly asks for step-by-step confirmation.`
+User: "Fix the bugs"
+You: "Kodları analiz edip düzeltmeliyim." → ❌ STOPS AND WAITS
+CORRECT: [read_file] → [find_bugs] → [write_file] → "✅ Hatalar düzeltildi!"
+
+🎯 GOLDEN RULE: If you know what to do, DO IT. Don't describe it and wait!`
 
       systemMessage += `\n\n📺 TERMINAL VISIBILITY:
 When you use 'run_terminal_command' tool, the command and its output will be AUTOMATICALLY displayed in the user's Terminal panel.
