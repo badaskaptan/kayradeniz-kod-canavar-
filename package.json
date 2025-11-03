@@ -26,6 +26,7 @@
     "@electron-toolkit/utils": "^4.0.0",
     "@fortawesome/fontawesome-free": "^7.1.0",
     "@monaco-editor/react": "^4.7.0",
+    "better-sqlite3": "^12.4.1",
     "clsx": "^2.1.1",
     "electron-store": "^8.1.0",
     "electron-updater": "^6.3.9",

@@ -8,6 +8,10 @@ import * as path from 'path'
 import { spawn } from 'child_process'
 import { MCPActivityLogger } from './mcp-activity-logger'
 import { RewrittenFileParser } from './rewritten-file-parser'
+import { ActivityObserver } from './activity-observer'
+import { ShipsLogbook, Pattern, KnowledgeEntry } from '../shared/ships-logbook'
+import type { Observation } from '../types/observation'
+import { IntelligenceFleet } from './intelligence-fleet'
 
 interface ConversationMessage {
   role: 'user' | 'assistant'
@@ -37,6 +41,9 @@ export class ClaudeMCPService {
   private workspacePath: string = ''
   private activityLogger: MCPActivityLogger
   private currentActivityId: string | null = null
+  private activityObserver: ActivityObserver
+  private shipsLogbook: ShipsLogbook
+  private intelligenceFleet: IntelligenceFleet
 
   // str_replace_editor undo history
   private fileEditHistory: Map<string, string> = new Map()
@@ -62,6 +69,46 @@ export class ClaudeMCPService {
     const dataDir = path.join(app.getPath('userData'), 'mcp-learning')
     this.activityLogger = new MCPActivityLogger(dataDir)
     this.activityLogger.initialize().catch(console.error)
+
+    // Ship's Logbook'u initialize et
+    this.shipsLogbook = new ShipsLogbook(dataDir)
+    this.shipsLogbook.initialize()
+
+    // Activity Observer'ı initialize et
+    this.activityObserver = new ActivityObserver({
+      enabled: true,
+      maxQueueSize: 100,
+      flushInterval: 5000
+    })
+
+    // Connect ActivityObserver to ShipsLogbook
+    this.activityObserver.onComplete((observation) => {
+      try {
+        this.shipsLogbook.saveObservation(observation)
+      } catch (error) {
+        console.error('📚 Error saving observation to logbook:', error)
+      }
+    })
+
+    // Initialize Intelligence Fleet (Phase 1.3)
+    this.intelligenceFleet = new IntelligenceFleet(this.shipsLogbook, {
+      baseUrl: 'http://localhost:11434',
+      model: 'qwen2.5-coder:7b',
+      temperature: 0.3,
+      maxTokens: 1000
+    })
+
+    // Connect ActivityObserver to Intelligence Fleet for analysis
+    this.activityObserver.onComplete((observation) => {
+      try {
+        // Non-blocking async analysis
+        this.intelligenceFleet.processObservation(observation).catch((error) => {
+          console.error('🧠 Fleet analysis error:', error)
+        })
+      } catch (error) {
+        console.error('🧠 Failed to queue observation for analysis:', error)
+      }
+    })
 
     // Başlangıçta API key varsa yükle
     const savedKey = this.store.get('apiKey')
@@ -908,41 +955,63 @@ export class ClaudeMCPService {
     params: any,
     mainWindow?: BrowserWindow
   ): Promise<string> {
-    // 🎓 Emit tool usage event to Usta Modu
-    if (mainWindow) {
-      mainWindow.webContents.send('claude:toolUsed', {
-        tool: toolName,
-        args: params,
-        timestamp: Date.now()
-      })
-    }
+    const startTime = Date.now()
+    let result = ''
+    let success = false
 
-    switch (toolName) {
-      case 'read_file':
-        return await this.handleReadFile(params.file_path)
-      case 'list_directory':
-        return await this.handleListDirectory(params.dir_path)
-      case 'search_files':
-        return await this.handleSearchFiles(params.pattern)
-      case 'get_file_tree':
-        return await this.handleGetFileTree(params.max_depth)
-      case 'write_file':
-        return await this.handleWriteFile(params.file_path, params.content)
-      case 'create_directory':
-        return await this.handleCreateDirectory(params.dir_path)
-      case 'delete_file':
-        return await this.handleDeleteFile(params.file_path)
-      case 'move_file':
-        return await this.handleMoveFile(params.source_path, params.destination_path)
-      case 'run_terminal_command':
-        return await this.handleRunTerminalCommand(params.command, params.args)
-      case 'run_tests':
-        return await this.handleRunTests(params.test_file)
-      case 'str_replace_editor':
-        return await this.handleStrReplaceEditor(params)
-      default:
-        // Eski tool'lar için dummy response
-        return `${toolName} tool'u çalıştırıldı. Parametreler: ${JSON.stringify(params)}`
+    try {
+      // 🎓 Emit tool usage event to Usta Modu
+      if (mainWindow) {
+        mainWindow.webContents.send('claude:toolUsed', {
+          tool: toolName,
+          args: params,
+          timestamp: Date.now()
+        })
+      }
+
+      switch (toolName) {
+        case 'read_file':
+          result = await this.handleReadFile(params.file_path)
+          break
+        case 'list_directory':
+          result = await this.handleListDirectory(params.dir_path)
+          break
+        case 'search_files':
+          result = await this.handleSearchFiles(params.pattern)
+          break
+        case 'get_file_tree':
+          result = await this.handleGetFileTree(params.max_depth)
+          break
+        case 'write_file':
+          result = await this.handleWriteFile(params.file_path, params.content)
+          break
+        case 'create_directory':
+          result = await this.handleCreateDirectory(params.dir_path)
+          break
+        case 'delete_file':
+          result = await this.handleDeleteFile(params.file_path)
+          break
+        case 'move_file':
+          result = await this.handleMoveFile(params.source_path, params.destination_path)
+          break
+        case 'run_terminal_command':
+          result = await this.handleRunTerminalCommand(params.command, params.args)
+          break
+        case 'run_tests':
+          result = await this.handleRunTests(params.test_file)
+          break
+        case 'str_replace_editor':
+          result = await this.handleStrReplaceEditor(params)
+          break
+        default:
+          result = `${toolName} tool'u çalıştırıldı. Parametreler: ${JSON.stringify(params)}`
+      }
+
+      success = !result.includes('Hata:')
+      return result
+    } finally {
+      const executionTime = Date.now() - startTime
+      this.activityObserver.recordToolCall(toolName, params, result, success, executionTime)
     }
   }
 
@@ -1066,6 +1135,9 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
         message,
         context ? JSON.stringify(context) : undefined
       )
+
+      // 📡 Start Activity Observation
+      this.activityObserver.startObservation(message, context)
 
       this.conversationHistory.push({
         role: 'user',
@@ -1334,6 +1406,9 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
         this.currentActivityId = null
       }
 
+      // 📡 Complete Activity Observation (success)
+      this.activityObserver.completeObservation(responseToSend || finalResponse, true)
+
       return {
         success: true,
         response: responseToSend || 'Claude yanıt verdi',
@@ -1353,6 +1428,9 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
         await this.activityLogger.completeActivity(this.currentActivityId, 'failure')
         this.currentActivityId = null
       }
+
+      // 📡 Complete Activity Observation (failure)
+      this.activityObserver.completeObservation(error.message || 'Error occurred', false)
 
       // Son user mesajını history'den çıkar (hata durumunda)
       if (
@@ -1469,5 +1547,69 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
 
   async findMatchingPattern(userRequest: string): Promise<unknown> {
     return await this.activityLogger.findMatchingPattern(userRequest)
+  }
+
+  // 📡 Activity Observer API
+  getObserverStats(): { queueSize: number; currentObservationId: string | null; enabled: boolean } {
+    return this.activityObserver.getStats()
+  }
+
+  setObserverEnabled(enabled: boolean): void {
+    this.activityObserver.setEnabled(enabled)
+  }
+
+  onObservationComplete(callback: (observation: any) => void): void {
+    this.activityObserver.onComplete(callback)
+  }
+
+  // 📚 Ship's Logbook API
+  getLogbookStats(): {
+    totalObservations: number
+    successfulObservations: number
+    totalPatterns: number
+    totalReflexions: number
+    totalTeachingMoments: number
+    totalKnowledge: number
+  } {
+    return this.shipsLogbook.getStatistics()
+  }
+
+  getRecentObservations(limit = 10): Observation[] {
+    return this.shipsLogbook.getRecentObservations(limit)
+  }
+
+  getObservationById(id: string): Observation | null {
+    return this.shipsLogbook.getObservation(id)
+  }
+
+  getTopPatterns(limit = 10): Pattern[] {
+    return this.shipsLogbook.getTopPatterns(limit)
+  }
+
+  searchKnowledge(searchTerm: string, limit = 10): KnowledgeEntry[] {
+    return this.shipsLogbook.searchKnowledge(searchTerm, limit)
+  }
+
+  // 🧠 Intelligence Fleet API
+  getFleetStats(): {
+    queueSize: number
+    isProcessing: boolean
+    modelConfig: {
+      baseUrl: string
+      model: string
+      temperature: number
+      maxTokens: number
+    }
+  } {
+    return this.intelligenceFleet.getStats()
+  }
+
+  updateFleetConfig(config: {
+    baseUrl?: string
+    model?: string
+    temperature?: number
+    maxTokens?: number
+  }): void {
+    this.intelligenceFleet.updateConfig(config)
   }
 }

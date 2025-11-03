@@ -20,6 +20,7 @@ const mockExtras: ToolExtras = {
       readFile: async () => ({ success: true, data: '' }),
       writeFile: async () => ({ success: true }),
       deleteFile: async () => ({ success: true }),
+      moveFile: async () => ({ success: true }),
       createDirectory: async () => ({ success: true }),
       readDirectory: async () => ({ success: true, data: [] }),
       getStats: async () => ({

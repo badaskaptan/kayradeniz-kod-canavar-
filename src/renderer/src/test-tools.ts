@@ -35,6 +35,7 @@ Line 10: Tenth line`
       }),
       writeFile: async () => ({ success: true }),
       deleteFile: async () => ({ success: true }),
+      moveFile: async () => ({ success: true }),
       createDirectory: async () => ({ success: true }),
       readDirectory: async (path: string) => ({
         success: true,
