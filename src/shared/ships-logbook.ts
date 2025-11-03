@@ -168,6 +168,41 @@ export class ShipsLogbook {
       )
     `)
 
+    // 6. Night Orders table (Phase 2.2)
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS night_orders (
+        id TEXT PRIMARY KEY,
+        captain_orders TEXT NOT NULL,
+        tasks TEXT NOT NULL, -- JSON array of OrderedTask
+        mission_context TEXT NOT NULL,
+        priority TEXT NOT NULL, -- 'low' | 'medium' | 'high' | 'critical'
+        status TEXT NOT NULL, -- 'active' | 'completed' | 'failed' | 'aborted'
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        completed_at INTEGER
+      )
+    `)
+
+    // 7. Task Execution table (Phase 2.2)
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS task_execution (
+        id TEXT PRIMARY KEY,
+        order_id TEXT NOT NULL,
+        task_id TEXT NOT NULL,
+        agent_role TEXT NOT NULL,
+        agent_context TEXT NOT NULL, -- JSON AgentContext snapshot
+        result TEXT,
+        status TEXT NOT NULL, -- 'pending' | 'in_progress' | 'completed' | 'failed' | 'retry'
+        started_at INTEGER,
+        completed_at INTEGER,
+        execution_time INTEGER,
+        retry_count INTEGER NOT NULL DEFAULT 0,
+        deviation_severity TEXT, -- 'minor' | 'moderate' | 'major' | 'critical'
+        deviation_description TEXT,
+        FOREIGN KEY (order_id) REFERENCES night_orders(id)
+      )
+    `)
+
     // Create indexes for better query performance
     this.db.exec(`
       CREATE INDEX IF NOT EXISTS idx_observations_timestamp ON observations(timestamp);
@@ -178,6 +213,9 @@ export class ShipsLogbook {
       CREATE INDEX IF NOT EXISTS idx_teaching_category ON teaching_moments(category);
       CREATE INDEX IF NOT EXISTS idx_knowledge_category ON knowledge_base(category);
       CREATE INDEX IF NOT EXISTS idx_knowledge_score ON knowledge_base(relevance_score DESC);
+      CREATE INDEX IF NOT EXISTS idx_night_orders_status ON night_orders(status);
+      CREATE INDEX IF NOT EXISTS idx_task_execution_order ON task_execution(order_id);
+      CREATE INDEX IF NOT EXISTS idx_task_execution_status ON task_execution(status);
     `)
 
     console.log("📚 Ship's Logbook schema initialized")
@@ -496,6 +534,249 @@ export class ShipsLogbook {
       totalTeachingMoments: stats.totalTeachingMoments.count,
       totalKnowledge: stats.totalKnowledge.count
     }
+  }
+
+  // ==================== NIGHT ORDERS (Phase 2.2) ====================
+
+  /**
+   * Save a Night Order mission to the database
+   */
+  saveNightOrder(order: {
+    id: string
+    captainOrders: string
+    tasks: any[] // OrderedTask[]
+    missionContext: string
+    priority: string
+    status: string
+  }): void {
+    const stmt = this.db.prepare(`
+      INSERT INTO night_orders (
+        id, captain_orders, tasks, mission_context,
+        priority, status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+
+    const now = Date.now()
+    stmt.run(
+      order.id,
+      order.captainOrders,
+      JSON.stringify(order.tasks),
+      order.missionContext,
+      order.priority,
+      order.status,
+      now,
+      now
+    )
+
+    console.log(`📚 Night Order saved: ${order.id.substring(0, 8)}`)
+  }
+
+  /**
+   * Get active Night Order (if any)
+   */
+  getActiveNightOrder(): any | null {
+    const stmt = this.db.prepare(`
+      SELECT * FROM night_orders
+      WHERE status = 'active'
+      ORDER BY created_at DESC
+      LIMIT 1
+    `)
+
+    const row = stmt.get() as any
+    if (!row) return null
+
+    return {
+      id: row.id,
+      captainOrders: row.captain_orders,
+      tasks: JSON.parse(row.tasks),
+      missionContext: row.mission_context,
+      priority: row.priority,
+      status: row.status,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      completedAt: row.completed_at
+    }
+  }
+
+  /**
+   * Update Night Order status
+   */
+  updateNightOrderStatus(orderId: string, status: string, completedAt?: number): void {
+    const stmt = this.db.prepare(`
+      UPDATE night_orders
+      SET status = ?, updated_at = ?, completed_at = ?
+      WHERE id = ?
+    `)
+
+    stmt.run(status, Date.now(), completedAt || null, orderId)
+    console.log(`📚 Night Order ${orderId.substring(0, 8)} updated: ${status}`)
+  }
+
+  /**
+   * Save task execution record
+   */
+  saveTaskExecution(execution: {
+    id: string
+    orderId: string
+    taskId: string
+    agentRole: string
+    agentContext: any // AgentContext
+    result?: string
+    status: string
+    startedAt?: number
+    completedAt?: number
+    executionTime?: number
+    retryCount?: number
+    deviationSeverity?: string
+    deviationDescription?: string
+  }): void {
+    const stmt = this.db.prepare(`
+      INSERT INTO task_execution (
+        id, order_id, task_id, agent_role, agent_context,
+        result, status, started_at, completed_at, execution_time,
+        retry_count, deviation_severity, deviation_description
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+
+    stmt.run(
+      execution.id,
+      execution.orderId,
+      execution.taskId,
+      execution.agentRole,
+      JSON.stringify(execution.agentContext),
+      execution.result || null,
+      execution.status,
+      execution.startedAt || null,
+      execution.completedAt || null,
+      execution.executionTime || null,
+      execution.retryCount || 0,
+      execution.deviationSeverity || null,
+      execution.deviationDescription || null
+    )
+
+    console.log(
+      `📚 Task execution saved: ${execution.taskId} (${execution.agentRole}) - ${execution.status}`
+    )
+  }
+
+  /**
+   * Update task execution status
+   */
+  updateTaskExecution(
+    executionId: string,
+    updates: {
+      result?: string
+      status?: string
+      completedAt?: number
+      executionTime?: number
+      retryCount?: number
+      deviationSeverity?: string
+      deviationDescription?: string
+    }
+  ): void {
+    // Build dynamic UPDATE query
+    const fields: string[] = []
+    const values: any[] = []
+
+    if (updates.result !== undefined) {
+      fields.push('result = ?')
+      values.push(updates.result)
+    }
+    if (updates.status !== undefined) {
+      fields.push('status = ?')
+      values.push(updates.status)
+    }
+    if (updates.completedAt !== undefined) {
+      fields.push('completed_at = ?')
+      values.push(updates.completedAt)
+    }
+    if (updates.executionTime !== undefined) {
+      fields.push('execution_time = ?')
+      values.push(updates.executionTime)
+    }
+    if (updates.retryCount !== undefined) {
+      fields.push('retry_count = ?')
+      values.push(updates.retryCount)
+    }
+    if (updates.deviationSeverity !== undefined) {
+      fields.push('deviation_severity = ?')
+      values.push(updates.deviationSeverity)
+    }
+    if (updates.deviationDescription !== undefined) {
+      fields.push('deviation_description = ?')
+      values.push(updates.deviationDescription)
+    }
+
+    if (fields.length === 0) return
+
+    values.push(executionId)
+    const sql = `UPDATE task_execution SET ${fields.join(', ')} WHERE id = ?`
+
+    this.db.prepare(sql).run(...values)
+    console.log(`📚 Task execution ${executionId.substring(0, 8)} updated`)
+  }
+
+  /**
+   * Get task executions for a Night Order
+   */
+  getTaskExecutions(orderId: string): any[] {
+    const stmt = this.db.prepare(`
+      SELECT * FROM task_execution
+      WHERE order_id = ?
+      ORDER BY started_at ASC
+    `)
+
+    const rows = stmt.all(orderId) as any[]
+    return rows.map((row) => ({
+      id: row.id,
+      orderId: row.order_id,
+      taskId: row.task_id,
+      agentRole: row.agent_role,
+      agentContext: JSON.parse(row.agent_context),
+      result: row.result,
+      status: row.status,
+      startedAt: row.started_at,
+      completedAt: row.completed_at,
+      executionTime: row.execution_time,
+      retryCount: row.retry_count,
+      deviationSeverity: row.deviation_severity,
+      deviationDescription: row.deviation_description
+    }))
+  }
+
+  /**
+   * Get Night Orders with filters
+   */
+  getNightOrders(filters?: { status?: string; limit?: number }): any[] {
+    let sql = 'SELECT * FROM night_orders'
+    const params: any[] = []
+
+    if (filters?.status) {
+      sql += ' WHERE status = ?'
+      params.push(filters.status)
+    }
+
+    sql += ' ORDER BY created_at DESC'
+
+    if (filters?.limit) {
+      sql += ' LIMIT ?'
+      params.push(filters.limit)
+    }
+
+    const stmt = this.db.prepare(sql)
+    const rows = stmt.all(...params) as any[]
+
+    return rows.map((row) => ({
+      id: row.id,
+      captainOrders: row.captain_orders,
+      tasks: JSON.parse(row.tasks),
+      missionContext: row.mission_context,
+      priority: row.priority,
+      status: row.status,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      completedAt: row.completed_at
+    }))
   }
 
   /**
