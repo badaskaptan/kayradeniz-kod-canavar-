@@ -286,6 +286,24 @@ export class OllamaService {
       })
 
       if (!response.ok) {
+        const errorText = await response.text()
+
+        // Parse common Ollama errors
+        if (
+          errorText.includes('unable to load full model on GPU') ||
+          errorText.includes('model requires more system memory')
+        ) {
+          throw new Error(
+            `❌ GPU Belleği Yetersiz!\n\n` +
+              `Model GPU RAM'inize sığmıyor. Daha küçük bir model kullanın:\n\n` +
+              `• gemma2:2b (1.6GB) - Önerilen ✅\n` +
+              `• qwen2.5:0.5b (400MB) - Çok hızlı\n\n` +
+              `Terminal'de çalıştırın:\n` +
+              `ollama pull gemma2:2b\n\n` +
+              `Sonra Settings'ten yeni modeli seçin.`
+          )
+        }
+
         throw new Error(`Tool chat failed: ${response.statusText}`)
       }
 
