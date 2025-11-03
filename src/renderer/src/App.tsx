@@ -34,7 +34,7 @@ function App(): React.JSX.Element {
   const [showApiKeyManager, setShowApiKeyManager] = useState(false)
   const [currentTheme, setCurrentTheme] = useState('dragon')
   const [colorMode, setColorMode] = useState<'dark' | 'light'>('dark')
-  const [agentMode, setAgentMode] = useState(true) // 🔧 TOOL MODE ENABLED by default
+  const [agentMode, setAgentMode] = useState(true) // 🔧 TOOL MODE - User controls via header button
 
   // 🔧 Initialize Tool Registry
   const toolRegistry = getToolRegistry()
@@ -113,11 +113,11 @@ function App(): React.JSX.Element {
         const models = await ollamaService.listModels()
 
         if (models.length === 0) {
-          console.warn('[App] ⚠️ No models installed - run: ollama pull qwen2.5:0.5b')
+          console.warn('[App] ⚠️ No models installed - run: ollama pull qwen2.5-coder:7b')
           return
         }
 
-        const modelToPreload = models.find((m) => m.name === 'qwen2.5:0.5b') || models[0]
+        const modelToPreload = models.find((m) => m.name === 'qwen2.5-coder:7b') || models[0]
         console.log(`[App] 🚀 Preloading model: ${modelToPreload.name}`)
 
         await ollamaService.preloadModel(modelToPreload.name)
@@ -353,11 +353,11 @@ function App(): React.JSX.Element {
         // Mevcut modelleri listele
         const models = await ollamaService.listModels()
         if (models.length === 0) {
-          throw new Error('No models available. Please run: ollama pull qwen2.5:0.5b')
+          throw new Error('No models available. Please run: ollama pull qwen2.5-coder:7b')
         }
 
-        // Varsayılan model: qwen2.5:0.5b (400MB, ultra-fast, Tool Calling ✅)
-        const DEFAULT_MODEL = 'qwen2.5:0.5b'
+        // Varsayılan model: qwen2.5-coder:7b (7GB, powerful, Tool Calling ✅)
+        const DEFAULT_MODEL = 'qwen2.5-coder:7b'
         const selectedModel = models.find((m) => m.name === DEFAULT_MODEL)?.name || models[0].name
 
         console.log('[App] Using model:', selectedModel)

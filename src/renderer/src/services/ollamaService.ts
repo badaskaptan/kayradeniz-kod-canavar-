@@ -296,8 +296,9 @@ export class OllamaService {
           throw new Error(
             `❌ GPU Belleği Yetersiz!\n\n` +
               `Model GPU RAM'inize sığmıyor. Daha küçük bir model kullanın:\n\n` +
-              `• qwen2.5:0.5b (400MB) - Önerilen ✅ (Tool Calling destekli)\n` +
-              `• gemma2:2b (1.6GB) - Daha güçlü (Tool Calling YOK)\n\n` +
+              `• qwen2.5:0.5b (400MB) - Çok hızlı (Tool Calling YOK)\n` +
+              `• gemma2:2b (1.6GB) - Orta (Tool Calling YOK)\n` +
+              `• qwen2.5-coder:7b (7GB) - Güçlü (Tool Calling VAR) ✅\n\n` +
               `Terminal'de çalıştırın:\n` +
               `ollama pull qwen2.5:0.5b\n\n` +
               `Sonra Settings'ten yeni modeli seçin.`
