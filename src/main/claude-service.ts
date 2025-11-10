@@ -42,6 +42,7 @@ export class ClaudeMCPService {
   private activityLogger: MCPActivityLogger
   private currentActivityId: string | null = null
   private activityObserver: ActivityObserver
+  private currentObservationId?: string // Dual-teacher observation tracking
   private shipsLogbook: ShipsLogbook
   private intelligenceFleet: IntelligenceFleet
 
@@ -75,20 +76,16 @@ export class ClaudeMCPService {
     this.shipsLogbook.initialize()
 
     // Activity Observer'ı initialize et
-    this.activityObserver = new ActivityObserver({
-      enabled: true,
-      maxQueueSize: 100,
-      flushInterval: 5000
-    })
+    this.activityObserver = new ActivityObserver(
+      {
+        enabled: true,
+        maxQueueSize: 100,
+        flushInterval: 5000
+      },
+      this.shipsLogbook
+    )
 
-    // Connect ActivityObserver to ShipsLogbook
-    this.activityObserver.onComplete((observation) => {
-      try {
-        this.shipsLogbook.saveObservation(observation)
-      } catch (error) {
-        console.error('📚 Error saving observation to logbook:', error)
-      }
-    })
+    // ActivityObserver will persist observations directly to ShipsLogbook (if available)
 
     // Initialize Intelligence Fleet (Phase 1.3)
     this.intelligenceFleet = new IntelligenceFleet(this.shipsLogbook, {
@@ -967,6 +964,14 @@ export class ClaudeMCPService {
           args: params,
           timestamp: Date.now()
         })
+
+        // 💭 Emit thinking step for VS Code Copilot-style workflow
+        mainWindow.webContents.send('claude:thinkingStep', {
+          type: 'tool_execution',
+          tool: toolName,
+          description: this.getToolDescription(toolName, params),
+          status: 'running'
+        })
       }
 
       switch (toolName) {
@@ -1011,7 +1016,29 @@ export class ClaudeMCPService {
       return result
     } finally {
       const executionTime = Date.now() - startTime
-      this.activityObserver.recordToolCall(toolName, params, result, success, executionTime)
+      
+      // 💭 Emit thinking step completion
+      if (mainWindow) {
+        mainWindow.webContents.send('claude:thinkingStep', {
+          type: 'tool_execution',
+          tool: toolName,
+          description: this.getToolDescription(toolName, params),
+          status: success ? 'completed' : 'error',
+          executionTime
+        })
+      }
+      
+      // Pass currentObservationId to recordToolCall
+      if (this.currentObservationId) {
+        this.activityObserver.recordToolCall(
+          this.currentObservationId,
+          toolName,
+          params,
+          result,
+          success,
+          executionTime
+        )
+      }
     }
   }
 
@@ -1101,11 +1128,27 @@ CORRECT: [read_file] → [find_bugs] → [write_file] → "✅ Hatalar düzeltil
 
 🎯 GOLDEN RULE: If you know what to do, DO IT. Don't describe it and wait!`
 
-      systemMessage += `\n\n📺 TERMINAL VISIBILITY:
-When you use 'run_terminal_command' tool, the command and its output will be AUTOMATICALLY displayed in the user's Terminal panel.
-You don't need to repeat the command or output in your response - user can see it in the terminal.
-Just mention what you're doing briefly, like: "Running npm install..." or "Starting the dev server..."
-The terminal will show the full command and output.`
+      systemMessage += `\n\n� COMMUNICATION RULES (CRITICAL):
+1. ✅ ALWAYS explain what you're doing when using tools
+2. ✅ ALWAYS provide a summary after completing file operations
+3. ✅ ALWAYS confirm changes with a brief message
+4. ❌ NEVER stay silent after using tools - USER NEEDS FEEDBACK!
+
+Examples of GOOD responses:
+- "✅ SnakeGame.java dosyasına settings menüsü ekledim. Artık Game menüsünden ayarlara erişebilirsin!"
+- "📖 Kodu okudum ve 3 hata buldum. Düzeltiyorum..." → [fixes] → "✅ Tüm hatalar düzeltildi!"
+- "📁 3 dosya oluşturdum: index.html, style.css, game.js. Oyun hazır!"
+
+Examples of BAD responses (DO NOT DO THIS):
+- [uses tool] → (silence) → ❌ USER CONFUSED!
+- [uses tool] → [uses another tool] → (silence) → ❌ NO FEEDBACK!
+
+🎯 GOLDEN RULE: ALWAYS talk to the user after using tools. Explain what changed!
+
+📺 TERMINAL COMMANDS (SPECIAL CASE):
+When you use 'run_terminal_command' tool, the output is shown in Terminal panel.
+You still need to briefly explain: "⚡ npm install çalıştırıyorum..." or "✅ Build tamamlandı!"
+But you DON'T need to repeat the full terminal output in your response.`
 
       // 🎭 Profil kontrolü - HER ZAMAN profil bilgisini gönder
       if (this.profileInitialized && this.currentUserProfile) {
@@ -1136,8 +1179,12 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
         context ? JSON.stringify(context) : undefined
       )
 
-      // 📡 Start Activity Observation
-      this.activityObserver.startObservation(message, context)
+      // 📡 Start Activity Observation (CLAUDE teacher)
+      this.currentObservationId = this.activityObserver.startObservation(
+        'CLAUDE', // Teacher signature
+        message,
+        context
+      )
 
       this.conversationHistory.push({
         role: 'user',
@@ -1183,8 +1230,11 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
 
           if (mainWindow) {
             mainWindow.webContents.send('claude:toolUsed', {
+              tool: toolUse.name, // 🎓 Fixed: Use 'tool' field for consistency
               name: toolUse.name,
-              id: toolUse.id
+              id: toolUse.id,
+              args: {}, // Will be populated when input arrives
+              timestamp: Date.now()
             })
           }
         }
@@ -1407,7 +1457,14 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
       }
 
       // 📡 Complete Activity Observation (success)
-      this.activityObserver.completeObservation(responseToSend || finalResponse, true)
+      if (this.currentObservationId) {
+        this.activityObserver.completeObservation(
+          this.currentObservationId,
+          responseToSend || finalResponse,
+          true
+        )
+        this.currentObservationId = undefined
+      }
 
       return {
         success: true,
@@ -1430,7 +1487,14 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
       }
 
       // 📡 Complete Activity Observation (failure)
-      this.activityObserver.completeObservation(error.message || 'Error occurred', false)
+      if (this.currentObservationId) {
+        this.activityObserver.completeObservation(
+          this.currentObservationId,
+          error.message || 'Error occurred',
+          false
+        )
+        this.currentObservationId = undefined
+      }
 
       // Son user mesajını history'den çıkar (hata durumunda)
       if (
@@ -1550,7 +1614,12 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
   }
 
   // 📡 Activity Observer API
-  getObserverStats(): { queueSize: number; currentObservationId: string | null; enabled: boolean } {
+  getObserverStats(): {
+    queueSize: number
+    activeObservations: number
+    observationsByTeacher: { CLAUDE: number; OPENAI: number }
+    enabled: boolean
+  } {
     return this.activityObserver.getStats()
   }
 
@@ -1611,5 +1680,31 @@ ALWAYS address the user as "${profile.user.name}" and maintain your "${profile.a
     maxTokens?: number
   }): void {
     this.intelligenceFleet.updateConfig(config)
+  }
+
+  // 💭 VS Code Copilot-style tool descriptions
+  private getToolDescription(toolName: string, params: any): string {
+    switch (toolName) {
+      case 'read_file':
+        return `📖 Reading \`${params.file_path}\``
+      case 'list_directory':
+        return `📂 Listing directory \`${params.dir_path || '.'}\``
+      case 'write_file':
+        return `✍️ Writing to \`${params.file_path}\``
+      case 'create_directory':
+        return `📁 Creating directory \`${params.dir_path}\``
+      case 'delete_file':
+        return `🗑️ Deleting \`${params.file_path}\``
+      case 'move_file':
+        return `📦 Moving \`${params.source_path}\` → \`${params.destination_path}\``
+      case 'run_terminal_command':
+        return `⚡ Running: \`${params.command} ${(params.args || []).join(' ')}\``
+      case 'search_files':
+        return `🔍 Searching for \`${params.pattern}\``
+      case 'get_file_tree':
+        return `🌳 Generating file tree (depth: ${params.max_depth || 3})`
+      default:
+        return `🔧 Executing \`${toolName}\``
+    }
   }
 }

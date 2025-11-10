@@ -104,6 +104,8 @@ export class ShipsLogbook {
       CREATE TABLE IF NOT EXISTS observations (
         id TEXT PRIMARY KEY,
         timestamp INTEGER NOT NULL,
+        teacher TEXT NOT NULL, -- 'CLAUDE' | 'OPENAI'
+        teacher_style TEXT NOT NULL, -- 'SAFE_METHODICAL' | 'FAST_EFFICIENT'
         user_message TEXT NOT NULL,
         claude_response TEXT NOT NULL,
         tools_used TEXT NOT NULL, -- JSON array of tool calls
@@ -206,6 +208,7 @@ export class ShipsLogbook {
     // Create indexes for better query performance
     this.db.exec(`
       CREATE INDEX IF NOT EXISTS idx_observations_timestamp ON observations(timestamp);
+      CREATE INDEX IF NOT EXISTS idx_observations_teacher ON observations(teacher);
       CREATE INDEX IF NOT EXISTS idx_observations_success ON observations(success);
       CREATE INDEX IF NOT EXISTS idx_patterns_category ON patterns(category);
       CREATE INDEX IF NOT EXISTS idx_patterns_usage ON patterns(usage_count DESC);
@@ -227,26 +230,42 @@ export class ShipsLogbook {
    * Save an observation to the database
    */
   saveObservation(observation: Observation): void {
-    const stmt = this.db.prepare(`
-      INSERT INTO observations (
-        id, timestamp, user_message, claude_response, tools_used,
-        context, total_execution_time, success, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `)
+    try {
+      const stmt = this.db.prepare(`
+        INSERT INTO observations (
+          id, timestamp, teacher, teacher_style, user_message, claude_response, tools_used,
+          context, total_execution_time, success, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `)
 
-    stmt.run(
-      observation.id,
-      observation.timestamp,
-      observation.userMessage,
-      observation.claudeResponse,
-      JSON.stringify(observation.toolCalls),
-      observation.context || null,
-      observation.totalExecutionTime,
-      observation.success ? 1 : 0,
-      Date.now()
-    )
+      stmt.run(
+        observation.id,
+        observation.timestamp,
+        observation.teacher,
+        observation.teacherStyle || 'SAFE_METHODICAL', // Default if missing
+        observation.userMessage || '',
+        observation.claudeResponse || '',
+        JSON.stringify(observation.toolCalls || []),
+        observation.context || null,
+        observation.totalExecutionTime || 0,
+        observation.success ? 1 : 0,
+        Date.now()
+      )
 
-    console.log(`📚 Observation saved: ${observation.id.substring(0, 8)}`)
+      console.log(
+        `📚 Observation saved [${observation.teacher}]: ${observation.id.substring(0, 8)}`
+      )
+    } catch (err) {
+      console.error('📚 Failed to save observation:', err)
+      console.error('Observation data:', {
+        id: observation.id,
+        teacher: observation.teacher,
+        teacherStyle: observation.teacherStyle,
+        hasUserMessage: !!observation.userMessage,
+        hasResponse: !!observation.claudeResponse,
+        toolCount: observation.toolCalls?.length || 0
+      })
+    }
   }
 
   /**
@@ -289,10 +308,46 @@ export class ShipsLogbook {
     return rows.map(this.rowToObservation)
   }
 
+  /**
+   * Get observations by teacher (CLAUDE or OPENAI)
+   */
+  getObservationsByTeacher(teacher: 'CLAUDE' | 'OPENAI', limit = 50): Observation[] {
+    const stmt = this.db.prepare(`
+      SELECT * FROM observations
+      WHERE teacher = ?
+      ORDER BY timestamp DESC
+      LIMIT ?
+    `)
+
+    const rows = stmt.all(teacher, limit) as any[]
+    return rows.map(this.rowToObservation)
+  }
+
+  /**
+   * Get observations by teacher and success status
+   */
+  getObservationsByTeacherAndSuccess(
+    teacher: 'CLAUDE' | 'OPENAI',
+    success: boolean,
+    limit = 50
+  ): Observation[] {
+    const stmt = this.db.prepare(`
+      SELECT * FROM observations
+      WHERE teacher = ? AND success = ?
+      ORDER BY timestamp DESC
+      LIMIT ?
+    `)
+
+    const rows = stmt.all(teacher, success ? 1 : 0, limit) as any[]
+    return rows.map(this.rowToObservation)
+  }
+
   private rowToObservation(row: any): Observation {
     return {
       id: row.id,
       timestamp: row.timestamp,
+      teacher: row.teacher as 'CLAUDE' | 'OPENAI',
+      teacherStyle: row.teacher_style as 'SAFE_METHODICAL' | 'FAST_EFFICIENT',
       userMessage: row.user_message,
       claudeResponse: row.claude_response,
       toolCalls: JSON.parse(row.tools_used),

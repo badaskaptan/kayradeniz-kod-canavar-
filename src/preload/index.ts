@@ -52,6 +52,21 @@ const api: ToolBridgeAPI = {
   // Shell APIs
   shell: {
     openUrl: (url: string) => ipcRenderer.invoke('shell:openUrl', url)
+  },
+
+  // Night Orders APIs (Phase 2 - Hybrid Autonomous System)
+  nightOrders: {
+    issueFromNaturalLanguage: (userRequest: string) =>
+      ipcRenderer.invoke('nightOrders:issueFromNaturalLanguage', userRequest),
+    getCurrentOrder: () => ipcRenderer.invoke('nightOrders:getCurrentOrder'),
+    getNextPendingTask: () => ipcRenderer.invoke('nightOrders:getNextPendingTask'),
+    executeNextTask: () => ipcRenderer.invoke('nightOrders:executeNextTask'),
+    getStatistics: () => ipcRenderer.invoke('nightOrders:getStatistics'),
+    completeOrder: (success: boolean) => ipcRenderer.invoke('nightOrders:completeOrder', success),
+    updateConfig: (config: unknown) => ipcRenderer.invoke('nightOrders:updateConfig', config),
+    getConfig: () => ipcRenderer.invoke('nightOrders:getConfig'),
+    startAutonomous: () => ipcRenderer.invoke('nightOrders:startAutonomous'),
+    stopAutonomous: () => ipcRenderer.invoke('nightOrders:stopAutonomous')
   }
 }
 

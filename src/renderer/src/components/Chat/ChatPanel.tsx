@@ -12,7 +12,7 @@ interface ChatPanelProps {
 export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element {
   const { getActiveConversation, isLoading, loadingMessage } = useChatStore()
   const [input, setInput] = useState('')
-  const [mcpServer, setMcpServer] = useState<'claude' | 'local' | 'ollama'>('claude')
+  const [mcpServer, setMcpServer] = useState<'claude' | 'openai' | 'local' | 'ollama'>('claude')
   const [hasApiKey, setHasApiKey] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -27,6 +27,10 @@ export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element 
       if (mcpServer === 'claude') {
         const hasKey = await window.claudeAPI?.hasApiKey()
         setHasApiKey(hasKey || false)
+      } else if (mcpServer === 'openai') {
+        // Check localStorage for OpenAI key
+        const openaiKey = localStorage.getItem('openai-api-key')
+        setHasApiKey(!!openaiKey && openaiKey.trim().length > 0)
       } else {
         setHasApiKey(true) // Local MCP and Ollama don't need API key
       }
@@ -55,9 +59,11 @@ export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element 
       const messageWithServer =
         mcpServer === 'ollama'
           ? `[OLLAMA] ${input}`
-          : mcpServer === 'local'
-            ? `[LOCAL-MCP] ${input}`
-            : input
+          : mcpServer === 'openai'
+            ? `[OPENAI] ${input}`
+            : mcpServer === 'local'
+              ? `[LOCAL-MCP] ${input}`
+              : input
 
       onSendMessage(messageWithServer)
       setInput('')
@@ -131,7 +137,16 @@ export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element 
             title="Claude API"
           >
             <i className="fas fa-cloud"></i>
-            <span>Claude MCP</span>
+            <span>Claude</span>
+          </button>
+          <button
+            type="button"
+            className={`mcp-server-btn ${mcpServer === 'openai' ? 'active' : ''}`}
+            onClick={() => setMcpServer('openai')}
+            title="OpenAI GPT (Cloud)"
+          >
+            <i className="fas fa-brain"></i>
+            <span>OpenAI</span>
           </button>
           <button
             type="button"
@@ -150,6 +165,12 @@ export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element 
             <span>Claude API key gerekli. Lütfen Settings&apos;ten API key ekleyin.</span>
           </div>
         )}
+        {mcpServer === 'openai' && !hasApiKey && (
+          <div className="chat-warning">
+            <AlertCircle className="w-4 h-4" />
+            <span>OpenAI API key gerekli. Lütfen Settings&apos;ten API key ekleyin.</span>
+          </div>
+        )}
         <div className="chat-input-wrapper">
           <textarea
             value={input}
@@ -165,15 +186,27 @@ export function ChatPanel({ onSendMessage }: ChatPanelProps): React.JSX.Element 
                 ? hasApiKey
                   ? "Claude AI'ya bir soru sorun..."
                   : 'Claude API key ekleyin...'
-                : "Local MCP Server'a bir soru sorun..."
+                : mcpServer === 'openai'
+                  ? hasApiKey
+                    ? "OpenAI GPT'ye bir soru sorun..."
+                    : 'OpenAI API key ekleyin...'
+                  : mcpServer === 'ollama'
+                    ? "Ollama (Yerel AI)'ya bir soru sorun..."
+                    : "Local MCP Server'a bir soru sorun..."
             }
-            disabled={mcpServer === 'claude' && !hasApiKey}
+            disabled={(mcpServer === 'claude' || mcpServer === 'openai') && !hasApiKey}
             rows={2}
           />
           <button
             type="submit"
             disabled={isButtonDisabled}
-            title={mcpServer === 'claude' && !hasApiKey ? 'Claude API key gerekli' : 'Mesaj gönder'}
+            title={
+              mcpServer === 'claude' && !hasApiKey
+                ? 'Claude API key gerekli'
+                : mcpServer === 'openai' && !hasApiKey
+                  ? 'OpenAI API key gerekli'
+                  : 'Mesaj gönder'
+            }
             className="send-btn"
           >
             <Send className="w-4 h-4" />

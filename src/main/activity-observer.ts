@@ -1,39 +1,44 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// 📡 Activity Observer - Ship's Radar System
-// Phase 1.1: Non-blocking observation of Claude's tool executions
+// 📡 Activity Observer - Ship's Dual Radar System
+// Phase 1.1: Non-blocking observation of BOTH Claude AND OpenAI executions
 
 import { randomUUID } from 'crypto'
 import type { Observation, ObserverConfig, ObserverEvent, ToolCall } from '../types/observation'
+import { ShipsLogbook } from '../shared/ships-logbook'
 
 /**
- * ActivityObserver watches Claude's tool executions without interfering.
+ * ActivityObserver watches BOTH teachers' (Claude + OpenAI) tool executions.
  *
- * Philosophy (from Master Plan):
- * "Install radar to observe Claude without interference - the foreign rival ship
- * must never know we're watching. We study his routes, techniques, and patterns
- * to learn and eventually surpass him."
+ * Philosophy (from Master Plan - Dual Teacher Edition):
+ * "Install dual radar to observe BOTH Captain Claude AND Captain GPT without interference.
+ * We study both teaching styles - Claude's careful, methodical approach and GPT's fast,
+ * efficient strategies. Ollama will learn the BEST of both worlds!"
  *
  * Key Requirements:
- * - NON-BLOCKING: Observation must never slow down Claude
+ * - NON-BLOCKING: Observation must never slow down either teacher
  * - ASYNC: All processing happens in background
- * - NO INTERFERENCE: Claude sees no difference
+ * - NO INTERFERENCE: Neither teacher knows we're watching
+ * - TEACHER TAGGING: Tag each observation with teacher signature (CLAUDE/GPT)
  */
 export class ActivityObserver {
-  private currentObservation: Observation | null = null
+  private currentObservations: Map<string, Observation> = new Map() // Support multiple concurrent observations
   private eventQueue: ObserverEvent[] = []
   private config: ObserverConfig
   private flushTimer: NodeJS.Timeout | null = null
 
   // Callbacks for Intelligence Fleet processing
   private onObservationComplete?: (observation: Observation) => void
+  private shipsLogbook?: ShipsLogbook
 
-  constructor(config?: Partial<ObserverConfig>) {
+  constructor(config?: Partial<ObserverConfig>, shipsLogbook?: ShipsLogbook) {
     this.config = {
       enabled: true,
       maxQueueSize: 100,
       flushInterval: 5000, // 5 seconds
       ...config
     }
+
+    this.shipsLogbook = shipsLogbook
 
     // Start periodic flush timer
     this.startFlushTimer()
@@ -43,42 +48,54 @@ export class ActivityObserver {
 
   /**
    * Start observing a new user request
-   * Called at the beginning of claude-service.sendMessage()
+   * Called at the beginning of AI service (Claude/OpenAI)
+   *
+   * @param teacher - Which teacher is being observed ('CLAUDE' | 'OPENAI')
+   * @param userMessage - The user's request
+   * @param context - Optional workspace context
    */
-  startObservation(userMessage: string, context?: string): string {
+  startObservation(teacher: 'CLAUDE' | 'OPENAI', userMessage: string, context?: string): string {
     if (!this.config.enabled) return ''
 
     const observationId = randomUUID()
 
-    this.currentObservation = {
+    const observation: Observation = {
       id: observationId,
       timestamp: Date.now(),
+      teacher, // NEW: Tag with teacher signature
+      teacherStyle: teacher === 'CLAUDE' ? 'SAFE_METHODICAL' : 'FAST_EFFICIENT', // NEW: Style tag
       userMessage,
-      claudeResponse: '',
+      claudeResponse: '', // Will be updated to 'aiResponse'
       toolCalls: [],
       context,
       totalExecutionTime: 0,
       success: false
     }
 
-    console.log(`📡 Observation started: ${observationId.substring(0, 8)}`)
+    this.currentObservations.set(observationId, observation)
+
+    console.log(`📡 Observation started [${teacher}]: ${observationId.substring(0, 8)}`)
     return observationId
   }
 
   /**
    * Record a tool call execution
-   * Called after each tool execution in executeToolInternal()
+   * Called after each tool execution
    *
    * CRITICAL: This must be ASYNC and non-blocking!
    */
   recordToolCall(
+    observationId: string,
     toolName: string,
     input: any,
     result: string,
     success: boolean,
     executionTime: number
   ): void {
-    if (!this.config.enabled || !this.currentObservation) return
+    if (!this.config.enabled) return
+
+    const observation = this.currentObservations.get(observationId)
+    if (!observation) return
 
     const toolCall: ToolCall = {
       id: randomUUID(),
@@ -91,44 +108,61 @@ export class ActivityObserver {
     }
 
     // Add to current observation
-    this.currentObservation.toolCalls.push(toolCall)
+    observation.toolCalls.push(toolCall)
 
     // Queue event for async processing (non-blocking)
     this.queueEvent({
       type: 'tool_call',
-      data: toolCall,
+      data: { ...toolCall, teacher: observation.teacher }, // Include teacher tag
       timestamp: Date.now()
     })
 
-    console.log(`📡 Tool recorded: ${toolName} (${executionTime}ms, success: ${success})`)
+    console.log(
+      `📡 Tool recorded [${observation.teacher}]: ${toolName} (${executionTime}ms, ` +
+        `success: ${success})`
+    )
   }
 
   /**
    * Complete the current observation
-   * Called at the end of claude-service.sendMessage()
+   * Called at the end of AI service execution
    */
-  completeObservation(claudeResponse: string, success: boolean): void {
-    if (!this.config.enabled || !this.currentObservation) return
+  completeObservation(observationId: string, aiResponse: string, success: boolean): void {
+    if (!this.config.enabled) return
+
+    const observation = this.currentObservations.get(observationId)
+    if (!observation) return
 
     const endTime = Date.now()
-    this.currentObservation.claudeResponse = claudeResponse
-    this.currentObservation.success = success
-    this.currentObservation.totalExecutionTime = endTime - this.currentObservation.timestamp
+    observation.claudeResponse = aiResponse // TODO: Rename to 'aiResponse' in types
+    observation.success = success
+    observation.totalExecutionTime = endTime - observation.timestamp
 
     // Queue observation for Intelligence Fleet processing (async)
     this.queueEvent({
       type: 'observation_complete',
-      data: { ...this.currentObservation }, // Clone to avoid mutation
+      data: { ...observation }, // Clone to avoid mutation
       timestamp: endTime
     })
 
     console.log(
-      `📡 Observation complete: ${this.currentObservation.id.substring(0, 8)} ` +
-        `(${this.currentObservation.toolCalls.length} tools, ${this.currentObservation.totalExecutionTime}ms)`
+      `📡 Observation complete [${observation.teacher}]: ` +
+        `${observation.id.substring(0, 8)} ` +
+        `(${observation.toolCalls.length} tools, ${observation.totalExecutionTime}ms)`
     )
 
-    // Reset current observation
-    this.currentObservation = null
+    // Persist observation to Ship's Logbook if available (non-blocking)
+    if (this.shipsLogbook) {
+      try {
+        // saveObservation is synchronous (better-sqlite3) in current implementation
+        this.shipsLogbook.saveObservation(observation)
+        console.log(`📚 Observation persisted to Ship's Logbook: ${observation.id.substring(0, 8)}`)
+      } catch (err) {
+        console.error('📚 Failed to persist observation:', err)
+      }
+    }
+    // Remove from current observations
+    this.currentObservations.delete(observationId)
   }
 
   /**
@@ -208,12 +242,20 @@ export class ActivityObserver {
    */
   getStats(): {
     queueSize: number
-    currentObservationId: string | null
+    activeObservations: number
+    observationsByTeacher: { CLAUDE: number; OPENAI: number }
     enabled: boolean
   } {
+    const byTeacher = { CLAUDE: 0, OPENAI: 0 }
+
+    for (const obs of this.currentObservations.values()) {
+      byTeacher[obs.teacher]++
+    }
+
     return {
       queueSize: this.eventQueue.length,
-      currentObservationId: this.currentObservation?.id || null,
+      activeObservations: this.currentObservations.size,
+      observationsByTeacher: byTeacher,
       enabled: this.config.enabled
     }
   }

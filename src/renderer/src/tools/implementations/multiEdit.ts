@@ -237,13 +237,30 @@ WARNINGS:
       properties: {
         filepath: {
           type: 'string',
-          description: 'The path to the file to modify, relative to the workspace root',
-          required: true
+          description: 'The path to the file to modify, relative to the workspace root'
         },
         edits: {
           type: 'array',
           description: 'Array of edit operations to perform sequentially on the file',
-          required: true
+          items: {
+            type: 'object',
+            properties: {
+              old_string: {
+                type: 'string',
+                description: 'The exact string to find and replace'
+              },
+              new_string: {
+                type: 'string',
+                description: 'The replacement string'
+              },
+              replace_all: {
+                type: 'boolean',
+                description:
+                  'If true, replace all occurrences. Default is false (replace first only)'
+              }
+            },
+            required: ['old_string', 'new_string']
+          }
         }
       }
     }

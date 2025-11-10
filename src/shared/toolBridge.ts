@@ -131,6 +131,26 @@ export interface ToolBridgeAPI {
     openDirectory(options?: OpenDirectoryDialogOptions): Promise<ToolBridgeResult<string | null>>
     saveFile(options?: SaveFileDialogOptions): Promise<ToolBridgeResult<string | null>>
   }
+  nightOrders: {
+    issueFromNaturalLanguage: (
+      userRequest: string
+    ) => Promise<{ success: boolean; order?: any; error?: string }>
+    getCurrentOrder: () => Promise<{ success: boolean; order?: any; error?: string }>
+    getNextPendingTask: () => Promise<{ success: boolean; task?: any; error?: string }>
+    executeNextTask: () => Promise<{
+      success: boolean
+      task?: any
+      context?: any
+      error?: string
+      needsReview?: boolean
+    }>
+    getStatistics: () => Promise<{ success: boolean; stats?: any; error?: string }>
+    completeOrder: (success: boolean) => Promise<{ success: boolean; error?: string }>
+    updateConfig: (config: any) => Promise<{ success: boolean; error?: string }>
+    getConfig: () => Promise<{ success: boolean; config?: any; error?: string }>
+    startAutonomous: () => Promise<{ success: boolean; error?: string }>
+    stopAutonomous: () => Promise<{ success: boolean; error?: string }>
+  }
 }
 
 export interface FileDialogFilter {

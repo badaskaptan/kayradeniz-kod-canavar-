@@ -32,7 +32,7 @@ function resolveDirPath(dirPath?: string): string {
  * Implementation
  */
 export const lsImpl: ToolImpl = async (args, extras) => {
-  const dirPath = resolveDirPath(getStringArg(args, 'dirPath', true))
+  const dirPath = resolveDirPath(getStringArg(args, 'dirPath', false)) // Optional: defaults to "."
   const recursive = getBooleanArg(args, 'recursive', false) ?? false
 
   try {

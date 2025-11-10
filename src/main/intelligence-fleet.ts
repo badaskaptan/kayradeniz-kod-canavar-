@@ -54,19 +54,58 @@ export class IntelligenceFleet {
   private ollamaConfig: OllamaConfig
   private processingQueue: Observation[] = []
   private isProcessing = false
+  private ollamaAvailable = false // Track if Ollama is accessible
 
   constructor(logbook: ShipsLogbook, ollamaConfig?: Partial<OllamaConfig>) {
     this.logbook = logbook
     this.ollamaConfig = {
       baseUrl: ollamaConfig?.baseUrl || 'http://localhost:11434',
-      model: ollamaConfig?.model || 'qwen2.5-coder:7b',
+      model: ollamaConfig?.model || '', // Empty string = no model selected
       temperature: ollamaConfig?.temperature || 0.3,
       maxTokens: ollamaConfig?.maxTokens || 1000
     }
 
     console.log('🧠 Intelligence Fleet initialized')
     console.log(`   Ollama: ${this.ollamaConfig.baseUrl}`)
-    console.log(`   Model: ${this.ollamaConfig.model}`)
+
+    if (this.ollamaConfig.model) {
+      console.log(`   Model: ${this.ollamaConfig.model}`)
+      // Check Ollama availability in background
+      this.checkOllamaAvailability()
+    } else {
+      console.log('   Model: Not configured (pattern extraction disabled)')
+      console.log('   💡 Tip: Configure Ollama model in Settings to enable pattern learning')
+    }
+  }
+
+  /**
+   * Check if Ollama is accessible and model is available
+   */
+  private async checkOllamaAvailability(): Promise<void> {
+    try {
+      const response = await fetch(`${this.ollamaConfig.baseUrl}/api/tags`, {
+        method: 'GET'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        const models = data.models || []
+        const modelExists = models.some((m: any) => m.name === this.ollamaConfig.model)
+
+        if (modelExists) {
+          this.ollamaAvailable = true
+          console.log('   ✅ Ollama model available')
+        } else {
+          console.log(`   ⚠️  Model '${this.ollamaConfig.model}' not found in Ollama`)
+          console.log(`   💡 Available models: ${models.map((m: any) => m.name).join(', ')}`)
+        }
+      } else {
+        console.log('   ⚠️  Ollama service not accessible')
+      }
+    } catch {
+      console.log('   ⚠️  Ollama not running or not accessible')
+      console.log('   💡 Pattern extraction will be disabled until Ollama is configured')
+    }
   }
 
   /**
@@ -128,6 +167,11 @@ export class IntelligenceFleet {
    */
   private async analyzeObservation(observation: Observation): Promise<FleetAnalysis> {
     const startTime = Date.now()
+
+    // If Ollama is not available, do basic pattern extraction without AI
+    if (!this.ollamaAvailable) {
+      return this.basicPatternExtraction(observation)
+    }
 
     // Extract patterns from tool sequence
     const patterns = await this.extractPatterns(observation)
@@ -310,7 +354,7 @@ Analysis:`
    */
   private async createTeachingMoments(
     observation: Observation,
-    _reflexions: Reflexion[]
+    reflexions: Reflexion[] // Reserved for future use
   ): Promise<TeachingMoment[]> {
     // Only create teaching moments for successful, multi-tool observations
     if (!observation.success || observation.toolCalls.length < 2) {
@@ -418,9 +462,47 @@ Teaching:`
   }
 
   /**
+   * Basic pattern extraction without AI (fallback when Ollama unavailable)
+   */
+  private basicPatternExtraction(observation: Observation): FleetAnalysis {
+    const patterns: Pattern[] = []
+
+    // Simple pattern: tool sequence
+    if (observation.toolCalls.length > 0) {
+      const toolSequence = observation.toolCalls.map((t) => t.name)
+      const sequenceStr = toolSequence.join(' → ')
+
+      patterns.push({
+        id: randomUUID(),
+        name: `Basic: ${sequenceStr}`,
+        toolSequence: JSON.stringify(toolSequence), // Must be JSON string
+        successRate: observation.success ? 1.0 : 0.0,
+        usageCount: 1,
+        avgExecutionTime: observation.totalExecutionTime,
+        category: 'basic',
+        createdAt: Date.now(),
+        lastUsedAt: Date.now()
+      })
+    }
+
+    return {
+      observationId: observation.id,
+      patterns,
+      reflexions: [], // No AI analysis without Ollama
+      teachingMoments: [],
+      knowledgeEntries: [],
+      timestamp: Date.now()
+    }
+  }
+
+  /**
    * Call Ollama for LLM inference
    */
   private async callOllama(prompt: string, maxTokens: number): Promise<string> {
+    if (!this.ollamaAvailable) {
+      throw new Error('Ollama is not available')
+    }
+
     const response = await fetch(`${this.ollamaConfig.baseUrl}/api/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -444,25 +526,37 @@ Teaching:`
   }
 
   /**
+   * Update Ollama configuration (can be called from Settings)
+   */
+  updateConfig(config: Partial<OllamaConfig>): void {
+    if (config.baseUrl) this.ollamaConfig.baseUrl = config.baseUrl
+    if (config.model) this.ollamaConfig.model = config.model
+    if (config.temperature !== undefined) this.ollamaConfig.temperature = config.temperature
+    if (config.maxTokens) this.ollamaConfig.maxTokens = config.maxTokens
+
+    console.log('🧠 Intelligence Fleet config updated')
+    console.log(`   Model: ${this.ollamaConfig.model}`)
+
+    // Re-check availability
+    if (this.ollamaConfig.model) {
+      this.checkOllamaAvailability()
+    }
+  }
+
+  /**
    * Get current processing stats
    */
   getStats(): {
     queueSize: number
     isProcessing: boolean
     modelConfig: OllamaConfig
+    ollamaAvailable: boolean
   } {
     return {
       queueSize: this.processingQueue.length,
       isProcessing: this.isProcessing,
-      modelConfig: { ...this.ollamaConfig }
+      modelConfig: { ...this.ollamaConfig },
+      ollamaAvailable: this.ollamaAvailable
     }
-  }
-
-  /**
-   * Update Ollama configuration
-   */
-  updateConfig(config: Partial<OllamaConfig>): void {
-    this.ollamaConfig = { ...this.ollamaConfig, ...config }
-    console.log('🧠 Intelligence Fleet config updated:', this.ollamaConfig)
   }
 }

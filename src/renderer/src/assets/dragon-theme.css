@@ -295,6 +295,22 @@ body {
   color: var(--dragon-accent);
 }
 
+/* Night Orders Button */
+.night-orders-btn {
+  background: linear-gradient(135deg, var(--bg-tertiary), rgba(0, 100, 200, 0.2));
+  border: 1px solid rgba(0, 150, 255, 0.4);
+}
+
+.night-orders-btn:hover {
+  background: linear-gradient(135deg, var(--bg-hover), rgba(0, 150, 255, 0.3));
+  border-color: rgba(0, 150, 255, 0.6);
+  box-shadow: 0 0 15px rgba(0, 150, 255, 0.4);
+}
+
+.night-orders-btn .fa-moon {
+  color: #4da6ff;
+}
+
 /* ============================================
    MAIN LAYOUT
    ============================================ */

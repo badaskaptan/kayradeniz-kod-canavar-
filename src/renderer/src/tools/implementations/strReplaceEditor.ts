@@ -280,41 +280,34 @@ export const strReplaceEditorTool: Tool = {
         command: {
           type: 'string',
           enum: ['view', 'str_replace', 'create', 'insert'],
-          description: 'Command to execute: view, str_replace, create, or insert',
-          required: true
+          description: 'Command to execute: view, str_replace, create, or insert'
         },
         path: {
           type: 'string',
-          description: 'File or directory path (relative to workspace root)',
-          required: true
+          description: 'File or directory path (relative to workspace root)'
         },
         view_range: {
           type: 'array',
-          items: { type: 'number', description: 'Line number' },
+          items: { type: 'number' },
           description:
-            '[view only] Array of [start_line, end_line]. Lines are 1-indexed. Use -1 for end to read to EOF.',
-          required: false
+            '[view only] Array of [start_line, end_line]. Lines are 1-indexed. Use -1 for end to read to EOF.'
         },
         old_str: {
           type: 'string',
           description:
-            '[str_replace only] Exact string to replace (must match exactly once including whitespace)',
-          required: false
+            '[str_replace only] Exact string to replace (must match exactly once including whitespace)'
         },
         new_str: {
           type: 'string',
-          description: '[str_replace/insert only] New text to insert/replace with',
-          required: false
+          description: '[str_replace/insert only] New text to insert/replace with'
         },
         file_text: {
           type: 'string',
-          description: '[create only] Content for new file',
-          required: false
+          description: '[create only] Content for new file'
         },
         insert_line: {
           type: 'number',
-          description: '[insert only] Line number after which to insert (0 = beginning of file)',
-          required: false
+          description: '[insert only] Line number after which to insert (0 = beginning of file)'
         }
       }
     }

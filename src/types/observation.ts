@@ -17,12 +17,15 @@ export interface ToolCall {
 
 /**
  * User request observation with context
+ * UPDATED: Now supports dual-teacher observation (Claude + OpenAI)
  */
 export interface Observation {
   id: string // Unique observation ID (UUID)
   timestamp: number // Unix timestamp
+  teacher: 'CLAUDE' | 'OPENAI' // NEW: Which teacher executed this task
+  teacherStyle: 'SAFE_METHODICAL' | 'FAST_EFFICIENT' // NEW: Teaching style signature
   userMessage: string // Original user request
-  claudeResponse: string // Claude's final response
+  claudeResponse: string // AI's final response (TODO: rename to 'aiResponse')
   toolCalls: ToolCall[] // All tools executed during this request
   context?: string // Additional context (workspace path, selected code, etc.)
   totalExecutionTime: number // Total time from request to response

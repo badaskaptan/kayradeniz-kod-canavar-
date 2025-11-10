@@ -10,7 +10,13 @@ import './ipc'
 // Import Claude MCP Service
 import { ClaudeMCPService } from './claude-service'
 
+// Import Night Orders Command (Phase 2)
+import { NightOrdersCommand } from './night-orders-command'
+import { ShipsLogbook } from '../shared/ships-logbook'
+
 let claudeService: ClaudeMCPService
+let nightOrdersCommand: NightOrdersCommand
+let shipsLogbook: ShipsLogbook
 
 /**
  * Open URL - uses Microsoft Edge for localhost, default browser for others
@@ -194,6 +200,17 @@ function createApplicationMenu(mainWindow: BrowserWindow): void {
 }
 
 function createWindow(): void {
+  // Initialize Ship's Logbook and Night Orders Command (Phase 2)
+  const userDataPath = app.getPath('userData')
+  shipsLogbook = new ShipsLogbook(userDataPath)
+  nightOrdersCommand = new NightOrdersCommand(shipsLogbook, {
+    maxRetries: 3,
+    autoEscalate: true,
+    contextWindowSize: 5,
+    enableReflexion: true
+  })
+  console.log('🌙 Night Orders Command initialized in main process')
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 1400,
@@ -251,6 +268,9 @@ app.whenReady().then(() => {
 
   // Setup Claude IPC Handlers
   setupClaudeHandlers()
+
+  // Setup Night Orders IPC Handlers
+  setupNightOrdersHandlers()
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -373,4 +393,257 @@ function setupClaudeHandlers(): void {
   ipcMain.handle('claude:findMatchingPattern', async (_event, userRequest: string) => {
     return await claudeService.findMatchingPattern(userRequest)
   })
+
+  // 📡 Activity Observer IPC Handlers (Dual-Teacher Support)
+  ipcMain.handle(
+    'claude:startObservation',
+    async (
+      _event,
+      {
+        teacher,
+        message,
+        context
+      }: { teacher: 'CLAUDE' | 'OPENAI'; message: string; context?: unknown }
+    ) => {
+      try {
+        const observationId = claudeService['activityObserver'].startObservation(
+          teacher,
+          message,
+          typeof context === 'string' ? context : JSON.stringify(context)
+        )
+        return { success: true, observationId }
+      } catch (error) {
+        console.error('[IPC] Failed to start observation:', error)
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+      }
+    }
+  )
+
+  ipcMain.handle(
+    'claude:recordToolCall',
+    async (
+      _event,
+      {
+        observationId,
+        toolName,
+        params,
+        result,
+        success,
+        executionTime
+      }: {
+        observationId: string
+        toolName: string
+        params: unknown
+        result: unknown
+        success: boolean
+        executionTime: number
+      }
+    ) => {
+      try {
+        claudeService['activityObserver'].recordToolCall(
+          observationId,
+          toolName,
+          params,
+          String(result),
+          success,
+          executionTime
+        )
+        return { success: true }
+      } catch (error) {
+        console.error('[IPC] Failed to record tool call:', error)
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+      }
+    }
+  )
+
+  ipcMain.handle(
+    'claude:completeObservation',
+    async (
+      _event,
+      {
+        observationId,
+        response,
+        success
+      }: {
+        observationId: string
+        response: unknown
+        success: boolean
+      }
+    ) => {
+      try {
+        claudeService['activityObserver'].completeObservation(
+          observationId,
+          String(response),
+          success
+        )
+        return { success: true }
+      } catch (error) {
+        console.error('[IPC] Failed to complete observation:', error)
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+      }
+    }
+  )
+}
+
+// ============================================
+// Night Orders IPC Handlers (Phase 2)
+// ============================================
+function setupNightOrdersHandlers(): void {
+  // Issue new Night Orders from natural language
+  ipcMain.handle('nightOrders:issueFromNaturalLanguage', async (_event, userRequest: string) => {
+    try {
+      const order = await nightOrdersCommand.issueOrdersFromNaturalLanguage(userRequest)
+      return { success: true, order }
+    } catch (error) {
+      console.error('[Night Orders] Failed to issue orders:', error)
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  })
+
+  // Get current active order
+  ipcMain.handle('nightOrders:getCurrentOrder', async () => {
+    try {
+      const order = nightOrdersCommand.getCurrentOrder()
+      return { success: true, order }
+    } catch (error) {
+      console.error('[Night Orders] Failed to get current order:', error)
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  })
+
+  // Get next pending task
+  ipcMain.handle('nightOrders:getNextPendingTask', async () => {
+    try {
+      const task = nightOrdersCommand.getNextPendingTask()
+      return { success: true, task }
+    } catch (error) {
+      console.error('[Night Orders] Failed to get next task:', error)
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  })
+
+  // Execute next pending task (Phase 2.3)
+  ipcMain.handle('nightOrders:executeNextTask', async () => {
+    try {
+      const result = await nightOrdersCommand.executeNextTask()
+      return result
+    } catch (error) {
+      console.error('[Night Orders] Failed to execute task:', error)
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  })
+
+  // Record task execution
+  ipcMain.handle(
+    'nightOrders:recordTaskExecution',
+    async (
+      _event,
+      {
+        taskId,
+        officer,
+        action,
+        result,
+        details
+      }: {
+        taskId: number
+        officer: string
+        action: string
+        result: 'success' | 'partial' | 'failed'
+        details: {
+          problems?: string[]
+          filesModified?: string[]
+          toolsUsed?: string[]
+          outputSummary?: string
+          needsReview?: boolean
+        }
+      }
+    ) => {
+      try {
+        const currentOrder = nightOrdersCommand.getCurrentOrder()
+        if (!currentOrder) {
+          return { success: false, error: 'No active Night Order' }
+        }
+
+        const task = currentOrder.taskBreakdown.find((t) => t.taskId === taskId)
+        if (!task) {
+          return { success: false, error: `Task ${taskId} not found` }
+        }
+
+        nightOrdersCommand.recordTaskExecution(task, officer as 'coder', action, result, details)
+
+        return { success: true }
+      } catch (error) {
+        console.error('[Night Orders] Failed to record task execution:', error)
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+      }
+    }
+  )
+
+  // Get mission statistics
+  ipcMain.handle('nightOrders:getStatistics', async () => {
+    try {
+      const stats = nightOrdersCommand.getStatistics()
+      return { success: true, stats }
+    } catch (error) {
+      console.error('[Night Orders] Failed to get statistics:', error)
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  })
+
+  // Complete current order
+  ipcMain.handle('nightOrders:completeOrder', async (_event, success: boolean) => {
+    try {
+      nightOrdersCommand.completeOrder(success)
+      return { success: true }
+    } catch (error) {
+      console.error('[Night Orders] Failed to complete order:', error)
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  })
+
+  // Update configuration
+  ipcMain.handle('nightOrders:updateConfig', async (_event, config: Record<string, unknown>) => {
+    try {
+      nightOrdersCommand.updateConfig(config)
+      return { success: true }
+    } catch (error) {
+      console.error('[Night Orders] Failed to update config:', error)
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  })
+
+  // Get configuration
+  ipcMain.handle('nightOrders:getConfig', async () => {
+    try {
+      const config = nightOrdersCommand.getConfig()
+      return { success: true, config }
+    } catch (error) {
+      console.error('[Night Orders] Failed to get config:', error)
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  })
+
+  // Start autonomous execution
+  ipcMain.handle('nightOrders:startAutonomous', async () => {
+    try {
+      nightOrdersCommand.startAutonomousExecution()
+      return { success: true }
+    } catch (error) {
+      console.error('[Night Orders] Failed to start autonomous execution:', error)
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  })
+
+  // Stop autonomous execution
+  ipcMain.handle('nightOrders:stopAutonomous', async () => {
+    try {
+      nightOrdersCommand.stopAutonomousExecution()
+      return { success: true }
+    } catch (error) {
+      console.error('[Night Orders] Failed to stop autonomous execution:', error)
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  })
+
+  console.log('🌙 Night Orders IPC handlers initialized')
 }

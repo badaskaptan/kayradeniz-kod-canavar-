@@ -1,6 +1,7 @@
 // Settings Panel - API Key ve Ollama Yönetimi
 import React, { useState, useEffect } from 'react'
 import { OllamaSettings } from '../renderer/src/components/Settings/OllamaSettings'
+import { OpenAISettings } from '../renderer/src/components/Settings/OpenAISettings'
 import { ProfileManager } from '../renderer/src/components/Settings/ProfileManager'
 import type { UserProfile } from '../types/user-profile'
 import './ApiKeyManager.css'
@@ -20,7 +21,7 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({
   const [isValid, setIsValid] = useState<boolean | null>(null)
   const [isValidating, setIsValidating] = useState(false)
   const [showKey, setShowKey] = useState(false)
-  const [activeTab, setActiveTab] = useState<'claude' | 'ollama' | 'profile'>('claude')
+  const [activeTab, setActiveTab] = useState<'claude' | 'openai' | 'ollama' | 'profile'>('claude')
 
   // Default profile
   const [userProfile, setUserProfile] = useState<UserProfile>({
@@ -154,6 +155,13 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({
             Claude API
           </button>
           <button
+            className={`tab-btn ${activeTab === 'openai' ? 'active' : ''}`}
+            onClick={() => setActiveTab('openai')}
+          >
+            <i className="fas fa-brain"></i>
+            OpenAI API
+          </button>
+          <button
             className={`tab-btn ${activeTab === 'ollama' ? 'active' : ''}`}
             onClick={() => setActiveTab('ollama')}
           >
@@ -257,6 +265,8 @@ export const ApiKeyManager: React.FC<ApiKeyManagerProps> = ({
               </div>
             </div>
           )}
+
+          {activeTab === 'openai' && <OpenAISettings />}
 
           {activeTab === 'ollama' && <OllamaSettings />}
 

@@ -9,10 +9,61 @@ export function OllamaSettings(): React.JSX.Element {
   const [models, setModels] = useState<OllamaModel[]>([])
   const [isChecking, setIsChecking] = useState(true)
   const [selectedModel, setSelectedModel] = useState('llama2')
+  const [intelligenceModel, setIntelligenceModel] = useState('')
+  const [isPullingModel, setIsPullingModel] = useState(false)
+  const [pullProgress, setPullProgress] = useState('')
 
   useEffect(() => {
     checkOllamaStatus()
+    loadIntelligenceModelSetting()
   }, [])
+
+  const loadIntelligenceModelSetting = (): void => {
+    // Load from user profile or local storage
+    const saved = localStorage.getItem('intelligence_fleet_model')
+    if (saved) {
+      setIntelligenceModel(saved)
+    }
+  }
+
+  const saveIntelligenceModel = (modelName: string): void => {
+    setIntelligenceModel(modelName)
+    localStorage.setItem('intelligence_fleet_model', modelName)
+
+    // Notify main process to update Intelligence Fleet config
+    // TODO: Add IPC call to update Intelligence Fleet
+    console.log('🧠 Intelligence Fleet model updated:', modelName)
+  }
+
+  const handlePullModel = async (modelName: string): Promise<void> => {
+    if (!isAvailable || !modelName) return
+
+    setIsPullingModel(true)
+    setPullProgress('Starting...')
+
+    try {
+      // Open terminal with ollama pull command
+      const command = `ollama pull ${modelName}`
+
+      // For now, just open system terminal with command
+      // User needs to run it manually
+      alert(
+        `To download the model, open your terminal (PowerShell/CMD) and run:\n\n${command}\n\nAfter download completes, click "Refresh" button.`
+      )
+
+      // Alternative: Copy to clipboard
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(command)
+        console.log('Command copied to clipboard')
+      }
+    } catch (error) {
+      console.error('Failed to initiate model pull:', error)
+      alert('Failed to setup model download. Please run: ollama pull ' + modelName)
+    } finally {
+      setIsPullingModel(false)
+      setPullProgress('')
+    }
+  }
 
   const checkOllamaStatus = async (): Promise<void> => {
     setIsChecking(true)
@@ -107,7 +158,8 @@ export function OllamaSettings(): React.JSX.Element {
           <div className="install-note">
             <i className="fas fa-lightbulb"></i>
             <span>
-              Kurulum sonrası bu sayfadaki "Yenile" butonuna tıklayarak bağlantıyı kontrol edin.
+              Kurulum sonrası bu sayfadaki &quot;Yenile&quot; butonuna tıklayarak bağlantıyı kontrol
+              edin.
             </span>
           </div>
         </div>
@@ -165,13 +217,110 @@ export function OllamaSettings(): React.JSX.Element {
         </div>
       )}
 
+      {/* Intelligence Fleet Model Selection */}
+      {isAvailable && (
+        <div className="intelligence-fleet-section">
+          <h4>
+            <i className="fas fa-brain"></i> Intelligence Fleet - Pattern Learning
+          </h4>
+          <p className="section-description">
+            Intelligence Fleet observes Claude and OpenAI, learning from their tool usage patterns.
+            Configure a model to enable AI-powered pattern extraction.
+          </p>
+
+          {/* Model Selection */}
+          <div className="model-selection">
+            <label htmlFor="intelligence-model">
+              <i className="fas fa-robot"></i> Learning Model:
+            </label>
+            <select
+              id="intelligence-model"
+              value={intelligenceModel}
+              onChange={(e) => saveIntelligenceModel(e.target.value)}
+              className="model-select"
+            >
+              <option value="">None (Basic pattern extraction only)</option>
+              <optgroup label="Recommended for Learning">
+                <option value="qwen2.5-coder:1.5b">
+                  qwen2.5-coder:1.5b (1 GB - Fast, 4GB RAM)
+                </option>
+                <option value="qwen2.5-coder:7b">qwen2.5-coder:7b (5 GB - Smart, 8GB RAM)</option>
+              </optgroup>
+              <optgroup label="Alternative Models">
+                <option value="deepseek-coder:1.3b">deepseek-coder:1.3b (0.8 GB - Fastest)</option>
+                <option value="codellama:7b">codellama:7b (4 GB - Code specialist)</option>
+              </optgroup>
+              {models.length > 0 && (
+                <optgroup label="Your Installed Models">
+                  {models.map((model) => (
+                    <option key={model.name} value={model.name}>
+                      {model.name} ({formatSize(model.size)})
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
+          </div>
+
+          {/* Model Status */}
+          {intelligenceModel && (
+            <div className="intelligence-status">
+              {models.some((m) => m.name === intelligenceModel) ? (
+                <div className="status-ready">
+                  <i className="fas fa-check-circle"></i>
+                  Model ready! Intelligence Fleet is active.
+                </div>
+              ) : (
+                <div className="status-not-installed">
+                  <i className="fas fa-exclamation-triangle"></i>
+                  Model &quot;{intelligenceModel}&quot; not installed
+                  <button
+                    onClick={() => handlePullModel(intelligenceModel)}
+                    disabled={isPullingModel}
+                    className="pull-model-btn"
+                  >
+                    {isPullingModel ? (
+                      <>
+                        <i className="fas fa-spinner fa-spin"></i>
+                        Downloading... {pullProgress}
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-download"></i>
+                        Download Model
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Info Box */}
+          <div className="intelligence-info">
+            <i className="fas fa-info-circle"></i>
+            <div>
+              <strong>How it works:</strong>
+              <ul>
+                <li>Observes both Claude and OpenAI tool executions</li>
+                <li>Extracts patterns: which tools, in what order, success rates</li>
+                <li>Learns differences between teachers (methodical vs efficient)</li>
+                <li>
+                  <strong>Privacy:</strong> All processing happens locally, no data leaves your PC
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Kullanım Bilgisi */}
       <div className="usage-info">
         <h5>
           <i className="fas fa-question-circle"></i> Nasıl Kullanılır?
         </h5>
         <ul>
-          <li>Chat panelinden "Local MCP" seçeneğini aktif edin</li>
+          <li>Chat panelinden &quot;Local MCP&quot; seçeneğini aktif edin</li>
           <li>Sorularınızı gönderin - tamamen lokal olarak işlenir</li>
           <li>API key gerekmez, internet bağlantısı gerekmez</li>
           <li>Verileriniz cihazınızda kalır</li>
