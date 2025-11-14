@@ -31,12 +31,18 @@ export { readFileRangeTool, readFileRangeImpl } from './readFileRange'
 export { runTerminalCommandTool, runTerminalCommandImpl } from './runTerminalCommand'
 export { changeDirectoryTool, changeDirectoryImpl } from './changeDirectory'
 
-// Git Operations (disabled - need main process)
+// Git Operations
 export { gitStatusTool, gitStatusImpl } from './gitStatus'
 export { gitDiffTool, gitDiffImpl } from './gitDiff'
 export { gitLogTool, gitLogImpl } from './gitLog'
 export { gitAddTool, gitAddImpl } from './gitAdd'
 export { gitCommitTool, gitCommitImpl } from './gitCommit'
+
+// Data Transformation
+export { jsonTransformTool, jsonTransformImpl } from './jsonTransform'
+
+// Advanced HTTP
+export { httpRequestTool, httpRequestImpl } from './httpRequest'
 
 // Re-export tools as array
 import { strReplaceEditorTool } from './strReplaceEditor'
@@ -57,6 +63,19 @@ import { listDirectoryTool } from './lsTool'
 import { readFileRangeTool } from './readFileRange'
 import { runTerminalCommandTool } from './runTerminalCommand'
 import { changeDirectoryTool } from './changeDirectory'
+
+// Git Tools
+import { gitStatusTool } from './gitStatus'
+import { gitDiffTool } from './gitDiff'
+import { gitLogTool } from './gitLog'
+import { gitAddTool } from './gitAdd'
+import { gitCommitTool } from './gitCommit'
+
+// Data Tools
+import { jsonTransformTool } from './jsonTransform'
+
+// Advanced Web Tools
+import { httpRequestTool } from './httpRequest'
 
 /**
  * Claude's Official Tool Set + Extensions
@@ -91,11 +110,29 @@ export const CLAUDE_OFFICIAL_TOOLS = [
 
   // Terminal
   runTerminalCommandTool,
-  changeDirectoryTool
+  changeDirectoryTool,
+
+  // Git Operations
+  gitStatusTool,
+  gitDiffTool,
+  gitLogTool,
+  gitAddTool,
+  gitCommitTool,
+
+  // Process Management (Disabled - API needs implementation)
+  // processSpawnTool,
+  // processKillTool,
+
+  // Data Transformation
+  jsonTransformTool,
+
+  // Advanced HTTP Client
+  httpRequestTool
 ]
 
 /**
  * All Available Tools
- * Total: 19 tools (git disabled)
+ * Total: 27 tools
+ * ⚓ Git enabled, HTTP enhanced, JSON transform ready
  */
 export const BASE_TOOLS = CLAUDE_OFFICIAL_TOOLS

@@ -9,7 +9,16 @@ import type { ToolBridgeAPI } from '../../../shared/toolBridge'
 // Core Tool Types
 // ============================================================================
 
-export type ToolCategory = 'file' | 'terminal' | 'git' | 'search' | 'codebase' | 'web' | 'custom'
+export type ToolCategory =
+  | 'file'
+  | 'terminal'
+  | 'git'
+  | 'search'
+  | 'codebase'
+  | 'web'
+  | 'custom'
+  | 'process'
+  | 'data'
 
 export type ToolPolicy =
   | 'allowedWithPermission'
