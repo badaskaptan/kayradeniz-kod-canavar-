@@ -86,6 +86,34 @@ export {
   gitBranchDeleteImpl
 } from './gitBranch'
 
+// Environment Variable Manager
+export {
+  envGetTool,
+  envGetImpl,
+  envSetTool,
+  envSetImpl,
+  envLoadFileTool,
+  envLoadFileImpl,
+  envSaveFileTool,
+  envSaveFileImpl
+} from './envManager'
+
+// Docker Helper
+export {
+  dockerPsTool,
+  dockerPsImpl,
+  dockerImagesTool,
+  dockerImagesImpl,
+  dockerRunTool,
+  dockerRunImpl,
+  dockerStopTool,
+  dockerStopImpl,
+  dockerLogsTool,
+  dockerLogsImpl,
+  dockerExecTool,
+  dockerExecImpl
+} from './dockerHelper'
+
 // Re-export tools as array
 import { strReplaceEditorTool } from './strReplaceEditor'
 import { bashTool } from './bash'
@@ -139,6 +167,19 @@ import {
   gitMergeTool,
   gitBranchDeleteTool
 } from './gitBranch'
+
+// Environment Manager
+import { envGetTool, envSetTool, envLoadFileTool, envSaveFileTool } from './envManager'
+
+// Docker Tools
+import {
+  dockerPsTool,
+  dockerImagesTool,
+  dockerRunTool,
+  dockerStopTool,
+  dockerLogsTool,
+  dockerExecTool
+} from './dockerHelper'
 
 /**
  * Claude's Official Tool Set + Extensions
@@ -215,16 +256,34 @@ export const CLAUDE_OFFICIAL_TOOLS = [
   gitBranchSwitchTool,
   gitBranchListTool,
   gitMergeTool,
-  gitBranchDeleteTool
+  gitBranchDeleteTool,
+
+  // Environment Variable Management
+  envGetTool,
+  envSetTool,
+  envLoadFileTool,
+  envSaveFileTool,
+
+  // Docker Container Management
+  dockerPsTool,
+  dockerImagesTool,
+  dockerRunTool,
+  dockerStopTool,
+  dockerLogsTool,
+  dockerExecTool
 ]
 
 /**
  * All Available Tools
- * Total: 42 tools
- * ⚓ Phase 1 + Phase 2 Complete:
- * - Git (10 tools), HTTP, JSON, YAML
- * - Code formatting, Archive operations
- * - WebSocket real-time communication
- * 🌊 Ready for ocean voyage!
+ * Total: 52 tools
+ * ⚓ Phase 1 + Phase 2 + Phase 3 Integration:
+ * - Git Operations (10 tools)
+ * - HTTP/WebSocket (5 tools)
+ * - Data Transform (4 tools: JSON, YAML)
+ * - Code Management (4 tools)
+ * - Environment Variables (4 tools)
+ * - Docker Management (6 tools)
+ * - File/Search/Terminal (19 tools)
+ * 🌊 Production-ready multi-agent system!
  */
 export const BASE_TOOLS = CLAUDE_OFFICIAL_TOOLS

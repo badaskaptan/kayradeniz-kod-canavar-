@@ -14,7 +14,6 @@ class SimpleYAML {
 
     for (const line of lines) {
       const trimmed = line.trim()
-      const currentIndent = line.search(/\S/)
 
       if (trimmed.includes(':')) {
         const [key, ...valueParts] = trimmed.split(':')
@@ -26,7 +25,6 @@ class SimpleYAML {
         } else {
           // Object key
           currentKey = key.trim()
-          indent = currentIndent
         }
       } else if (trimmed.startsWith('-')) {
         // Array item
