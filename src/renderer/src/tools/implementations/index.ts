@@ -57,6 +57,35 @@ export {
   archiveListImpl
 } from './archiveTools'
 
+// WebSocket Operations
+export {
+  wsConnectTool,
+  wsConnectImpl,
+  wsSendTool,
+  wsSendImpl,
+  wsCloseTool,
+  wsCloseImpl,
+  wsListTool,
+  wsListImpl
+} from './webSocketTool'
+
+// YAML Operations
+export { yamlParseTool, yamlParseImpl, yamlWriteTool, yamlWriteImpl } from './yamlTransform'
+
+// Advanced Git Operations
+export {
+  gitBranchCreateTool,
+  gitBranchCreateImpl,
+  gitBranchSwitchTool,
+  gitBranchSwitchImpl,
+  gitBranchListTool,
+  gitBranchListImpl,
+  gitMergeTool,
+  gitMergeImpl,
+  gitBranchDeleteTool,
+  gitBranchDeleteImpl
+} from './gitBranch'
+
 // Re-export tools as array
 import { strReplaceEditorTool } from './strReplaceEditor'
 import { bashTool } from './bash'
@@ -95,6 +124,21 @@ import { codeFormatTool } from './codeFormat'
 
 // Archive Tools
 import { archiveCompressTool, archiveExtractTool, archiveListTool } from './archiveTools'
+
+// WebSocket Tools
+import { wsConnectTool, wsSendTool, wsCloseTool, wsListTool } from './webSocketTool'
+
+// YAML Tools
+import { yamlParseTool, yamlWriteTool } from './yamlTransform'
+
+// Advanced Git Tools
+import {
+  gitBranchCreateTool,
+  gitBranchSwitchTool,
+  gitBranchListTool,
+  gitMergeTool,
+  gitBranchDeleteTool
+} from './gitBranch'
 
 /**
  * Claude's Official Tool Set + Extensions
@@ -154,12 +198,33 @@ export const CLAUDE_OFFICIAL_TOOLS = [
   // Archive Operations
   archiveCompressTool,
   archiveExtractTool,
-  archiveListTool
+  archiveListTool,
+
+  // WebSocket Real-time Communication
+  wsConnectTool,
+  wsSendTool,
+  wsCloseTool,
+  wsListTool,
+
+  // YAML Support
+  yamlParseTool,
+  yamlWriteTool,
+
+  // Advanced Git Operations
+  gitBranchCreateTool,
+  gitBranchSwitchTool,
+  gitBranchListTool,
+  gitMergeTool,
+  gitBranchDeleteTool
 ]
 
 /**
  * All Available Tools
- * Total: 31 tools
- * ⚓ Git, HTTP, JSON, Code formatting, Archive operations - Phase 1 complete
+ * Total: 42 tools
+ * ⚓ Phase 1 + Phase 2 Complete:
+ * - Git (10 tools), HTTP, JSON, YAML
+ * - Code formatting, Archive operations
+ * - WebSocket real-time communication
+ * 🌊 Ready for ocean voyage!
  */
 export const BASE_TOOLS = CLAUDE_OFFICIAL_TOOLS
