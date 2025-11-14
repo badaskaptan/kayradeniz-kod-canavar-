@@ -61,7 +61,7 @@ export const dockerPsTool: Tool = {
 }
 
 // Docker Image List
-export const dockerImagesImpl: ToolImpl = async (args, extras) => {
+export const dockerImagesImpl: ToolImpl = async (_args, extras) => {
   try {
     const result = await extras.ide.terminal.exec('docker images')
 
@@ -231,9 +231,7 @@ export const dockerStopImpl: ToolImpl = async (args, extras) => {
       }
     ]
   } catch (error) {
-    throw new Error(
-      `Docker stop failed: ${error instanceof Error ? error.message : String(error)}`
-    )
+    throw new Error(`Docker stop failed: ${error instanceof Error ? error.message : String(error)}`)
   }
 }
 
@@ -268,7 +266,11 @@ export const dockerStopTool: Tool = {
 
 // Docker Logs
 export const dockerLogsImpl: ToolImpl = async (args, extras) => {
-  const { container, tail = 100, follow = false } = args as {
+  const {
+    container,
+    tail = 100,
+    follow = false
+  } = args as {
     container: string
     tail?: number
     follow?: boolean
@@ -292,9 +294,7 @@ export const dockerLogsImpl: ToolImpl = async (args, extras) => {
       }
     ]
   } catch (error) {
-    throw new Error(
-      `Docker logs failed: ${error instanceof Error ? error.message : String(error)}`
-    )
+    throw new Error(`Docker logs failed: ${error instanceof Error ? error.message : String(error)}`)
   }
 }
 
@@ -337,14 +337,18 @@ export const dockerLogsTool: Tool = {
 
 // Docker Exec
 export const dockerExecImpl: ToolImpl = async (args, extras) => {
-  const { container, command, interactive = false } = args as {
+  const {
+    container,
+    command,
+    interactive = false
+  } = args as {
     container: string
     command: string
     interactive?: boolean
   }
 
   try {
-    let dockerCmd = `docker exec ${interactive ? '-it' : ''} ${container} ${command}`
+    const dockerCmd = `docker exec ${interactive ? '-it' : ''} ${container} ${command}`
 
     const result = await extras.ide.terminal.exec(dockerCmd)
 
@@ -360,9 +364,7 @@ export const dockerExecImpl: ToolImpl = async (args, extras) => {
       }
     ]
   } catch (error) {
-    throw new Error(
-      `Docker exec failed: ${error instanceof Error ? error.message : String(error)}`
-    )
+    throw new Error(`Docker exec failed: ${error instanceof Error ? error.message : String(error)}`)
   }
 }
 

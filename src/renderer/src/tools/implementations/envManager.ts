@@ -32,7 +32,10 @@ export const envGetImpl: ToolImpl = async (args, extras) => {
       throw new Error('Either key or showAll=true must be provided')
     }
 
-    const envValue = await extras.ide.terminal.getEnv(key)
+    const result = await extras.ide.terminal.exec(
+      process.platform === 'win32' ? `$env:${key}` : `echo $${key}`
+    )
+    const envValue = result.data?.stdout?.trim() || ''
 
     return [
       {
@@ -81,7 +84,11 @@ export const envGetTool: Tool = {
 
 // Set Environment Variable
 export const envSetImpl: ToolImpl = async (args, extras) => {
-  const { key, value, permanent = false } = args as {
+  const {
+    key,
+    value,
+    permanent = false
+  } = args as {
     key: string
     value: string
     permanent?: boolean
@@ -169,7 +176,10 @@ export const envLoadFileImpl: ToolImpl = async (args, extras) => {
     const loaded: string[] = []
     for (const line of lines) {
       const [key, ...valueParts] = line.split('=')
-      const value = valueParts.join('=').trim().replace(/^["']|["']$/g, '') // Remove quotes
+      const value = valueParts
+        .join('=')
+        .trim()
+        .replace(/^["']|["']$/g, '') // Remove quotes
 
       if (key && value) {
         const trimmedKey = key.trim()
@@ -227,7 +237,11 @@ export const envLoadFileTool: Tool = {
 
 // Save to .env File
 export const envSaveFileImpl: ToolImpl = async (args, extras) => {
-  const { filePath = '.env', variables, append = false } = args as {
+  const {
+    filePath = '.env',
+    variables,
+    append = false
+  } = args as {
     filePath?: string
     variables: Record<string, string>
     append?: boolean
@@ -259,7 +273,9 @@ export const envSaveFileImpl: ToolImpl = async (args, extras) => {
       {
         name: 'Environment Saved',
         description: `Saved ${Object.keys(variables).length} variable(s) to ${filePath}`,
-        content: `# Environment File Saved\n\n**File**: ${filePath}\n**Mode**: ${append ? 'Append' : 'Overwrite'}\n**Variables**: ${Object.keys(variables).length}\n\n${Object.entries(variables)
+        content: `# Environment File Saved\n\n**File**: ${filePath}\n**Mode**: ${append ? 'Append' : 'Overwrite'}\n**Variables**: ${Object.keys(variables).length}\n\n${Object.entries(
+          variables
+        )
           .map(([k, v]) => `- ${k}=${v}`)
           .join('\n')}`
       }
