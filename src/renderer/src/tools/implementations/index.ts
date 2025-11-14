@@ -44,6 +44,19 @@ export { jsonTransformTool, jsonTransformImpl } from './jsonTransform'
 // Advanced HTTP
 export { httpRequestTool, httpRequestImpl } from './httpRequest'
 
+// Code Formatting
+export { codeFormatTool, codeFormatImpl } from './codeFormat'
+
+// Archive Operations
+export {
+  archiveCompressTool,
+  archiveCompressImpl,
+  archiveExtractTool,
+  archiveExtractImpl,
+  archiveListTool,
+  archiveListImpl
+} from './archiveTools'
+
 // Re-export tools as array
 import { strReplaceEditorTool } from './strReplaceEditor'
 import { bashTool } from './bash'
@@ -76,6 +89,12 @@ import { jsonTransformTool } from './jsonTransform'
 
 // Advanced Web Tools
 import { httpRequestTool } from './httpRequest'
+
+// Code Formatting
+import { codeFormatTool } from './codeFormat'
+
+// Archive Tools
+import { archiveCompressTool, archiveExtractTool, archiveListTool } from './archiveTools'
 
 /**
  * Claude's Official Tool Set + Extensions
@@ -127,12 +146,20 @@ export const CLAUDE_OFFICIAL_TOOLS = [
   jsonTransformTool,
 
   // Advanced HTTP Client
-  httpRequestTool
+  httpRequestTool,
+
+  // Code Formatting
+  codeFormatTool,
+
+  // Archive Operations
+  archiveCompressTool,
+  archiveExtractTool,
+  archiveListTool
 ]
 
 /**
  * All Available Tools
- * Total: 27 tools
- * ⚓ Git enabled, HTTP enhanced, JSON transform ready
+ * Total: 31 tools
+ * ⚓ Git, HTTP, JSON, Code formatting, Archive operations - Phase 1 complete
  */
 export const BASE_TOOLS = CLAUDE_OFFICIAL_TOOLS
