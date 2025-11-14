@@ -17,12 +17,12 @@ export interface ParsedOrder {
 }
 
 /**
- * Task template for common patterns
+ * Task template for common patterns (reserved for future use)
  */
-interface TaskTemplate {
-  pattern: RegExp
-  generator: (match: RegExpMatchArray, context: any) => OrderedTask[]
-}
+// interface TaskTemplate {
+//   pattern: RegExp
+//   generator: (match: RegExpMatchArray, context: any) => OrderedTask[]
+// }
 
 /**
  * NightOrdersParser converts user requests into structured mission plans
@@ -516,11 +516,12 @@ export class NightOrdersParser {
   /**
    * Initialize task templates (for future expansion)
    */
-  private initializeTemplates(): TaskTemplate[] {
-    return [
-      // Add more sophisticated templates here as patterns emerge
-    ]
-  }
+  // @ts-ignore - Reserved for future use
+  // private initializeTemplates(): TaskTemplate[] {
+  //   return [
+  //     // Add more sophisticated templates here as patterns emerge
+  //   ]
+  // }
 
   /**
    * Update LLM availability

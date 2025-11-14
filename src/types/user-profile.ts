@@ -31,6 +31,7 @@ export interface UserProfile {
   theme: {
     current: ThemeName
     customColors?: CustomThemeColors
+    backgroundImage?: BackgroundImage
   }
 
   // Öğretmen Modu Ayarları
@@ -78,6 +79,11 @@ export interface CommunicationStyle {
  * Emoji Kullanımı
  */
 export type EmojiUsage = 'none' | 'minimal' | 'moderate' | 'heavy'
+
+/**
+ * Arka Plan Resmi Seçenekleri
+ */
+export type BackgroundImage = 'none' | 'dragon' | 'columbina'
 
 /**
  * Tema İsimleri

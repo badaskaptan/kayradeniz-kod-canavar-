@@ -48,6 +48,10 @@ export const ProfileManager: React.FC<ProfileManagerProps> = ({
     if (aiNameError) {
       return
     }
+    // Save to localStorage for background image
+    if (editedProfile.theme?.backgroundImage) {
+      localStorage.setItem('luma-background-image', editedProfile.theme.backgroundImage)
+    }
     onProfileUpdate(editedProfile)
     // Modal'ı kapatma - Settings içinde zaten açık kalmalı
   }
@@ -248,6 +252,33 @@ export const ProfileManager: React.FC<ProfileManagerProps> = ({
                 </button>
               ))}
             </div>
+
+            {/* Logo section commented out - reserved for future use */}
+
+            <div className="form-group" style={{ marginTop: '1.5rem' }}>
+              <label>🖼️ Arka Plan Resmi (Orta Panel)</label>
+              <div className="background-image-grid">
+                {(['none', 'dragon', 'columbina'] as const).map((bg) => (
+                  <button
+                    key={bg}
+                    className={`bg-image-btn ${editedProfile.theme?.backgroundImage === bg ? 'active' : ''}`}
+                    onClick={() =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        theme: { ...editedProfile.theme, backgroundImage: bg }
+                      })
+                    }
+                  >
+                    <span className="bg-preview">
+                      {bg === 'none' ? '🚫' : bg === 'dragon' ? '🐉' : '🎭'}
+                    </span>
+                    <span className="bg-label">
+                      {bg === 'none' ? 'Yok' : bg === 'dragon' ? 'Dragon' : 'Columbina'}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </section>
 
           {/* Öğretmen Modu */}
@@ -308,7 +339,7 @@ export const ProfileManager: React.FC<ProfileManagerProps> = ({
                     })
                   }
                 />
-                <span>&quot;Neden böyle?&quot; sorusunu açıkla</span>
+                <span>"Neden böyle?" sorusunu açıkla</span>
               </label>
             </div>
           </section>

@@ -123,19 +123,20 @@
 .welcome-screen::before {
   content: '';
   position: absolute;
-  top: 50%;
+  top: var(--bg-top, 50%);
   left: 50%;
   transform: translate(-50%, -50%);
   width: 900px;
   height: 900px;
-  background-image: url('../../assets/dragon_logo.svg');
+  background-image: var(--bg-image-url, url('../../assets/dragon_logo.svg'));
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  opacity: 0.18;
-  filter: drop-shadow(0 0 120px rgba(255, 133, 82, 0.5)) brightness(1.3);
+  opacity: var(--bg-opacity, 0.18);
+  filter: drop-shadow(0 0 120px rgba(255, 133, 82, 0.5)) brightness(var(--bg-brightness, 1.3));
   animation: bgDragonFloat 20s ease-in-out infinite;
   pointer-events: none;
+  transition: opacity 0.3s ease, filter 0.3s ease, top 0.3s ease;
 }
 
 @keyframes bgDragonFloat {

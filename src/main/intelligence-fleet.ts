@@ -354,7 +354,7 @@ Analysis:`
    */
   private async createTeachingMoments(
     observation: Observation,
-    reflexions: Reflexion[] // Reserved for future use
+    _reflexions: Reflexion[] // Reserved for future use
   ): Promise<TeachingMoment[]> {
     // Only create teaching moments for successful, multi-tool observations
     if (!observation.success || observation.toolCalls.length < 2) {

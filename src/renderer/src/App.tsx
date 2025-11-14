@@ -20,6 +20,7 @@ import { getToolRegistry } from './tools/registry'
 import { BASE_TOOLS } from './tools/implementations'
 import type { ToolBridgeAPI } from './types'
 import DragonLogo from './assets/dragon_logo.svg'
+import ColumbinaLogo from './assets/Columbina.svg'
 
 const getToolBridge = (): ToolBridgeAPI => {
   if (typeof window !== 'undefined' && window.api) {
@@ -40,6 +41,7 @@ function App(): React.JSX.Element {
   const [colorMode, setColorMode] = useState<'dark' | 'light'>('dark')
   const [agentMode, setAgentMode] = useState(true) // 🔧 TOOL MODE - User controls via header button
   const [claudeToolsUsed, setClaudeToolsUsed] = useState<string[]>([]) // 🔧 Track Claude tool usage
+  const [backgroundImage, setBackgroundImage] = useState<'none' | 'dragon' | 'columbina'>('dragon')
 
   // 🔧 Initialize Tool Registry
   const toolRegistry = getToolRegistry()
@@ -67,12 +69,74 @@ function App(): React.JSX.Element {
     localStorage.setItem('luma-color-mode', colorMode)
   }, [currentTheme, colorMode])
 
+  // 🖼️ Apply background image
+  useEffect(() => {
+    const root = document.documentElement
+    
+    console.log('🖼️ Setting background image:', backgroundImage)
+    
+    if (backgroundImage === 'none') {
+      // Hide background by setting opacity to 0
+      root.style.setProperty('--bg-opacity', '0')
+      console.log('   → Hidden (opacity: 0)')
+    } else {
+      // Use imported assets (Vite will handle the paths)
+      if (backgroundImage === 'dragon') {
+        root.style.setProperty('--bg-opacity', '0.18')
+        root.style.setProperty('--bg-top', '50%')
+        root.style.setProperty('--bg-brightness', '1.3')
+        const url = `url("${DragonLogo}")`
+        root.style.setProperty('--bg-image-url', url)
+        console.log('   → Dragon:', url)
+      } else if (backgroundImage === 'columbina') {
+        // Columbina: daha belirgin (opacity yüksek) ve biraz aşağıda
+        root.style.setProperty('--bg-opacity', '0.35')
+        root.style.setProperty('--bg-top', '58%')
+        root.style.setProperty('--bg-brightness', '1.5')
+        const url = `url("${ColumbinaLogo}")`
+        root.style.setProperty('--bg-image-url', url)
+        console.log('   → Columbina:', url, '(opacity: 0.35, top: 58%)')
+      }
+    }
+    localStorage.setItem('luma-background-image', backgroundImage)
+  }, [backgroundImage])
+
+  // 🖼️ Listen for background image changes from ProfileManager
+  useEffect(() => {
+    const handleStorageChange = (): void => {
+      const savedBgImage = localStorage.getItem('luma-background-image') as 'none' | 'dragon' | 'columbina' | null
+      if (savedBgImage && savedBgImage !== backgroundImage) {
+        setBackgroundImage(savedBgImage)
+      }
+    }
+
+    // Listen to storage events (works across tabs)
+    window.addEventListener('storage', handleStorageChange)
+
+    // Also listen for profile updates in same tab
+    const intervalId = setInterval(() => {
+      const savedBgImage = localStorage.getItem('luma-background-image') as 'none' | 'dragon' | 'columbina' | null
+      if (savedBgImage && savedBgImage !== backgroundImage) {
+        setBackgroundImage(savedBgImage)
+      }
+    }, 500) // Check every 500ms
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      clearInterval(intervalId)
+    }
+  }, [backgroundImage])
+
   // 🎨 Load saved theme/mode on mount
   useEffect(() => {
     // Priority: localStorage > userProfile
     const savedTheme = localStorage.getItem('luma-theme')
     const savedMode = localStorage.getItem('luma-color-mode') as 'dark' | 'light' | null
 
+    // Load background image
+    const savedBgImage = localStorage.getItem('luma-background-image') as 'none' | 'dragon' | 'columbina' | null
+    console.log('📦 Loading saved background image:', savedBgImage)
+    
     // If no localStorage theme, check userProfile
     if (!savedTheme) {
       const savedProfile = localStorage.getItem('userProfile')
@@ -82,12 +146,21 @@ function App(): React.JSX.Element {
           if (profile.theme?.current) {
             setCurrentTheme(profile.theme.current)
           }
+          if (profile.theme?.backgroundImage) {
+            console.log('📦 Setting background from profile:', profile.theme.backgroundImage)
+            setBackgroundImage(profile.theme.backgroundImage)
+          }
         } catch (e) {
           console.error('Profile parse error:', e)
         }
       }
     } else {
       setCurrentTheme(savedTheme)
+    }
+    
+    if (savedBgImage) {
+      console.log('📦 Setting background from localStorage:', savedBgImage)
+      setBackgroundImage(savedBgImage)
     }
 
     if (savedMode) setColorMode(savedMode)
